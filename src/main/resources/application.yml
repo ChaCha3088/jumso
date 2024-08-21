@@ -1,0 +1,42 @@
+spring:
+    application:
+        name: simple-blog
+
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/simple-blog?serverTimezone=Asia/Seoul
+        username: simple-blog
+        password: chachacha
+    jpa:
+        hibernate:
+            ddl-auto: create
+        open-in-view: false
+        properties:
+            hibernate:
+                default_batch_fetch_size: 100
+
+server:
+    port: 9090
+    servlet:
+        context-path: /
+        encoding:
+            charset: UTF-8
+            enabled: true
+
+# JWT
+jwt:
+    issuer: simple-blog
+    secret: chachacha
+    token:
+        access:
+            expiration: 86_400_000 # 1일
+            header: Authorization
+        refresh:
+            expiration: 604_800_000 # 7? (1000L(ms -> s) * 60L(s -> m) * 60L(m -> h) * 24L(h -> d) * 7L(d -> w))
+            header: AuthorizationRefresh
+
+# p6spy
+decorator:
+    datasource:
+        p6spy:
+            enable-logging: true
