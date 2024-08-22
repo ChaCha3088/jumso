@@ -15,18 +15,4 @@ class MemberController(
 ) {
     @GetMapping
     fun findAll() = memberService.findAll()
-
-    @PostMapping
-    fun create(@Validated @RequestBody memberRequest: MemberRequest) {
-        memberService.create(memberRequest)
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handleException(e: MethodArgumentNotValidException): ResponseEntity<String> {
-        return ResponseEntity.badRequest().body(StringBuffer().apply {
-            e.bindingResult.allErrors.forEach {
-                append(it.defaultMessage).append("\n")
-            }
-        }.toString())
-    }
 }

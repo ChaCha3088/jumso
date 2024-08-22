@@ -17,7 +17,6 @@ class AuthenticationProcessFilter(
     companion object {
         private val NO_CHECK_URL = listOf(
             "/api/auth",
-            "/api/members",
             "/error", "/css", "/js", "/img", "/favicon.ico"
         )
 

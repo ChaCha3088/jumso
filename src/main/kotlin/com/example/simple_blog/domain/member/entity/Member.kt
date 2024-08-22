@@ -2,7 +2,6 @@ package com.example.simple_blog.domain.member.entity
 
 import com.example.simple_blog.domain.AuditingEntity
 import com.example.simple_blog.domain.auth.entity.RefreshToken
-import com.example.simple_blog.domain.property.entity.MemberProperty
 import com.example.simple_blog.enumstrorage.MemberRole
 import com.example.simple_blog.enumstrorage.MemberRole.USER
 import jakarta.persistence.*

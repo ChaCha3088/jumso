@@ -9,7 +9,7 @@ spring:
         password: chachacha
     jpa:
         hibernate:
-            ddl-auto: create
+            ddl-auto: update
         open-in-view: false
         properties:
             hibernate:
@@ -29,10 +29,12 @@ jwt:
     secret: chachacha
     token:
         access:
-            expiration: 86_400_000 # 1일
+#            expiration: 86_400_000 # 1일
+            expiration: 3_600_000 # 1시간
             header: Authorization
         refresh:
-            expiration: 604_800_000 # 7? (1000L(ms -> s) * 60L(s -> m) * 60L(m -> h) * 24L(h -> d) * 7L(d -> w))
+#            expiration: 604_800_000 # 7? (1000L(ms -> s) * 60L(s -> m) * 60L(m -> h) * 24L(h -> d) * 7L(d -> w))
+            expiration: 86_400_000 # 1일
             header: AuthorizationRefresh
 
 # p6spy

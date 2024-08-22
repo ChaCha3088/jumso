@@ -5,8 +5,10 @@ import com.example.simple_blog.domain.auth.exception.InvalidAccessTokenException
 import com.example.simple_blog.domain.auth.exception.InvalidPasswordException
 import com.example.simple_blog.domain.auth.exception.InvalidRefreshTokenException
 import com.example.simple_blog.domain.auth.service.AuthService
+import com.example.simple_blog.domain.member.dto.MemberRequest
 import com.example.simple_blog.domain.member.dto.MemberResponse
 import com.example.simple_blog.domain.member.exception.NoSuchMemberException
+import com.example.simple_blog.domain.member.service.MemberService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.tomcat.websocket.Constants.UNAUTHORIZED
@@ -26,7 +28,8 @@ import org.springframework.web.client.HttpClientErrorException.Unauthorized
 @RestController
 @RequestMapping(value = ["/api/auth"], consumes = [APPLICATION_JSON_VALUE])
 class AuthController(
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val memberService: MemberService
 ) {
     @PostMapping("/signin")
     fun signIn(
@@ -55,6 +58,11 @@ class AuthController(
         authService.signOut(request, response)
 
         return ResponseEntity.ok().build()
+    }
+
+    @PostMapping("/signup")
+    fun create(@Validated @RequestBody memberRequest: MemberRequest) {
+        memberService.create(memberRequest)
     }
 
     @ExceptionHandler(NoSuchMemberException::class)

@@ -1,5 +1,6 @@
 package com.example.simple_blog.domain.property.entity
 
+import com.example.simple_blog.domain.member.entity.MemberProperty
 import jakarta.persistence.*
 import jakarta.persistence.CascadeType.ALL
 import jakarta.persistence.FetchType.LAZY

@@ -1,15 +1,28 @@
 package com.example.simple_blog.domain.member.repository
 
-import com.example.simple_blog.domain.property.entity.MemberProperty
+import com.example.simple_blog.domain.member.entity.MemberProperty
+import com.linecorp.kotlinjdsl.querydsl.expression.column
 import com.linecorp.kotlinjdsl.spring.data.SpringDataQueryFactory
+import com.linecorp.kotlinjdsl.spring.data.listQuery
+import com.linecorp.kotlinjdsl.spring.data.selectQuery
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
 interface MemberPropertyRepository: JpaRepository<MemberProperty, Long>, MemberPropertyCustomRepository
 
-interface MemberPropertyCustomRepository
+interface MemberPropertyCustomRepository {
+    fun findByMemberId(memberId: Long): MutableSet<MemberProperty>
+}
 
 class MemberPropertyCustomRepositoryImpl(
     private val queryFactory: SpringDataQueryFactory
-): MemberPropertyCustomRepository
+): MemberPropertyCustomRepository {
+    override fun findByMemberId(memberId: Long): MutableSet<MemberProperty> {
+        return queryFactory.listQuery<MemberProperty> {
+            select(entity(MemberProperty::class))
+            from(entity(MemberProperty::class))
+            where(column(MemberProperty::memberId).equal(memberId))
+        }.toMutableSet()
+    }
+}
