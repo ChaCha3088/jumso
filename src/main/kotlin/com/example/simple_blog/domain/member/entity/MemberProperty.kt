@@ -23,7 +23,7 @@ class MemberProperty(
         protected set
 
     @Column(name = "member_id")
-    var memberId = memberId
+    var memberId: Long = memberId
         protected set
 
     @JoinColumn(nullable = false, insertable = false, updatable = false)
