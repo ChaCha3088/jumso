@@ -38,6 +38,9 @@ class JwtService(
     // access token, refresh token을 발급, DB에 저장한다.
     @Transactional
     fun issueJwts(member: Member): Array<String> {
+        // 마지막 로그인 시간 업데이트
+        member.updateLastSignIn()
+
         // refresh token을 발급한다.
         val newRefreshToken: String = JWT.create()
             .withIssuer(issuer)
