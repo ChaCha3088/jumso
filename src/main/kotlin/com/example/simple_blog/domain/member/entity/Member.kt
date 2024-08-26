@@ -2,6 +2,7 @@ package com.example.simple_blog.domain.member.entity
 
 import com.example.simple_blog.domain.AuditingEntity
 import com.example.simple_blog.domain.auth.entity.RefreshToken
+import com.example.simple_blog.domain.company.entity.Company
 import com.example.simple_blog.enumstrorage.MemberRole
 import com.example.simple_blog.enumstrorage.MemberRole.USER
 import jakarta.persistence.*
@@ -15,7 +16,8 @@ class Member(
     email: String,
     password: String,
     name: String,
-    nickname: String
+    nickname: String,
+    companyId: Long,
 ): AuditingEntity() {
     @Column(nullable = false, unique = true)
     @NotBlank
@@ -47,10 +49,18 @@ class Member(
     var isDeleted: Boolean = false
         protected set
 
-    // OneToOne로 RefreshToken을 관리한다.
     @OneToOne(mappedBy = "member", cascade = [ALL], orphanRemoval = true, fetch = LAZY)
     var refreshToken: RefreshToken? = null
         internal set
+
+    @JoinColumn(nullable = false, insertable = false, updatable = false)
+    @ManyToOne(fetch = LAZY, targetEntity = Company::class)
+    var company: Company? = null
+        protected set
+
+    @Column(name = "company_id")
+    var companyId: Long = companyId
+        protected set
 
     @OneToMany(mappedBy = "member", cascade = [ALL], orphanRemoval = true, fetch = LAZY)
     var properties: MutableList<MemberProperty> = mutableListOf()

@@ -10,7 +10,7 @@ plugins {
 allOpen {
 	annotation("jakarta.persistence.Entity")
 	annotation("jakarta.persistence.Embeddable")
-	annotation("jakarta.persistence.MappedSuperclass")
+	annotation("jakarta.persistence.BMappedSuperclass")
 }
 
 group = "com.example"

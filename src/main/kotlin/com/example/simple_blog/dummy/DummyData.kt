@@ -1,27 +1,51 @@
-//package com.example.simple_blog.dummy
+package com.example.simple_blog.dummy
+
+import com.example.simple_blog.domain.company.entity.Company
+import com.example.simple_blog.domain.company.repository.CompanyRepository
+import com.example.simple_blog.domain.member.repository.MemberPropertyRepository
+import com.example.simple_blog.domain.member.repository.MemberRepository
+import com.example.simple_blog.domain.property.repository.PropertyRepository
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.github.serpro69.kfaker.Faker
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.event.EventListener
+import java.io.File
+
+@Configuration
+class DummyData(
+    private val faker: Faker,
+
+    private val memberRepository: MemberRepository,
+    private val propertyRepository: PropertyRepository,
+    private val memberPropertyRepository: MemberPropertyRepository,
+    private val companyRepository: CompanyRepository,
+) {
+    @EventListener(ApplicationReadyEvent::class)
+    private fun init() {
+//        // 역직렬화
+//        val mapper = ObjectMapper().registerKotlinModule()
 //
-//import com.example.simple_blog.domain.member.entity.Member
-//import com.example.simple_blog.domain.member.repository.MemberPropertyRepository
-//import com.example.simple_blog.domain.member.repository.MemberRepository
-//import com.example.simple_blog.domain.member.entity.MemberProperty
-//import com.example.simple_blog.domain.property.entity.Property
-//import com.example.simple_blog.domain.property.repository.PropertyRepository
-//import io.github.serpro69.kfaker.Faker
-//import org.springframework.boot.context.event.ApplicationReadyEvent
-//import org.springframework.context.annotation.Configuration
-//import org.springframework.context.event.EventListener
-//import org.springframework.dao.DataIntegrityViolationException
+//        val companies: MutableList<Company> = mutableListOf()
 //
-//@Configuration
-//class DummyData(
-//    private val faker: Faker,
+//        // src/main/resources/companies 안의 json들을 읽고, Company 엔티티로 변환하여 저장
+//        val fileList = File("src/main/resources/companies").listFiles()
 //
-//    private val memberRepository: MemberRepository,
-//    private val propertyRepository: PropertyRepository,
-//    private val memberPropertyRepository: MemberPropertyRepository
-//) {
-//    @EventListener(ApplicationReadyEvent::class)
-//    private fun init() {
+//        for (file in fileList) {
+//            val deserialized = mapper.readValue<TemporaryResponse>(file)
+//
+//            // Company 생성
+//            deserialized.data.companies.forEach { it ->
+//                companies.add(Company(it.name).apply {
+//                    addCompanyEmails(it.emails)
+//                })
+//            }
+//        }
+//
+//        companyRepository.saveAll(companies)
+
 //        // Member 10000명 생성
 //        val members = mutableListOf<Member>()
 //
@@ -80,5 +104,5 @@
 //                // 중복 데이터가 발생할 수 있으므로 무시
 //            }
 //        }
-//    }
-//}
+    }
+}
