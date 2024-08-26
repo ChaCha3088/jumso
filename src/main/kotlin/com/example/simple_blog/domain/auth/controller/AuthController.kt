@@ -5,31 +5,32 @@ import com.example.simple_blog.domain.auth.exception.InvalidAccessTokenException
 import com.example.simple_blog.domain.auth.exception.InvalidPasswordException
 import com.example.simple_blog.domain.auth.exception.InvalidRefreshTokenException
 import com.example.simple_blog.domain.auth.service.AuthService
-import com.example.simple_blog.domain.member.dto.MemberRequest
+import com.example.simple_blog.domain.member.dto.TemporaryMemberRequest
 import com.example.simple_blog.domain.member.dto.MemberResponse
+import com.example.simple_blog.domain.member.exception.InvalidVerificationCodeException
 import com.example.simple_blog.domain.member.exception.NoSuchMemberException
+import com.example.simple_blog.domain.member.exception.TemporaryMemberExistsException
 import com.example.simple_blog.domain.member.service.MemberService
+import com.example.simple_blog.domain.member.service.TemporaryMemberService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.tomcat.websocket.Constants.UNAUTHORIZED
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
+import org.springframework.http.MediaType
+import org.springframework.http.MediaType.ALL_VALUE
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.MethodArgumentNotValidException
-import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.client.HttpClientErrorException.Unauthorized
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.RequestMethod.GET
 
 @RestController
 @RequestMapping(value = ["/api/auth"], consumes = [APPLICATION_JSON_VALUE])
 class AuthController(
     private val authService: AuthService,
-    private val memberService: MemberService
+    private val temporaryMemberService: TemporaryMemberService,
+    private val memberService: MemberService,
 ) {
     @PostMapping("/signin")
     fun signIn(
@@ -61,8 +62,24 @@ class AuthController(
     }
 
     @PostMapping("/signup")
-    fun create(@Validated @RequestBody memberRequest: MemberRequest) {
-        memberService.create(memberRequest)
+    fun create(@Validated @RequestBody temporaryMemberRequest: TemporaryMemberRequest) {
+        temporaryMemberService.create(temporaryMemberRequest)
+    }
+
+    @RequestMapping(method = [GET], value = ["/verify"], consumes = [ALL_VALUE])
+    fun verify(
+        @RequestParam(value = "verificationCode", required = true) verificationCode: String
+    ): ResponseEntity<String> {
+        temporaryMemberService.verify(verificationCode)
+
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(
+            "<html><body><h1>회원가입이 완료되었습니다.</h1></body></html>"
+        )
+    }
+
+    @ExceptionHandler(TemporaryMemberExistsException::class)
+    fun handleException(e: TemporaryMemberExistsException): ResponseEntity<String> {
+        return ResponseEntity.badRequest().body(e.message)
     }
 
     @ExceptionHandler(NoSuchMemberException::class)
@@ -83,6 +100,11 @@ class AuthController(
     @ExceptionHandler(InvalidRefreshTokenException::class)
     fun handleException(e: InvalidRefreshTokenException): ResponseEntity<String> {
         return ResponseEntity.status(UNAUTHORIZED).body(e.message)
+    }
+
+    @ExceptionHandler(InvalidVerificationCodeException::class)
+    fun handleException(e: InvalidVerificationCodeException): ResponseEntity<String> {
+        return ResponseEntity.badRequest().body(e.message)
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)

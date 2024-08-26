@@ -9,6 +9,7 @@ import com.example.simple_blog.domain.auth.exception.InvalidAccessTokenException
 import com.example.simple_blog.domain.auth.exception.InvalidRefreshTokenException
 import com.example.simple_blog.domain.auth.repository.RefreshTokenRepository
 import com.example.simple_blog.domain.member.entity.Member
+import com.example.simple_blog.domain.member.repository.MemberRepository
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
@@ -19,7 +20,8 @@ import java.util.*
 @Service
 // Transactional 붙이지 마
 class JwtService(
-    private val refreshTokenRepository: RefreshTokenRepository
+    private val memberRepository: MemberRepository,
+    private val refreshTokenRepository: RefreshTokenRepository,
 ) {
     @Value("\${jwt.issuer}")
     private lateinit var issuer: String
@@ -68,10 +70,13 @@ class JwtService(
 
     @Transactional
     fun reissueJwts(memberId: Long, refreshToken: String): Array<String> {
-        // RefreshToken 조회
-        val refreshTokenEntity: RefreshToken = refreshTokenRepository.findByMemberIdAndRefreshToken(memberId, refreshToken)
+        // Member 조회
+        val member: Member = memberRepository.findNotDeletedWithRefreshTokenByIdAndRefreshToken(memberId, refreshToken)
             // 없으면 꺼져
             ?: throw InvalidRefreshTokenException()
+
+        // 마지막 로그인 시간 업데이트
+        member.updateLastSignIn()
 
         // refresh token을 발급한다.
         val newRefreshToken: String = JWT.create()
@@ -84,7 +89,7 @@ class JwtService(
             .sign(HMAC512(secret))
 
         // Refresh Token Entity 업데이트
-        refreshTokenEntity.updateToken(newRefreshToken)
+        member.refreshToken!!.updateToken(newRefreshToken)
 
         // access token을 발급한다.
         val newAccessToken: String = JWT.create()

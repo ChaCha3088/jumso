@@ -10,12 +10,13 @@ import jakarta.persistence.CascadeType.ALL
 import jakarta.persistence.FetchType.LAZY
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import java.time.LocalDateTime
+import java.time.LocalDateTime.now
 
 @Entity
 class Member(
     email: String,
     password: String,
-    name: String,
     nickname: String,
     companyId: Long,
 ): AuditingEntity() {
@@ -27,11 +28,6 @@ class Member(
     @Column(nullable = false)
     @NotBlank
     var password: String = password
-        protected set
-
-    @Column(nullable = false)
-    @NotBlank
-    var name: String = name
         protected set
 
     @Column(nullable = false)
@@ -65,4 +61,13 @@ class Member(
     @OneToMany(mappedBy = "member", cascade = [ALL], orphanRemoval = true, fetch = LAZY)
     var properties: MutableList<MemberProperty> = mutableListOf()
         protected set
+
+    @Column(nullable = false)
+    @NotNull
+    var lastSignIn: LocalDateTime = now()
+        protected set
+
+    fun updateLastSignIn() {
+        lastSignIn = now()
+    }
 }
