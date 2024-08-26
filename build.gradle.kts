@@ -10,7 +10,7 @@ plugins {
 allOpen {
 	annotation("jakarta.persistence.Entity")
 	annotation("jakarta.persistence.Embeddable")
-	annotation("jakarta.persistence.BMappedSuperclass")
+	annotation("jakarta.persistence.MappedSuperclass")
 }
 
 group = "com.example"
@@ -56,6 +56,13 @@ dependencies {
 
     // Kotlin Faker
     implementation("io.github.serpro69:kotlin-faker:1.16.0")
+
+    // Spring Email
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+
+    // AWS Parameter Store
+//    implementation(platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.1.1"))
+    implementation("io.awspring.cloud:spring-cloud-starter-aws-parameter-store-config:2.3.3")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

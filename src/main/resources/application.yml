@@ -6,7 +6,6 @@ spring:
         driver-class-name: com.mysql.cj.jdbc.Driver
         url: jdbc:mysql://localhost:3306/simple-blog?serverTimezone=Asia/Seoul
         username: simple-blog
-        password: chachacha
     jpa:
         hibernate:
             ddl-auto: update
@@ -14,6 +13,17 @@ spring:
         properties:
             hibernate:
                 default_batch_fetch_size: 100
+
+    mail:
+        host: smtp.gmail.com
+        port: 587
+        username: jumso.official@gmail.com
+        properties:
+            mail:
+                smtp:
+                    auth: true
+                    starttls:
+                        enable: true
 
 server:
     port: 9090
@@ -26,7 +36,6 @@ server:
 # JWT
 jwt:
     issuer: simple-blog
-    secret: chachacha
     token:
         access:
 #            expiration: 86_400_000 # 1일
@@ -37,8 +46,9 @@ jwt:
             expiration: 86_400_000 # 1일
             header: AuthorizationRefresh
 
-# p6spy
-decorator:
-    datasource:
-        p6spy:
-            enable-logging: true
+aws:
+    paramstore:
+        enabled: true
+        prefix: /Jumso
+        name: WAS
+        profileSeparator: _

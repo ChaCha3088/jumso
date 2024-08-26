@@ -1,0 +1,27 @@
+spring:
+    datasource:
+        password: ${database.password}
+    mail:
+        password: ${mail.password}
+    config:
+        import: 'aws-parameterstore:'
+        activate:
+            on-profile: local
+
+server:
+    port: 9090
+    servlet:
+        context-path: /
+        encoding:
+            charset: UTF-8
+            enabled: true
+
+# JWT
+jwt:
+    secret: ${jwt.secret}
+
+# p6spy
+decorator:
+    datasource:
+        p6spy:
+            enable-logging: true
