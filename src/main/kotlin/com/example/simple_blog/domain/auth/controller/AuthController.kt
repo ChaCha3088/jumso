@@ -8,10 +8,7 @@ import com.example.simple_blog.domain.auth.exception.InvalidRefreshTokenExceptio
 import com.example.simple_blog.domain.auth.service.AuthService
 import com.example.simple_blog.domain.member.dto.TemporaryMemberRequest
 import com.example.simple_blog.domain.member.dto.MemberResponse
-import com.example.simple_blog.domain.member.exception.InvalidVerificationCodeException
-import com.example.simple_blog.domain.member.exception.MemberExistsException
-import com.example.simple_blog.domain.member.exception.NoSuchMemberException
-import com.example.simple_blog.domain.member.exception.TemporaryMemberExistsException
+import com.example.simple_blog.domain.member.exception.*
 import com.example.simple_blog.domain.member.service.MemberService
 import com.example.simple_blog.domain.member.service.TemporaryMemberService
 import jakarta.servlet.http.HttpServletRequest
@@ -77,6 +74,11 @@ class AuthController(
         return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(
             "<html><body><h1>회원가입이 완료되었습니다.</h1></body></html>"
         )
+    }
+
+    @ExceptionHandler(PasswordInvalidException::class)
+    fun handleException(e: PasswordInvalidException): ResponseEntity<String> {
+        return ResponseEntity.badRequest().body(e.message)
     }
     
     @ExceptionHandler(CompanyEmailNotFoundException::class)

@@ -9,6 +9,7 @@ import com.example.simple_blog.domain.member.exception.MemberExistsException
 import com.example.simple_blog.domain.member.exception.TemporaryMemberExistsException
 import com.example.simple_blog.domain.member.repository.MemberRepository
 import com.example.simple_blog.domain.member.repository.TemporaryMemberRepository
+import com.example.simple_blog.util.PasswordValidator
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
@@ -24,6 +25,7 @@ class TemporaryMemberService(
     private val companyEmailRepository: CompanyEmailRepository,
 
     private val passwordEncoder: PasswordEncoder,
+    private val passwordValidator: PasswordValidator,
 
     private val javaMailSender: JavaMailSender,
 
@@ -32,6 +34,9 @@ class TemporaryMemberService(
 ) {
     @Transactional
     fun create(temporaryMemberRequest: TemporaryMemberRequest) {
+        // password 검증
+        passwordValidator.validate(temporaryMemberRequest.username!!, temporaryMemberRequest.password!!)
+
         // 이미 같은 회사에 같은 username이 존재하는지 확인
         if (temporaryMemberRepository.existsByUsernameAndCompanyEmailId(temporaryMemberRequest.username!!, temporaryMemberRequest.companyEmailId!!)) {
             throw TemporaryMemberExistsException()
