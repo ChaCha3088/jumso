@@ -78,7 +78,7 @@ class AuthController(
             "<html><body><h1>회원가입이 완료되었습니다.</h1></body></html>"
         )
     }
-
+    
     @ExceptionHandler(CompanyEmailNotFoundException::class)
     fun handleException(e: CompanyEmailNotFoundException): ResponseEntity<String> {
         return ResponseEntity.badRequest().body(e.message)
@@ -88,7 +88,7 @@ class AuthController(
     fun handleException(e: MemberExistsException): ResponseEntity<String> {
         return ResponseEntity.badRequest().body(e.message)
     }
-
+    
     @ExceptionHandler(TemporaryMemberExistsException::class)
     fun handleException(e: TemporaryMemberExistsException): ResponseEntity<String> {
         return ResponseEntity.badRequest().body(e.message)

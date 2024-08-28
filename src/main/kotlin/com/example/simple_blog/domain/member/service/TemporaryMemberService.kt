@@ -47,7 +47,7 @@ class TemporaryMemberService(
         }
 
         val newTemporaryMember = temporaryMemberRepository.save(temporaryMemberRequest.toEntity(passwordEncoder))
-
+        
         // 이메일 보내기
         sendEmail(newTemporaryMember.username, companyEmail.address, newTemporaryMember.verificationCode)
     }
