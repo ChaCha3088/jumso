@@ -1,6 +1,7 @@
 package com.example.simple_blog.domain.auth.controller
 
 import com.example.simple_blog.domain.auth.dto.SignInRequest
+import com.example.simple_blog.domain.auth.exception.CompanyEmailNotFoundException
 import com.example.simple_blog.domain.auth.exception.InvalidAccessTokenException
 import com.example.simple_blog.domain.auth.exception.InvalidPasswordException
 import com.example.simple_blog.domain.auth.exception.InvalidRefreshTokenException
@@ -8,6 +9,7 @@ import com.example.simple_blog.domain.auth.service.AuthService
 import com.example.simple_blog.domain.member.dto.TemporaryMemberRequest
 import com.example.simple_blog.domain.member.dto.MemberResponse
 import com.example.simple_blog.domain.member.exception.InvalidVerificationCodeException
+import com.example.simple_blog.domain.member.exception.MemberExistsException
 import com.example.simple_blog.domain.member.exception.NoSuchMemberException
 import com.example.simple_blog.domain.member.exception.TemporaryMemberExistsException
 import com.example.simple_blog.domain.member.service.MemberService
@@ -75,6 +77,16 @@ class AuthController(
         return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(
             "<html><body><h1>회원가입이 완료되었습니다.</h1></body></html>"
         )
+    }
+
+    @ExceptionHandler(CompanyEmailNotFoundException::class)
+    fun handleException(e: CompanyEmailNotFoundException): ResponseEntity<String> {
+        return ResponseEntity.badRequest().body(e.message)
+    }
+
+    @ExceptionHandler(MemberExistsException::class)
+    fun handleException(e: MemberExistsException): ResponseEntity<String> {
+        return ResponseEntity.badRequest().body(e.message)
     }
 
     @ExceptionHandler(TemporaryMemberExistsException::class)
