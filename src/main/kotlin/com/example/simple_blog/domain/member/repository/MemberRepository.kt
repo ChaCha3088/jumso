@@ -7,6 +7,7 @@ import com.linecorp.kotlinjdsl.querydsl.expression.column
 import com.linecorp.kotlinjdsl.querydsl.from.fetch
 import com.linecorp.kotlinjdsl.spring.data.*
 import jakarta.persistence.criteria.JoinType.LEFT
+import org.springframework.data.jpa.domain.Specification.where
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
@@ -19,6 +20,8 @@ interface MemberCustomRepository {
 
     fun findNotDeletedByIdWithRefreshToken(id: Long): Member?
     fun findNotDeletedWithRefreshTokenByIdAndRefreshToken(id: Long, refreshToken: String): Member?
+
+    fun existsByEmail(email: String): Boolean
 
     fun deleteByMemberId(memberId: Long)
 }
@@ -64,6 +67,14 @@ class MemberCustomRepositoryImpl(
             where(column(Member::refreshToken).isNotNull().and(column(RefreshToken::token).equal(refreshToken)))
             fetch(Member::refreshToken, joinType = LEFT)
         }.resultList.firstOrNull()
+    }
+
+    override fun existsByEmail(email: String): Boolean {
+        return queryFactory.selectQuery<Member> {
+            select(entity(Member::class))
+            from(entity(Member::class))
+            where(column(Member::email).equal(email))
+        }.resultList.isNotEmpty()
     }
 
     override fun deleteByMemberId(memberId: Long) {

@@ -5,6 +5,7 @@ import com.example.simple_blog.domain.auth.repository.CompanyEmailRepository
 import com.example.simple_blog.domain.member.dto.TemporaryMemberRequest
 import com.example.simple_blog.domain.member.entity.TemporaryMember
 import com.example.simple_blog.domain.member.exception.InvalidVerificationCodeException
+import com.example.simple_blog.domain.member.exception.MemberExistsException
 import com.example.simple_blog.domain.member.exception.TemporaryMemberExistsException
 import com.example.simple_blog.domain.member.repository.MemberRepository
 import com.example.simple_blog.domain.member.repository.TemporaryMemberRepository
@@ -36,11 +37,17 @@ class TemporaryMemberService(
             throw TemporaryMemberExistsException()
         }
 
-        val newTemporaryMember = temporaryMemberRepository.save(temporaryMemberRequest.toEntity(passwordEncoder))
-
-        val companyEmail = companyEmailRepository.findById(newTemporaryMember.companyEmailId)
+        // companyEmailId로 companyEmail을 조회하고
+        val companyEmail = companyEmailRepository.findById(temporaryMemberRequest.companyEmailId!!)
             .orElseThrow { throw CompanyEmailNotFoundException() }
 
+        // username + @ + companyEmail.address로 이미 존재하는 회원인지 확인
+        if (memberRepository.existsByEmail("${temporaryMemberRequest.username}@${companyEmail.address}")) {
+            throw MemberExistsException()
+        }
+
+        val newTemporaryMember = temporaryMemberRepository.save(temporaryMemberRequest.toEntity(passwordEncoder))
+        
         // 이메일 보내기
         sendEmail(newTemporaryMember.username, companyEmail.address, newTemporaryMember.verificationCode)
     }
