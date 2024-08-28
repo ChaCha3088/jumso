@@ -19,9 +19,9 @@ data class TemporaryMemberRequest(
     val companyEmailId: Long?,
 ) {
     fun toEntity(passwordEncoder: PasswordEncoder) = TemporaryMember(
-        username = username!!,
-        password = passwordEncoder.encode(password),
-        nickname = nickname!!,
+        username = username!!.trim(),
+        password = passwordEncoder.encode(password!!.trim()),
+        nickname = nickname!!.trim(),
         companyEmailId = companyEmailId!!,
     )
 }
