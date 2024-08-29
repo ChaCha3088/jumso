@@ -3,10 +3,14 @@ package com.example.simple_blog.domain.member.entity
 import com.example.simple_blog.domain.AuditingEntity
 import com.example.simple_blog.domain.auth.entity.RefreshToken
 import com.example.simple_blog.domain.company.entity.Company
+import com.example.simple_blog.domain.member.enumstorage.BodyType
+import com.example.simple_blog.domain.member.enumstorage.HowFar
+import com.example.simple_blog.domain.member.enumstorage.Sex
 import com.example.simple_blog.enumstrorage.MemberRole
 import com.example.simple_blog.enumstrorage.MemberRole.USER
 import jakarta.persistence.*
 import jakarta.persistence.CascadeType.ALL
+import jakarta.persistence.EnumType.ORDINAL
 import jakarta.persistence.FetchType.LAZY
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -45,6 +49,11 @@ class Member(
     var isDeleted: Boolean = false
         protected set
 
+    @Column(nullable = false)
+    @NotNull
+    var lastSignIn: LocalDateTime = now()
+        protected set
+
     @OneToOne(mappedBy = "member", cascade = [ALL], orphanRemoval = true, fetch = LAZY)
     var refreshToken: RefreshToken? = null
         internal set
@@ -62,9 +71,20 @@ class Member(
     var properties: MutableList<MemberProperty> = mutableListOf()
         protected set
 
-    @Column(nullable = false)
-    @NotNull
-    var lastSignIn: LocalDateTime = now()
+    var bornAt: LocalDateTime? = null
+        protected set
+
+    @Enumerated(ORDINAL)
+    var sex: Sex? = null
+        protected set
+
+    var height: Int? = null
+        protected set
+
+    var bodyType: BodyType? = null
+        protected set
+
+    var howFar: HowFar? = null
         protected set
 
     // x 좌표, 위도
