@@ -71,9 +71,7 @@ class AuthController(
     ): ResponseEntity<String> {
         temporaryMemberService.verify(verificationCode)
 
-        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(
-            "<html><body><h1>회원가입이 완료되었습니다.</h1></body></html>"
-        )
+        return ResponseEntity.ok().build()
     }
 
     @ExceptionHandler(PasswordInvalidException::class)
