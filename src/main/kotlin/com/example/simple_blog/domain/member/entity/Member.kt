@@ -67,7 +67,20 @@ class Member(
     var lastSignIn: LocalDateTime = now()
         protected set
 
+    // x 좌표, 위도
+    var latitude: Double? = null
+        protected set
+
+    // y 좌표, 경도
+    var longitude: Double? = null
+        protected set
+
     fun updateLastSignIn() {
         lastSignIn = now()
+    }
+
+    fun updateLocation(latitude: Double, longitude: Double) {
+        this.latitude = latitude
+        this.longitude = longitude
     }
 }

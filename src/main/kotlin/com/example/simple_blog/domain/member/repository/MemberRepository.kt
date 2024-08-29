@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository
 interface MemberRepository: JpaRepository<Member, Long>, MemberCustomRepository
 
 interface MemberCustomRepository {
+    fun findNotDeletedById(memberId: Long): Member?
     fun findNotDeletedMembers(): List<Member>
     fun findNotDeletedByEmailWithRefreshToken(email: String): Member?
 
@@ -29,6 +30,15 @@ interface MemberCustomRepository {
 class MemberCustomRepositoryImpl(
     private val queryFactory: SpringDataQueryFactory,
 ): MemberCustomRepository {
+    override fun findNotDeletedById(memberId: Long): Member? {
+        return queryFactory.selectQuery<Member> {
+            select(entity(Member::class))
+            from(entity(Member::class))
+            where(column(Member::id).equal(memberId))
+            where(column(Member::isDeleted).equal(false))
+        }.resultList.firstOrNull()
+    }
+
     override fun findNotDeletedMembers(): List<Member> {
         return queryFactory.listQuery {
             select(entity(Member::class))
