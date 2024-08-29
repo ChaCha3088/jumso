@@ -75,6 +75,10 @@ class Member(
     var longitude: Double? = null
         protected set
 
+    @Column(length = 1000)
+    var introduction: String? = null
+        protected set
+
     fun updateLastSignIn() {
         lastSignIn = now()
     }
@@ -82,5 +86,9 @@ class Member(
     fun updateLocation(latitude: Double, longitude: Double) {
         this.latitude = latitude
         this.longitude = longitude
+    }
+
+    fun updateIntroduction(introduction: String) {
+        this.introduction = introduction
     }
 }
