@@ -1,11 +1,9 @@
 package com.example.simple_blog.domain.member.service
 
-import com.example.simple_blog.domain.member.dto.TemporaryMemberRequest
-import com.example.simple_blog.domain.member.dto.MemberResponse
+import com.example.simple_blog.domain.member.dto.UpdateIntroductionRequest
 import com.example.simple_blog.domain.member.dto.UpdateLocationRequest
 import com.example.simple_blog.domain.member.exception.NoSuchMemberException
 import com.example.simple_blog.domain.member.repository.MemberRepository
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,6 +18,16 @@ class MemberService(
             ?: throw NoSuchMemberException()
 
         member.updateLocation(updateLocationRequest.latitude!!, updateLocationRequest.longitude!!)
+
+        memberRepository.save(member)
+    }
+
+    @Transactional
+    fun updateIntroduce(memberId: Long, updateIntroductionRequest: UpdateIntroductionRequest) {
+        val member = memberRepository.findNotDeletedById(memberId)
+            ?: throw NoSuchMemberException()
+
+        member.updateIntroduction(updateIntroductionRequest.introduction!!)
 
         memberRepository.save(member)
     }
