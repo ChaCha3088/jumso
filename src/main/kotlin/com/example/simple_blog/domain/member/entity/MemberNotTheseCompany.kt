@@ -22,7 +22,7 @@ class MemberNotTheseCompany(
     @JoinColumn(nullable = false, insertable = false, updatable = false)
     @ManyToOne(fetch = LAZY, targetEntity = Company::class)
     var company: Company? = null
-        protected setq
+        protected set
 
     @Column(name = "company_id")
     var companyId: Long = companyId
