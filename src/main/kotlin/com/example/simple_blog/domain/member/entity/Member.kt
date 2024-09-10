@@ -3,9 +3,7 @@ package com.example.simple_blog.domain.member.entity
 import com.example.simple_blog.domain.AuditingEntity
 import com.example.simple_blog.domain.auth.entity.RefreshToken
 import com.example.simple_blog.domain.company.entity.Company
-import com.example.simple_blog.domain.member.enumstorage.BodyType
-import com.example.simple_blog.domain.member.enumstorage.HowFar
-import com.example.simple_blog.domain.member.enumstorage.Sex
+import com.example.simple_blog.domain.member.enumstorage.*
 import com.example.simple_blog.enumstrorage.MemberRole
 import com.example.simple_blog.enumstrorage.MemberRole.USER
 import jakarta.persistence.*
@@ -67,6 +65,11 @@ class Member(
     var companyId: Long = companyId
         protected set
 
+    @Column(nullable = false)
+    @NotNull
+    var didYouWriteProfile: Boolean = false
+        protected set
+
     @OneToMany(mappedBy = "member", cascade = [ALL], orphanRemoval = true, fetch = LAZY)
     var properties: MutableList<MemberProperty> = mutableListOf()
         protected set
@@ -81,10 +84,26 @@ class Member(
     var height: Int? = null
         protected set
 
+    @Enumerated(ORDINAL)
     var bodyType: BodyType? = null
         protected set
 
-    var howFar: HowFar? = null
+    @Column(length = 50)
+    var job: String? = null
+        protected set
+
+    var marry: Marry? = null
+        protected set
+
+    @Enumerated(ORDINAL)
+    var religion: Religion? = null
+        protected set
+
+    var smoke: Boolean? = null
+        protected set
+
+    @Enumerated(ORDINAL)
+    var drink: Drink? = null
         protected set
 
     // x 좌표, 위도
@@ -97,6 +116,43 @@ class Member(
 
     @Column(length = 1000)
     var introduction: String? = null
+        protected set
+
+    @Enumerated(ORDINAL)
+    var whatSexDoYouWant: Sex? = null
+        protected set
+
+    var howOldDoYouWantMin: Int? = null
+        protected set
+
+    var howOldDoYouWantMax: Int? = null
+        protected set
+
+    @Enumerated(ORDINAL)
+    var howFarCanYouGo: HowFar? = null
+        protected set
+
+    @Enumerated(ORDINAL)
+    var whatKindOfBodyTypeDoYouWant: BodyType? = null
+        protected set
+
+    @Enumerated(ORDINAL)
+    var whatKindOfMarryDoYouWant: Marry? = null
+        protected set
+
+    @Enumerated(ORDINAL)
+    var whatKindOfReligionDoYouWant: Religion? = null
+        protected set
+
+    var whatKindOfSmokeDoYouWant: Boolean? = null
+        protected set
+
+    @Enumerated(ORDINAL)
+    var whatKindOfDrinkDoYouWant: Drink? = null
+        protected set
+
+    @OneToMany(mappedBy = "member", cascade = [ALL], orphanRemoval = true, fetch = LAZY)
+    var notTheseCompanies: MutableList<MemberNotTheseCompany> = mutableListOf()
         protected set
 
     fun updateLastSignIn() {
