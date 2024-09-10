@@ -83,7 +83,7 @@ class Member(
 
     var height: Int? = null
         protected set
-
+  
     @Enumerated(ORDINAL)
     var bodyType: BodyType? = null
         protected set

@@ -4,5 +4,4 @@ enum class HowFar {
     CLOSE,
     MIDDLE,
     FAR,
-
 }
