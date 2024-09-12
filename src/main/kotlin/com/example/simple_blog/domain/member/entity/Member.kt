@@ -2,6 +2,7 @@ package com.example.simple_blog.domain.member.entity
 
 import com.example.simple_blog.domain.AuditingEntity
 import com.example.simple_blog.domain.auth.entity.RefreshToken
+import com.example.simple_blog.domain.chat.entity.MemberChatRoom
 import com.example.simple_blog.domain.company.entity.Company
 import com.example.simple_blog.domain.member.enumstorage.*
 import com.example.simple_blog.enumstrorage.MemberRole
@@ -68,6 +69,11 @@ class Member(
     @Column(nullable = false)
     @NotNull
     var didYouWriteProfile: Boolean = false
+        protected set
+
+    // Member의 채팅
+    @OneToMany(mappedBy = "member", cascade = [ALL], orphanRemoval = true, fetch = LAZY)
+    var membersChatRooms: MutableList<MemberChatRoom> = mutableListOf()
         protected set
 
     @OneToMany(mappedBy = "member", cascade = [ALL], orphanRemoval = true, fetch = LAZY)
