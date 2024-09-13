@@ -1,8 +1,14 @@
 spring:
     datasource:
         password: ${database.password}
+
+    redis:
+        host: localhost
+        port: 6379
+
     mail:
         password: ${mail.password}
+
     config:
         import: 'aws-parameterstore:'
         activate:
