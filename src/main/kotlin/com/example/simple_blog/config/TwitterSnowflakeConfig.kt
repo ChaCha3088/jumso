@@ -7,13 +7,17 @@ import com.littlenb.snowflake.worker.WorkerIdAssigner
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.lang.System.currentTimeMillis
+import java.time.LocalDateTime
+import java.time.LocalDateTime.of
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit.MILLISECONDS
 
 
 @Configuration
 class TwitterSnowflakeConfig {
     @Bean
-    fun snowflake(): IdGenerator {
+    fun idGenerator(): IdGenerator {
         val elasticFactory = ElasticIdGeneratorFactory()
 
         // TimeBits + WorkerBits + SeqBits = 64 -1
@@ -24,7 +28,13 @@ class TwitterSnowflakeConfig {
         // 시간
         elasticFactory.setTimeUnit(MILLISECONDS)
 
-        elasticFactory.setEpochTimestamp(1483200000000L)
+        // 2024년 09월 13일 00시 설정
+        val localDateTime: LocalDateTime = of(2024, 9, 13, 0, 0)
+
+        // 한국 표준시(GMT+9)로 변환
+        val zonedDateTime: ZonedDateTime = localDateTime.atZone(ZoneId.of("Asia/Seoul"))
+
+        elasticFactory.setEpochTimestamp(zonedDateTime.toInstant().toEpochMilli())
 
         val workerIdAssigner: WorkerIdAssigner = SimpleWorkerIdAssigner(currentTimeMillis())
 

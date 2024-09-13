@@ -1,5 +1,6 @@
 package com.example.simple_blog.domain.chat.service
 
+import com.example.simple_blog.domain.chat.dto.Message
 import com.example.simple_blog.domain.chat.dto.ChatRoomResponse
 import com.example.simple_blog.domain.chat.dto.CreateChatRoomRequest
 import com.example.simple_blog.domain.chat.entity.ChatRoom
@@ -21,6 +22,7 @@ class ChatService(
     private val redisTemplate: RedisTemplate<String, Any>,
 ) {
     private val chatServerLoad = "chat-server-load"
+    private val chatMessage = "chat-message"
 
     @Transactional
     fun createChatRoom(memberId: Long, createChatRoomRequest: CreateChatRoomRequest): ChatRoomResponse {
@@ -40,31 +42,13 @@ class ChatService(
                     // 존재하지 않으면
                     ?: {
                         // 채팅방 생성
-                        val targetMemberIds = createChatRoomRequest.targets.toMutableSet()
-                        targetMemberIds.add(memberId)
-
-                        val chatRoom = ChatRoom(
-                            title = createChatRoomRequest.title,
-                            newMemberIds = targetMemberIds
-                        )
-
-                        val newChatRoom = chatRoomRepository.save(chatRoom)
-                        chatRoomId = newChatRoom.id!!
+                        chatRoomId = createChatRoom(createChatRoomRequest, memberId)
                     }
             }
             in 2..99 -> {
                 // 그룹 채팅
                 // 상대들과 채팅방이 존재하는지 확인하지 않고 채팅방 생성
-                val targetMemberIds = createChatRoomRequest.targets.toMutableSet()
-                targetMemberIds.add(memberId)
-
-                val chatRoom = ChatRoom(
-                    title = createChatRoomRequest.title,
-                    newMemberIds = targetMemberIds
-                )
-
-                val newChatRoom = chatRoomRepository.save(chatRoom)
-                chatRoomId = newChatRoom.id!!
+                chatRoomId = createChatRoom(createChatRoomRequest, memberId)
             }
             else -> {
                 throw IllegalArgumentException("채팅 상대는 최대 99명까지 가능합니다.")
@@ -72,8 +56,13 @@ class ChatService(
         }
 
         // redis에 채팅방 생성 요청
-        // redis에 채팅방이 있는지 확인
-        redisTemplate.
+        // 채팅방에 "채팅방이 생성되었습니다." 메시지 추가
+        val systemMessage = Message(0L, "채팅방이 생성되었습니다.")
+
+        // ToDo : json 형태로 변환하여 저장
+        val chatMessage = systemMessage.toJson()
+
+        redisTemplate.opsForZSet().add(chatMessage + chatRoomId, "채팅방이 생성되었습니다.", idGenerator.nextId().toDouble())
 
         // redis에 채팅 서버 부하 정보 요청
         // 채팅 서버 WebSocket 연결 개수를 기반으로 채팅 서버 선택
@@ -84,5 +73,21 @@ class ChatService(
             chatRoomId = chatRoomId,
             chatServerId = result!!.firstOrNull()?.toString()?.toInt() ?: 0
         )
+    }
+
+    private fun createChatRoom(
+        createChatRoomRequest: CreateChatRoomRequest,
+        memberId: Long,
+    ): Long {
+        val targetMemberIds = createChatRoomRequest.targets.toMutableSet()
+        targetMemberIds.add(memberId)
+
+        val chatRoom = ChatRoom(
+            title = createChatRoomRequest.title,
+            newMemberIds = targetMemberIds
+        )
+
+        val newChatRoom = chatRoomRepository.save(chatRoom)
+        return newChatRoom.id!!
     }
 }
