@@ -6,10 +6,12 @@ import com.example.simple_blog.domain.chat.dto.CreateChatRoomRequest
 import com.example.simple_blog.domain.chat.entity.ChatRoom
 import com.example.simple_blog.domain.chat.repository.ChatRoomRepository
 import com.example.simple_blog.domain.chat.repository.MemberChatRoomRepository
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.littlenb.snowflake.sequence.IdGenerator
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import kotlin.Double.Companion.POSITIVE_INFINITY
 
 @Service
 @Transactional(readOnly = true)
@@ -17,16 +19,17 @@ class ChatService(
     private val chatRoomRepository: ChatRoomRepository,
     private val memberChatRoomRepository: MemberChatRoomRepository,
     private val idGenerator: IdGenerator,
+    private val objectMapper: ObjectMapper,
 
     // Redis의 Sorted Set을 사용하여 채팅 서버 부하 정보를 저장
     private val redisTemplate: RedisTemplate<String, Any>,
 ) {
-    private val chatServerLoad = "chat-server-load"
-    private val chatMessage = "chat-message"
+    private val redisChatServerLoad = "chat-server-load"
+    private val redisChatMessage = "chat-message-"
 
     @Transactional
     fun createChatRoom(memberId: Long, createChatRoomRequest: CreateChatRoomRequest): ChatRoomResponse {
-        var chatRoomId = 0L;
+        var chatRoomId: Long = 0L;
         when (createChatRoomRequest.targets.size) {
             0 -> {
                 throw IllegalArgumentException("채팅 상대가 존재하지 않습니다.")
@@ -34,13 +37,16 @@ class ChatService(
             1 -> {
                 // 1:1 채팅
                 // 상대와 채팅방이 존재하는지 확인
-                memberChatRoomRepository.findExistingMemberChatRoom(memberId, createChatRoomRequest.targets.first())
+                memberChatRoomRepository.findExistingMemberChatRoom(
+                    memberId,
+                    createChatRoomRequest.targets.first()
+                )
                     // 존재하면
                     ?.let {
                         chatRoomId = it.chatRoom.id!!
                     }
                     // 존재하지 않으면
-                    ?: {
+                    ?: run {
                         // 채팅방 생성
                         chatRoomId = createChatRoom(createChatRoomRequest, memberId)
                     }
@@ -59,19 +65,23 @@ class ChatService(
         // 채팅방에 "채팅방이 생성되었습니다." 메시지 추가
         val systemMessage = Message(0L, "채팅방이 생성되었습니다.")
 
-        // ToDo : json 형태로 변환하여 저장
-        val chatMessage = systemMessage.toJson()
+        // Json으로 변환
+        val chatMessage = objectMapper.writeValueAsString(systemMessage)
 
-        redisTemplate.opsForZSet().add(chatMessage + chatRoomId, "채팅방이 생성되었습니다.", idGenerator.nextId().toDouble())
+        // 채팅방에 메시지 추가
+        redisTemplate.opsForZSet().add(redisChatMessage + chatRoomId, chatMessage, idGenerator.nextId().toDouble())
 
         // redis에 채팅 서버 부하 정보 요청
         // 채팅 서버 WebSocket 연결 개수를 기반으로 채팅 서버 선택
-        val result = redisTemplate.opsForZSet().range(chatServerLoad, 0, 0)
+        // score는 최소값 1개만 score와 함께 조회
+        val result = redisTemplate.opsForZSet().rangeByScoreWithScores(redisChatServerLoad, 0.0, POSITIVE_INFINITY, 0, 1)!!.first()
 
-        // result가 없으면 채팅 서버 id 0번, 있으면 result[0]번 채팅 서버 선택
+        // 채팅 서버 부하 정보 업데이트
+        redisTemplate.opsForZSet().incrementScore(redisChatServerLoad, result.value!!, 1.0)
+
         return ChatRoomResponse(
             chatRoomId = chatRoomId,
-            chatServerId = result!!.firstOrNull()?.toString()?.toInt() ?: 0
+            chatServerId = result.value.toString().toInt()
         )
     }
 

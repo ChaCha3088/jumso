@@ -29,7 +29,7 @@ class MemberChatRoomCustomRepositoryImpl(
             select(entity(MemberChatRoom::class))
             from(entity(MemberChatRoom::class))
             where(column(MemberChatRoom::memberId).`in`(memberId, targetId))
-            groupBy(column(MemberChatRoom::chatRoom).nested(ChatRoom::id))
+            groupBy(column(MemberChatRoom::chatRoom).nested(ChatRoom::id), column(MemberChatRoom::id))
             having(countDistinct(column(MemberChatRoom::memberId)).equal(2))
         }.resultList.firstOrNull()
     }

@@ -2,6 +2,9 @@ package com.example.simple_blog.config
 
 import com.example.simple_blog.domain.auth.filter.AuthenticationProcessFilter
 import com.example.simple_blog.domain.auth.handler.JwtLogoutHandler
+import com.example.simple_blog.domain.auth.security.CustomUserDetailsService
+import com.example.simple_blog.enumstrorage.MemberRole
+import com.example.simple_blog.enumstrorage.MemberRole.USER
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.servlet.http.HttpServletResponse.SC_OK
@@ -20,8 +23,8 @@ import org.springframework.security.web.authentication.logout.LogoutFilter
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
+    private val authenticationProcessFilter: AuthenticationProcessFilter,
     private val jwtLogoutHandler: JwtLogoutHandler,
-    private val authenticationProcessFilter: AuthenticationProcessFilter
 ) {
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
@@ -40,11 +43,8 @@ class SecurityConfig(
                             "/js/**",
                             "/favicon.ico",
                             "/error/**"
-                        )
-                        .permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/members/**").permitAll()
-                        .anyRequest().authenticated()
+                        ).permitAll()
+                        .anyRequest().permitAll()
                 }
 
         // 세션

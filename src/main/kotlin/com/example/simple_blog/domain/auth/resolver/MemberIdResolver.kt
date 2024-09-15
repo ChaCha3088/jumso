@@ -10,7 +10,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 
 class MemberIdResolver(
-    private val jwtService: JwtService
+    private val jwtService: JwtService,
 ) : HandlerMethodArgumentResolver {
     override fun supportsParameter(parameter: MethodParameter): Boolean {
         return parameter.parameterType == Long::class.java && parameter.hasParameterAnnotation(MemberId::class.java)
@@ -23,8 +23,11 @@ class MemberIdResolver(
     ): Any {
         val request = webRequest.nativeRequest as HttpServletRequest
         val accessToken: String = jwtService.extractAccessToken(request)
+
+        // accessToken을 검증하고
         jwtService.validateAccessToken(accessToken)
 
+        // memberId를 반환
         return jwtService.extractMemberIdFromAccessToken(accessToken)
     }
 }

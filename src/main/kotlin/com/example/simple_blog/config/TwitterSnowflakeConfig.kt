@@ -6,7 +6,6 @@ import com.littlenb.snowflake.worker.SimpleWorkerIdAssigner
 import com.littlenb.snowflake.worker.WorkerIdAssigner
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import java.lang.System.currentTimeMillis
 import java.time.LocalDateTime
 import java.time.LocalDateTime.of
 import java.time.ZoneId
@@ -36,7 +35,7 @@ class TwitterSnowflakeConfig {
 
         elasticFactory.setEpochTimestamp(zonedDateTime.toInstant().toEpochMilli())
 
-        val workerIdAssigner: WorkerIdAssigner = SimpleWorkerIdAssigner(currentTimeMillis())
+        val workerIdAssigner: WorkerIdAssigner = SimpleWorkerIdAssigner(0)
 
         return elasticFactory.create(workerIdAssigner)
     }
