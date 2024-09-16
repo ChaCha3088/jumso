@@ -26,6 +26,7 @@ class ChatService(
 ) {
     private val redisChatServerLoad = "chat-server-load"
     private val redisChatMessage = "chat-message-"
+    private val redisMemberChatServer = "member-chat-server"
 
     @Transactional
     fun createChatRoom(memberId: Long, createChatRoomRequest: CreateChatRoomRequest): ChatRoomResponse {
@@ -78,6 +79,9 @@ class ChatService(
 
         // 채팅 서버 부하 정보 업데이트
         redisTemplate.opsForZSet().incrementScore(redisChatServerLoad, result.value!!, 1.0)
+
+        // redis에 이 member가 어떤 채팅 서버에 연결되어 있는지 저장
+        redisTemplate.opsForHash<Long, Int>().put(redisMemberChatServer, memberId, result.value.toString().toInt())
 
         return ChatRoomResponse(
             chatRoomId = chatRoomId,
