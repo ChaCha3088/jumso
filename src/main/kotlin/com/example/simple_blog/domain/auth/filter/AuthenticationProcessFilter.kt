@@ -16,6 +16,7 @@ class AuthenticationProcessFilter(
 ): OncePerRequestFilter() {
     companion object {
         private val NO_CHECK_URL = listOf(
+            "/",
             "/api/auth",
             "/error", "/css", "/js", "/img", "/favicon.ico"
         )
@@ -35,43 +36,46 @@ class AuthenticationProcessFilter(
             filterChain.doFilter(request, response)
             return
         }
-        // 메인 페이지거나, 확인하지 않는 URL이면 바로 다음 필터로 넘어가기
-        if (request.requestURI == "/" || isNoCheckUrl(request.requestURI)) {
-            filterChain.doFilter(request, response) //
-            return  // return으로 이후 현재 필터 진행 막기 (안해주면 아래로 내려가서 계속 필터 진행시킴)
-        }
 
-        try {
-            // 여기에는 애초에 검증 해야하는 요청만 들어오자나
-            // access token 검증
-            val accessToken: String = jwtService.extractAccessToken(request)
+        filterChain.doFilter(request, response)
 
-            //System.out.println("accessToken : " + accessToken);
-            if (!jwtService.validateAccessToken(accessToken)) {
-                throw InvalidAccessTokenException()
-            }
-
-            filterChain.doFilter(request, response) //다음 필터 호출
-            return  // return으로 이후 현재 필터 진행 막기
-        } // accessToken이 유효하지 않으면,
-        catch (e: InvalidAccessTokenException) {
-            // 원래 가려던 곳 상태 저장해주기
-            response.status = SC_UNAUTHORIZED
-            response.setHeader(
-                "Location",
-                "/api/auth/reissue/v1?redirectUrl=" + request.requestURI
-            )
-            response.characterEncoding = "UTF-8"
-            response.writer.write(e.message)
-        } catch (e: IllegalArgumentException) {
-            response.status = SC_UNAUTHORIZED
-            response.setHeader(
-                "Location",
-                "/api/auth/reissue/v1?redirectUrl=" + request.requestURI
-            )
-            response.characterEncoding = "UTF-8"
-            response.writer.write("Illegal Argument Exception")
-        }
+//        // 확인하지 않는 URL이면 바로 다음 필터로 넘어가기
+//        if (isNoCheckUrl(request.requestURI)) {
+//            filterChain.doFilter(request, response) //
+//            return  // return으로 이후 현재 필터 진행 막기 (안해주면 아래로 내려가서 계속 필터 진행시킴)
+//        }
+//
+//        try {
+//            // 여기에는 애초에 검증 해야하는 요청만 들어오자나
+//            // access token 검증
+//            val accessToken: String = jwtService.extractAccessToken(request)
+//
+//            //System.out.println("accessToken : " + accessToken);
+//            if (!jwtService.validateAccessToken(accessToken)) {
+//                throw InvalidAccessTokenException()
+//            }
+//
+//            filterChain.doFilter(request, response) //다음 필터 호출
+//            return  // return으로 이후 현재 필터 진행 막기
+//        } // accessToken이 유효하지 않으면,
+//        catch (e: InvalidAccessTokenException) {
+//            // 원래 가려던 곳 상태 저장해주기
+//            response.status = SC_UNAUTHORIZED
+//            response.setHeader(
+//                "Location",
+//                "/api/auth/reissue/v1?redirectUrl=" + request.requestURI
+//            )
+//            response.characterEncoding = "UTF-8"
+//            response.writer.write(e.message)
+//        } catch (e: IllegalArgumentException) {
+//            response.status = SC_UNAUTHORIZED
+//            response.setHeader(
+//                "Location",
+//                "/api/auth/reissue/v1?redirectUrl=" + request.requestURI
+//            )
+//            response.characterEncoding = "UTF-8"
+//            response.writer.write("Illegal Argument Exception")
+//        }
     }
 
     private fun isNoCheckUrl(url: String): Boolean {

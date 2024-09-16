@@ -40,7 +40,7 @@ dependencies {
     // JWT
     implementation("com.auth0:java-jwt:4.4.0")
 
-	implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 //	implementation("org.springframework.boot:spring-boot-starter-websocket")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -51,7 +51,11 @@ dependencies {
     // Kotlin JDSL
     implementation("com.linecorp.kotlin-jdsl:spring-data-kotlin-jdsl-starter-jakarta:2.2.1.RELEASE")
 
-    // p6spy
+	// Tweeter Snowflake
+	implementation("com.littlenb:snowflake:1.0.5")
+
+
+	// p6spy
     implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1")
 
     // Kotlin Faker

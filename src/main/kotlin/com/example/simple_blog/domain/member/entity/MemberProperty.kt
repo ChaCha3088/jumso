@@ -6,13 +6,6 @@ import jakarta.persistence.*
 import jakarta.persistence.FetchType.LAZY
 
 @Entity
-@Table(
-    uniqueConstraints = [
-        UniqueConstraint(
-            columnNames = ["member_id", "property_id"]
-        )
-    ]
-)
 class MemberProperty(
     memberId: Long,
     propertyId: Long,

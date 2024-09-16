@@ -26,4 +26,20 @@ class MemberChatRoom(
     @ManyToOne(fetch = LAZY, targetEntity = ChatRoom::class)
     var chatRoom: ChatRoom = chatRoom
         protected set
+
+    // hashCode와 equals를 override
+    override fun hashCode(): Int {
+        return memberId.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MemberChatRoom
+
+        if (memberId != other.memberId) return false
+
+        return true
+    }
 }
