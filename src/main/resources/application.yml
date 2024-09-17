@@ -1,11 +1,11 @@
 spring:
     application:
-        name: simple-blog
+        name: jumso
 
     datasource:
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://localhost:3306/simple-blog?serverTimezone=Asia/Seoul
-        username: simple-blog
+        url: jdbc:mysql://localhost:3306/jumso?serverTimezone=Asia/Seoul
+        username: jumso
     jpa:
         hibernate:
             ddl-auto: update
@@ -35,7 +35,7 @@ server:
 
 # JWT
 jwt:
-    issuer: simple-blog
+    issuer: jumso
     token:
         access:
 #            expiration: 86_400_000 # 1일
