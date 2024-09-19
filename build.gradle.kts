@@ -1,95 +1,96 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
 plugins {
-	id("org.springframework.boot") version "3.3.2"
-	id("io.spring.dependency-management") version "1.1.6"
-	id("org.asciidoctor.jvm.convert") version "3.3.2"
-	kotlin("plugin.jpa") version "1.9.24"
-	kotlin("jvm") version "1.9.24"
-	kotlin("plugin.spring") version "1.9.24"
+    id("org.springframework.boot") version "3.3.2" apply false
+    id("io.spring.dependency-management") version "1.1.6" apply false
+
+    kotlin("jvm") version "1.9.24"
+    kotlin("plugin.spring") version "1.9.24" apply false
+    kotlin("plugin.jpa") version "1.9.24" apply false
+    id("org.jetbrains.kotlin.plugin.allopen") version "1.9.24" apply false
 }
 
-allOpen {
-	annotation("jakarta.persistence.Entity")
-	annotation("jakarta.persistence.Embeddable")
-	annotation("jakarta.persistence.MappedSuperclass")
+allprojects {
+    group = "com.jumso"
+    version = "1.0-SNAPSHOT"
+
+    repositories {
+        mavenCentral()
+    }
 }
 
-group = "com.example"
-version = "0.0.1-SNAPSHOT"
+subprojects {
+    apply(plugin = "java")
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+    apply(plugin = "kotlin")
+
+    apply(plugin = "org.jetbrains.kotlin.plugin.spring")
+    apply(plugin = "org.springframework.boot")
+    apply(plugin = "io.spring.dependency-management")
+
+    apply(plugin = "kotlin-jpa")
+//    apply(plugin = "kotlin-spring") //all-open
+
+    dependencies {
+        // Security
+        implementation("org.springframework.boot:spring-boot-starter-security")
+        // JWT
+        implementation("com.auth0:java-jwt:4.4.0")
+        // Validation
+        implementation("org.springframework.boot:spring-boot-starter-validation")
+
+        // Web
+        implementation("org.springframework.boot:spring-boot-starter-web")
+
+        // DataBase
+        implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+        implementation("org.springframework.boot:spring-boot-starter-data-redis")
+        implementation("com.mysql:mysql-connector-j:8.0.33")
+        // Kotlin JDSL
+        implementation("com.linecorp.kotlin-jdsl:spring-data-kotlin-jdsl-starter-jakarta:2.2.1.RELEASE")
+        // Tweeter Snowflake
+        implementation("com.littlenb:snowflake:1.0.5")
+
+        // Logging
+        implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1")
+
+        // AWS Parameter Store
+        implementation("io.awspring.cloud:spring-cloud-starter-aws-parameter-store-config:2.3.3")
+
+        // ETC
+        implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+        implementation("org.jetbrains.kotlin:kotlin-reflect")
+        // Kotlin Faker
+        implementation("io.github.serpro69:kotlin-faker:1.16.0")
+
+        // Test
+        testImplementation(kotlin("test"))
+        testImplementation(platform("org.junit:junit-bom:5.10.0"))
+        testImplementation("org.junit.jupiter:junit-jupiter")
+    }
+
+    tasks.test {
+        useJUnitPlatform()
+    }
+
+    tasks.withType<KotlinCompile> {
+        kotlinOptions {
+            freeCompilerArgs = listOf("-Xjsr305=strict")
+            jvmTarget = "17"
+        }
+    }
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
 }
 
-repositories {
-	mavenCentral()
-}
+// was 설정
+project(":was") {
+    val jar: Jar by tasks
+    jar.enabled = true
 
-extra["snippetsDir"] = file("build/generated-snippets")
-
-dependencies {
-//	implementation("org.springframework.boot:spring-boot-starter-actuator")
-//	implementation("org.springframework.boot:spring-boot-starter-cache")
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.boot:spring-boot-starter-data-redis")
-
-//	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-	implementation("org.springframework.boot:spring-boot-starter-security")
-
-    // JWT
-    implementation("com.auth0:java-jwt:4.4.0")
-
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-	implementation("org.springframework.boot:spring-boot-starter-web")
-//	implementation("org.springframework.boot:spring-boot-starter-websocket")
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-	implementation("org.jetbrains.kotlin:kotlin-reflect")
-
-	implementation("com.mysql:mysql-connector-j:8.0.33")
-
-    // Kotlin JDSL
-    implementation("com.linecorp.kotlin-jdsl:spring-data-kotlin-jdsl-starter-jakarta:2.2.1.RELEASE")
-
-	// Tweeter Snowflake
-	implementation("com.littlenb:snowflake:1.0.5")
-
-
-	// p6spy
-    implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1")
-
-    // Kotlin Faker
-    implementation("io.github.serpro69:kotlin-faker:1.16.0")
-
-    // Spring Email
-    implementation("org.springframework.boot:spring-boot-starter-mail")
-
-    // AWS Parameter Store
-//    implementation(platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.1.1"))
-    implementation("io.awspring.cloud:spring-cloud-starter-aws-parameter-store-config:2.3.3")
-
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-	testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
-	testImplementation("org.springframework.security:spring-security-test")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
-
-kotlin {
-	compilerOptions {
-		freeCompilerArgs.addAll("-Xjsr305=strict")
-	}
-}
-
-tasks.withType<Test> {
-	useJUnitPlatform()
-}
-
-tasks.test {
-	outputs.dir(project.extra["snippetsDir"]!!)
-}
-
-tasks.asciidoctor {
-	inputs.dir(project.extra["snippetsDir"]!!)
-	dependsOn(tasks.test)
+    val bootJar: BootJar by tasks
+    bootJar.enabled = false
 }
