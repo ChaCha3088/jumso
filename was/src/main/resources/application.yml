@@ -1,6 +1,6 @@
 spring:
     application:
-        name: jumso
+        name: jumso-was
 
     datasource:
         driver-class-name: com.mysql.cj.jdbc.Driver
@@ -24,14 +24,6 @@ spring:
                     auth: true
                     starttls:
                         enable: true
-
-server:
-    port: 9090
-    servlet:
-        context-path: /
-        encoding:
-            charset: UTF-8
-            enabled: true
 
 # JWT
 jwt:

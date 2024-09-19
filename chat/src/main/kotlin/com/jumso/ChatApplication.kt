@@ -1,11 +1,11 @@
-package com.example.jumso
+package com.jumso
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class SimpleBlogApplication
+class ChatApplication
 
 fun main(args: Array<String>) {
-	runApplication<SimpleBlogApplication>(*args)
+	runApplication<ChatApplication>(*args)
 }

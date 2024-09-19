@@ -2,9 +2,11 @@ package com.example.jumso.domain.property.entity
 
 import com.example.jumso.domain.AuditingEntity
 import com.example.jumso.domain.member.entity.MemberProperty
-import jakarta.persistence.*
 import jakarta.persistence.CascadeType.ALL
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
 import jakarta.persistence.FetchType.LAZY
+import jakarta.persistence.OneToMany
 import jakarta.validation.constraints.NotBlank
 
 @Entity

@@ -6,8 +6,8 @@ import com.example.jumso.domain.auth.exception.InvalidAccessTokenException
 import com.example.jumso.domain.auth.exception.InvalidPasswordException
 import com.example.jumso.domain.auth.exception.InvalidRefreshTokenException
 import com.example.jumso.domain.auth.service.AuthService
-import com.example.jumso.domain.member.dto.TemporaryMemberRequest
 import com.example.jumso.domain.member.dto.MemberResponse
+import com.example.jumso.domain.member.dto.TemporaryMemberRequest
 import com.example.jumso.domain.member.exception.*
 import com.example.jumso.domain.member.service.MemberService
 import com.example.jumso.domain.member.service.TemporaryMemberService

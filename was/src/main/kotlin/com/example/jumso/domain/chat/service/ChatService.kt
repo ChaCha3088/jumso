@@ -1,8 +1,8 @@
 package com.example.jumso.domain.chat.service
 
-import com.example.jumso.domain.chat.dto.Message
 import com.example.jumso.domain.chat.dto.ChatRoomResponse
 import com.example.jumso.domain.chat.dto.CreateChatRoomRequest
+import com.example.jumso.domain.chat.dto.Message
 import com.example.jumso.domain.chat.entity.ChatRoom
 import com.example.jumso.domain.chat.repository.ChatRoomRepository
 import com.example.jumso.domain.chat.repository.MemberChatRoomRepository

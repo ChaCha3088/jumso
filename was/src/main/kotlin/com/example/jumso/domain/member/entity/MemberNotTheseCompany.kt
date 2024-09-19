@@ -2,8 +2,11 @@ package com.example.jumso.domain.member.entity
 
 import com.example.jumso.domain.AuditingEntity
 import com.example.jumso.domain.company.entity.Company
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
 import jakarta.persistence.FetchType.LAZY
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 
 @Entity
 class MemberNotTheseCompany(

@@ -5,7 +5,10 @@ import com.example.jumso.domain.member.entity.Member
 import com.linecorp.kotlinjdsl.query.spec.ExpressionOrderSpec
 import com.linecorp.kotlinjdsl.querydsl.expression.column
 import com.linecorp.kotlinjdsl.querydsl.from.fetch
-import com.linecorp.kotlinjdsl.spring.data.*
+import com.linecorp.kotlinjdsl.spring.data.SpringDataQueryFactory
+import com.linecorp.kotlinjdsl.spring.data.deleteQuery
+import com.linecorp.kotlinjdsl.spring.data.listQuery
+import com.linecorp.kotlinjdsl.spring.data.selectQuery
 import jakarta.persistence.criteria.JoinType.LEFT
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository

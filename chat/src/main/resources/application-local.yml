@@ -1,0 +1,29 @@
+spring:
+    redis:
+        host: localhost
+        port: 6379
+        username: cha3088
+        password: ${redis.password}
+
+    config:
+        import: 'aws-parameterstore:'
+        activate:
+            on-profile: local
+
+server:
+    port: 7000
+    servlet:
+        context-path: /
+        encoding:
+            charset: UTF-8
+            enabled: true
+
+# JWT
+jwt:
+    secret: ${jwt.secret}
+
+# p6spy
+decorator:
+    datasource:
+        p6spy:
+            enable-logging: true

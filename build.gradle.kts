@@ -33,8 +33,6 @@ subprojects {
 //    apply(plugin = "kotlin-spring") //all-open
 
     dependencies {
-        // Security
-        implementation("org.springframework.boot:spring-boot-starter-security")
         // JWT
         implementation("com.auth0:java-jwt:4.4.0")
         // Validation
@@ -44,11 +42,8 @@ subprojects {
         implementation("org.springframework.boot:spring-boot-starter-web")
 
         // DataBase
-        implementation("org.springframework.boot:spring-boot-starter-data-jpa")
         implementation("org.springframework.boot:spring-boot-starter-data-redis")
         implementation("com.mysql:mysql-connector-j:8.0.33")
-        // Kotlin JDSL
-        implementation("com.linecorp.kotlin-jdsl:spring-data-kotlin-jdsl-starter-jakarta:2.2.1.RELEASE")
         // Tweeter Snowflake
         implementation("com.littlenb:snowflake:1.0.5")
 
