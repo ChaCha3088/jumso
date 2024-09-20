@@ -1,15 +1,13 @@
 spring:
     datasource:
+        url: jdbc:mysql://localhost:3306/jumso?serverTimezone=Asia/Seoul
         password: ${database.password}
 
     redis:
         host: localhost
         port: 6379
-        username: cha3088
+        username: jumso
         password: ${redis.password}
-
-    mail:
-        password: ${mail.password}
 
     config:
         import: 'aws-parameterstore:'

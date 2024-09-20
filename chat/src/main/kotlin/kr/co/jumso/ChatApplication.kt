@@ -1,4 +1,4 @@
-package com.jumso
+package kr.co.jumso
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

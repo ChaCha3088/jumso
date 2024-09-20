@@ -1,0 +1,33 @@
+spring:
+    application:
+        name: jumso-email
+
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        username: jumso
+    jpa:
+        hibernate:
+            ddl-auto:
+        open-in-view: false
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.MySQLDialect
+                default_batch_fetch_size: 100
+
+    mail:
+        host: smtp.gmail.com
+        port: 587
+        username: jumso.official@gmail.com
+        properties:
+            mail:
+                smtp:
+                    auth: true
+                    starttls:
+                        enable: true
+
+aws:
+    paramstore:
+        enabled: true
+        prefix: /Jumso
+        name: email
+        profileSeparator: _

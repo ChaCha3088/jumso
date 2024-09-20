@@ -1,4 +1,4 @@
-package com.jumso.registry
+package kr.co.jumso.registry
 
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.WebSocketSession

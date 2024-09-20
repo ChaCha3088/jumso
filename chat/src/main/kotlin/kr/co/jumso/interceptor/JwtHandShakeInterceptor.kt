@@ -1,6 +1,6 @@
-package com.jumso.interceptor
+package kr.co.jumso.interceptor
 
-import com.example.jumso.domain.auth.service.JwtService
+import kr.co.jumso.domain.auth.service.JwtService
 import org.springframework.http.server.ServerHttpRequest
 import org.springframework.http.server.ServerHttpResponse
 import org.springframework.stereotype.Component
@@ -11,7 +11,6 @@ import org.springframework.web.socket.server.HandshakeInterceptor
 class JwtHandShakeInterceptor(
     private val jwtService: JwtService,
 ): HandshakeInterceptor {
-
     override fun beforeHandshake(
         request: ServerHttpRequest,
         response: ServerHttpResponse,
@@ -19,17 +18,24 @@ class JwtHandShakeInterceptor(
         attributes: MutableMap<String, Any>
     ): Boolean {
         // request의 header에서 jwt를 가져온다.
-        var authorization = request.headers["Authorization"].toString()
+        var authorization = request.headers["Authorization"]?.firstOrNull()
+            ?.let {
+                if (!it.contains("Bearer ")) {
+                    return false
+                }
 
-        authorization = authorization.replace("Bearer ", "")
+                var accessToken = it.replace("Bearer ", "")
 
-        // 클라이언트의 jwt를 검증하고, memberId를 가져온다.
-        val memberId = jwtService.extractMemberIdFromAccessToken(authorization)
+                // 클라이언트의 jwt를 검증하고, memberId를 가져온다.
+                val memberId = jwtService.extractMemberIdFromAccessToken(accessToken)
 
-        // attributes에 memberId를 저장한다.
-        attributes["memberId"] = memberId
+                // attributes에 memberId를 저장한다.
+                attributes["memberId"] = memberId.toString()
 
-        return true
+                return true
+            }
+
+            ?: return false
     }
 
     override fun afterHandshake(
