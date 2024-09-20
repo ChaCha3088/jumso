@@ -72,20 +72,8 @@ class ChatService(
         // 채팅방에 메시지 추가
         redisTemplate.opsForZSet().add(redisChatMessage + chatRoomId, chatMessage, idGenerator.nextId().toDouble())
 
-        // redis에 채팅 서버 부하 정보 요청
-        // 채팅 서버 WebSocket 연결 개수를 기반으로 채팅 서버 선택
-        // score는 최소값 1개만 score와 함께 조회
-        val result = redisTemplate.opsForZSet().rangeByScoreWithScores(redisChatServerLoad, 0.0, POSITIVE_INFINITY, 0, 1)!!.first()
-
-        // 채팅 서버 부하 정보 업데이트
-        redisTemplate.opsForZSet().incrementScore(redisChatServerLoad, result.value!!, 1.0)
-
-        // redis에 이 member가 어떤 채팅 서버에 연결되어 있는지 저장
-        redisTemplate.opsForHash<Long, Int>().put(redisMemberChatServer, memberId, result.value.toString().toInt())
-
         return ChatRoomResponse(
             chatRoomId = chatRoomId,
-            chatServerPort = result.value.toString().toInt()
         )
     }
 
