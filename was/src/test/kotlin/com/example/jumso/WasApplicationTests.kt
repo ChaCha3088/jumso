@@ -1,4 +1,4 @@
-package com.example.jumso
+package kr.co.jumso
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
