@@ -1,0 +1,46 @@
+spring:
+    application:
+        name: jumso-was
+
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/jumso?serverTimezone=Asia/Seoul
+        username: jumso
+    jpa:
+        hibernate:
+            ddl-auto: update
+        open-in-view: false
+        properties:
+            hibernate:
+                default_batch_fetch_size: 100
+
+    mail:
+        host: smtp.gmail.com
+        port: 587
+        username: jumso.official@gmail.com
+        properties:
+            mail:
+                smtp:
+                    auth: true
+                    starttls:
+                        enable: true
+
+# JWT
+jwt:
+    issuer: jumso
+    token:
+        access:
+#            expiration: 86_400_000 # 1일
+            expiration: 3_600_000 # 1시간
+            header: Authorization
+        refresh:
+#            expiration: 604_800_000 # 7? (1000L(ms -> s) * 60L(s -> m) * 60L(m -> h) * 24L(h -> d) * 7L(d -> w))
+            expiration: 86_400_000 # 1일
+            header: AuthorizationRefresh
+
+aws:
+    paramstore:
+        enabled: true
+        prefix: /Jumso
+        name: WAS
+        profileSeparator: _
