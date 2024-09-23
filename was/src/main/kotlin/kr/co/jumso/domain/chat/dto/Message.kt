@@ -1,6 +1,8 @@
 package kr.co.jumso.domain.chat.dto
 
+import kr.co.jumso.domain.chat.enumstorage.MessageType
+
 data class Message(
-    val senderId: Long,
-    val message: String,
+    val type: MessageType,
+    val data: Any,
 )

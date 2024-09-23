@@ -1,17 +1,18 @@
-package kr.co.jumso.domain.chat.service
+package kr.co.jumso.chat.service
 
 import kr.co.jumso.domain.chat.dto.ChatRoomResponse
 import kr.co.jumso.domain.chat.dto.CreateChatRoomRequest
-import kr.co.jumso.domain.chat.dto.Message
 import kr.co.jumso.domain.chat.entity.ChatRoom
 import kr.co.jumso.domain.chat.repository.ChatRoomRepository
 import kr.co.jumso.domain.chat.repository.MemberChatRoomRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.littlenb.snowflake.sequence.IdGenerator
+import kr.co.jumso.domain.chat.dto.ChatMessage
+import kr.co.jumso.domain.chat.dto.Message
+import kr.co.jumso.domain.chat.enumstorage.MessageType.SYSTEM
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import kotlin.Double.Companion.POSITIVE_INFINITY
 
 @Service
 @Transactional(readOnly = true)
@@ -27,6 +28,8 @@ class ChatService(
     private val redisChatServerLoad = "chat-server-load"
     private val redisChatMessage = "chat-message-"
     private val redisMemberChatServer = "member-chat-server"
+    private val redisMemberChatSet = "member-chat-set"
+    private val systemName = "system"
 
     @Transactional
     fun createChatRoom(memberId: Long, createChatRoomRequest: CreateChatRoomRequest): ChatRoomResponse {
@@ -63,15 +66,46 @@ class ChatService(
             }
         }
 
+        val newMembersId = chatRoom!!.memberChatRooms.map {
+            it.memberId
+        }.toMutableSet()
+
+        // redis에 채팅방 참여 회원 정보 저장
+        newMembersId.map {
+            redisTemplate.opsForSet().add("${redisMemberChatSet}-${chatRoom!!.id}", it.toString())
+        }
+
         // redis에 채팅방 생성 요청
         // 채팅방에 "채팅방이 생성되었습니다." 메시지 추가
-        val systemMessage = Message(0L, "채팅방이 생성되었습니다.")
+        val systemMessageId = idGenerator.nextId()
+        val systemMessage = Message(
+            type = SYSTEM,
+            data = ChatMessage(
+                chatId = systemMessageId,
+
+                senderId = memberId,
+                senderName = systemName,
+
+                roomId = chatRoom!!.id!!,
+
+                message = "채팅방이 생성되었습니다."
+            )
+        )
 
         // Json으로 변환
-        val chatMessage = objectMapper.writeValueAsString(systemMessage)
+        val jsonChatMessage = objectMapper.writeValueAsString(systemMessage)
 
         // 채팅방에 메시지 추가
-        redisTemplate.opsForZSet().add(redisChatMessage + chatRoom!!.id, chatMessage, idGenerator.nextId().toDouble())
+        redisTemplate.opsForZSet().add(redisChatMessage + chatRoom!!.id, jsonChatMessage, systemMessageId.toDouble())
+
+        // redis에 회원이 속한 채팅 서버를 조회하고
+        redisTemplate.opsForHash<String, String>().get(redisMemberChatServer, memberId.toString())
+            ?.let {
+                // ToDo: 해당 Kafka에 메시지 발행
+            }
+            ?: run {
+                // ToDo: 아니면 푸시 알림 요청
+            }
 
         return ChatRoomResponse(
             chatRoomId = chatRoom!!.id!!,

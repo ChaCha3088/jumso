@@ -1,12 +1,10 @@
 package kr.co.jumso.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import kr.co.jumso.domain.chat.repository.ChatRoomRepository
+import kr.co.jumso.domain.chat.dto.Message
+import kr.co.jumso.domain.chat.enumstorage.MessageType.*
 import kr.co.jumso.registry.SessionRegistry
-import kr.co.jumso.domain.chat.dto.ChatRoomResponse
-import kr.co.jumso.dto.MessageResponse
-import kr.co.jumso.enumstorage.MessageType
-import kr.co.jumso.enumstorage.MessageType.SERVER
+import kr.co.jumso.domain.chat.service.ChatRoomService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
@@ -20,9 +18,9 @@ import java.time.format.DateTimeFormatter.ofPattern
 
 @Component
 class WebSocketHandler(
+    private val chatRoomService: ChatRoomService,
+    
     private val sessionRegistry: SessionRegistry,
-
-    private val chatRoomRepository: ChatRoomRepository,
 
     private val redisTemplate: RedisTemplate<String, String>,
 
@@ -57,24 +55,9 @@ class WebSocketHandler(
                 // redis에 "chat-server-load"로 ws 개수 보고
                 redisTemplate.opsForZSet().add(chatServerLoad, serverPort, sessionRegistry.getSessionCount())
 
-                // ToDo: 채팅방 목록 조회하여 클라이언트에게 전달
-                val chatRoomResponses = chatRoomRepository.findChatRoomsByMemberId(memberId.toLong())
-                    .map { chatRoom ->
-                        ChatRoomResponse(
-                            chatRoom.id!!,
-                            chatRoom.title,
-                        )
-                    }
-
-                val dto = objectMapper.writeValueAsString(
-                    MessageResponse(
-                        SERVER,
-                        chatRoomResponses
-                    )
-                )
-
-                val result = objectMapper.writeValueAsString(dto)
-
+                // 채팅방 목록을 조회하여 클라이언트에게 전달
+                val result = objectMapper.writeValueAsString(chatRoomService.findChatRoomByMemberId(memberId.toLong()))
+                
                 session.sendMessage(TextMessage(result))
             }
             ?: run {
@@ -84,8 +67,52 @@ class WebSocketHandler(
     }
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
+        // Message 객체로 변환
         val payload = message.payload
-        session.sendMessage(TextMessage("Hello, $payload"))
+
+        val messageObject = objectMapper.readValue(payload, Message::class.java)
+
+        // ToDo: MessageType에 따라 분기처리 예정
+        when (messageObject.type) {
+            // 채팅방 목록 조회
+            REQUEST_SELECT_CHAT_ROOM_LIST -> {
+                // session에서 memberId를 가져온다.
+                session.attributes["memberId"]
+                    ?.let {
+                        val memberId = it as Long
+
+                        // 채팅방 목록을 조회하여 클라이언트에게 전달
+                        val result = objectMapper.writeValueAsString(chatRoomService.findChatRoomByMemberId(memberId))
+
+                        session.sendMessage(TextMessage(result))
+                    }
+                    ?: run {
+                        // memberId가 없으면 연결을 끊는다.
+                        session.close(NORMAL.withReason("memberId가 없습니다."))
+                    }
+            }
+            // 채팅방 생성
+            REQUEST_CREATE_CHAT_ROOM -> {
+                // session에서 memberId를 가져온다.
+
+
+            }
+            // 채팅방 삭제
+            REQUEST_DELETE_CHAT_ROOM -> {
+
+            }
+            // 채팅방의 메시지 조회
+            REQUEST_SELECT_CHAT_ROOM_MESSAGES -> {
+
+            }
+            // 채팅 보내기
+            REQUEST_SEND_CHAT -> {
+
+            }
+            else -> {
+                // 예외 처리
+            }
+        }
     }
 
     // 통신 에러시

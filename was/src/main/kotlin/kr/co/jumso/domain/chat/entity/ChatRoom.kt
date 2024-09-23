@@ -18,7 +18,7 @@ class ChatRoom(
     var title: String = title
         protected set
 
-    // 채팅 회원
+    // 회원 채팅방
     @OneToMany(mappedBy = "chatRoom", cascade = [ALL], orphanRemoval = true, fetch = LAZY)
     var memberChatRooms: MutableSet<MemberChatRoom> = newMemberIds.map {
         MemberChatRoom(it, this)
