@@ -1,13 +1,18 @@
 package kr.co.jumso.domain.chat.entity
 
+import jakarta.persistence.*
 import kr.co.jumso.domain.AuditingEntity
 import kr.co.jumso.domain.member.entity.Member
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
 import jakarta.persistence.FetchType.LAZY
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
 
+@Table(
+    name = "member_chat_room",
+    uniqueConstraints = [
+        UniqueConstraint(
+            columnNames = ["member_id", "chat_room_id"]
+        )
+    ]
+)
 @Entity
 class MemberChatRoom(
     memberId: Long,
@@ -38,8 +43,6 @@ class MemberChatRoom(
 
         other as MemberChatRoom
 
-        if (memberId != other.memberId) return false
-
-        return true
+        return memberId == other.memberId
     }
 }

@@ -1,0 +1,6 @@
+docker run \
+-d \
+-p 6379:6379 \
+-v /Users/mac/Desktop/code/private/simple-blog/redis/redis.conf:/usr/local/etc/redis/redis.conf \
+-v /Users/mac/Desktop/code/private/simple-blog/redis/users.acl:/usr/local/etc/redis/users.acl \
+--name redis redis redis-server /usr/local/etc/redis/redis.conf

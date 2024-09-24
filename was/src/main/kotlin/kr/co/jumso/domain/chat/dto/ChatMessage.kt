@@ -12,9 +12,6 @@ data class ChatMessage(
     @field:NotBlank
     val senderName: String,
 
-    @field:NotNull
-    val roomId: Long,
-
     @field:NotBlank
     val message: String,
 )

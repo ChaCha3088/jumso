@@ -17,6 +17,8 @@ interface ChatRoomRepository: JpaRepository<ChatRoom, Long>, ChatRoomCustomRepos
 
 interface ChatRoomCustomRepository {
     fun findChatRoomsByMemberId(memberId: Long): List<ChatRoom>
+
+    fun findExistingOneToOneChatRoom(memberId: Long, targetId: Long): ChatRoom?
 }
 
 class ChatRoomCustomRepositoryImpl(
@@ -59,5 +61,57 @@ class ChatRoomCustomRepositoryImpl(
         }
 
         return jpaQuery.resultList as List<ChatRoom>
+    }
+
+    override fun findExistingOneToOneChatRoom(memberId: Long, targetId: Long): ChatRoom? {
+//        SELECT
+//            count(distinct chat_room_id)
+//        FROM
+//            member_chat_room
+//        GROUP BY
+//            chat_room_id
+//        HAVING
+//            COUNT(DISTINCT member_id) = 2
+//                AND COUNT(CASE WHEN member_id NOT IN (10001, 10005) THEN 1 END) = 0;
+
+        val subQuery = jpql {
+            select(
+                path(MemberChatRoom::chatRoom).path(ChatRoom::id)
+            )
+                .from(
+                    entity(MemberChatRoom::class)
+                )
+                .groupBy(
+                    path(MemberChatRoom::chatRoom).path(ChatRoom::id)
+                )
+                .having(
+                    countDistinct(path(MemberChatRoom::memberId)).equal(2)
+                        .and(count(caseWhen(path(MemberChatRoom::memberId).notIn(memberId, targetId)).then(1)).equal(0))
+                )
+        }
+
+        val mainQuery = jpql {
+            select(
+                entity(ChatRoom::class)
+            )
+                .from(
+                    entity(ChatRoom::class),
+                )
+                .where(
+                    path(ChatRoom::id).`in`(subQuery.asSubquery())
+                )
+        }
+
+        val rendered = renderer.render(mainQuery, context)
+
+        val jpaQuery: Query = entityManager.createQuery(rendered.query).apply {
+            rendered.params.forEach { (key, value) ->
+                setParameter(key, value)
+            }
+        }
+
+        val resultList = jpaQuery.resultList
+
+        return resultList.firstOrNull() as ChatRoom?
     }
 }

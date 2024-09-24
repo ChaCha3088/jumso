@@ -8,5 +8,5 @@ data class CreateChatRoomRequest(
     val title: String,
 
     @field:NotEmpty(message = "대화 상대는 필수입니다.")
-    val targets: Set<Long>
+    val targets: MutableSet<Long>
 )
