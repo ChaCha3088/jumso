@@ -7,8 +7,10 @@ import kr.co.jumso.domain.chat.repository.ChatRoomRepository
 import kr.co.jumso.domain.chat.repository.MemberChatRoomRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.littlenb.snowflake.sequence.IdGenerator
+import jakarta.validation.Validator
 import kr.co.jumso.domain.chat.dto.ChatMessage
 import kr.co.jumso.domain.chat.dto.Message
+import kr.co.jumso.domain.chat.enumstorage.MessageType.RESPONSE_SELECT_CHAT_ROOM_LIST
 import kr.co.jumso.domain.chat.enumstorage.MessageType.SYSTEM
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
@@ -16,20 +18,36 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional(readOnly = true)
-class ChatService(
+class ChatRoomService(
     private val chatRoomRepository: ChatRoomRepository,
     private val memberChatRoomRepository: MemberChatRoomRepository,
-    private val idGenerator: IdGenerator,
-    private val objectMapper: ObjectMapper,
 
     // Redis의 Sorted Set을 사용하여 채팅 서버 부하 정보를 저장
     private val redisTemplate: RedisTemplate<String, Any>,
+
+    private val idGenerator: IdGenerator,
+    private val objectMapper: ObjectMapper,
 ) {
     private val redisChatServerLoad = "chat-server-load"
     private val redisChatMessage = "chat-message-"
     private val redisMemberChatServer = "member-chat-server"
     private val redisMemberChatSet = "member-chat-set"
     private val systemName = "system"
+
+    fun findChatRoomByMemberId(memberId: Long): Message {
+        val chatRoomResponses = chatRoomRepository.findChatRoomsByMemberId(memberId)
+            .map { chatRoom ->
+                ChatRoomResponse(
+                    chatRoom.id!!,
+                    chatRoom.title,
+                )
+            }
+
+        return Message(
+            RESPONSE_SELECT_CHAT_ROOM_LIST,
+            chatRoomResponses
+        )
+    }
 
     @Transactional
     fun createChatRoom(memberId: Long, createChatRoomRequest: CreateChatRoomRequest): ChatRoomResponse {

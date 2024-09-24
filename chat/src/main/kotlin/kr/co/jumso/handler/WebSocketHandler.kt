@@ -1,10 +1,12 @@
 package kr.co.jumso.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import kr.co.jumso.annotation.Valid
+import kr.co.jumso.chat.service.ChatRoomService
+import kr.co.jumso.domain.chat.dto.CreateChatRoomRequest
 import kr.co.jumso.domain.chat.dto.Message
 import kr.co.jumso.domain.chat.enumstorage.MessageType.*
 import kr.co.jumso.registry.SessionRegistry
-import kr.co.jumso.domain.chat.service.ChatRoomService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
@@ -19,7 +21,7 @@ import java.time.format.DateTimeFormatter.ofPattern
 @Component
 class WebSocketHandler(
     private val chatRoomService: ChatRoomService,
-    
+
     private val sessionRegistry: SessionRegistry,
 
     private val redisTemplate: RedisTemplate<String, String>,
@@ -49,7 +51,7 @@ class WebSocketHandler(
                 redisTemplate.opsForHash<String, String>().put(
                     memberIdToServerPortAndSessionId,
                     memberId,
-                    "${now().format(ofPattern("yyyy-MM-dd"))} ${serverPort} ${session.id}"
+                    "${now().format(ofPattern("yyyy-MM-dd"))} $serverPort ${session.id}"
                 )
 
                 // redis에 "chat-server-load"로 ws 개수 보고
@@ -93,8 +95,17 @@ class WebSocketHandler(
             }
             // 채팅방 생성
             REQUEST_CREATE_CHAT_ROOM -> {
-                // session에서 memberId를 가져온다.
+                // message에서 CreateChatRoomRequest를 가져온다.
+                val createChatRoomRequest = objectMapper.convertValue(messageObject.data, CreateChatRoomRequest::class.java)
 
+                // session에서 memberId를 가져온다.
+                session.attributes["memberId"]
+                    ?.let {
+                        val memberId = it as Long
+
+                        // 채팅방 생성 요청
+                        val result = objectMapper.writeValueAsString(chatRoomService.createChatRoom(memberId, @Valid createChatRoomRequest))
+                    }
 
             }
             // 채팅방 삭제
