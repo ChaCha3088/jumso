@@ -1,4 +1,4 @@
-package kr.co.jumso.domain.chat.dto
+package kr.co.jumso.domain.chat.dto.response
 
 data class ChatRoomResponse(
     val chatRoomId: Long,

@@ -1,7 +1,7 @@
 package kr.co.jumso
 
 import kr.co.jumso.enumstorage.RedisKeys.CHAT_SERVER_LOAD
-import kr.co.jumso.enumstorage.RedisKeys.MEMBER_ID_TO_SERVER_PORT_AND_SESSION_ID
+import kr.co.jumso.enumstorage.RedisKeys.MEMBER_ID_TO_SERVER_PORT
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -27,11 +27,11 @@ class RedisInit(
     override fun onApplicationEvent(event: ApplicationReadyEvent) {
         try {
             redisTemplate.opsForHash<String, String>()
-                .delete(MEMBER_ID_TO_SERVER_PORT_AND_SESSION_ID.key)
+                .delete(MEMBER_ID_TO_SERVER_PORT.toString())
         } catch (_: Exception) {
 
         }
 
-        redisTemplate.opsForZSet().remove(CHAT_SERVER_LOAD.key, serverPort)
+        redisTemplate.opsForZSet().remove(CHAT_SERVER_LOAD.toString(), serverPort)
     }
 }

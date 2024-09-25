@@ -1,4 +1,4 @@
-package kr.co.jumso.domain.chat.dto
+package kr.co.jumso.domain.chat.dto.request
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty

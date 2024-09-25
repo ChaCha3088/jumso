@@ -1,13 +1,11 @@
 package kr.co.jumso.enumstorage
 
-enum class RedisKeys(
-    val key: String
-) {
-    MEMBER_ID_TO_SERVER_PORT_AND_SESSION_ID("member-id-to-server-port-and-session-id"),
+enum class RedisKeys {
+    MEMBER_ID_TO_SERVER_PORT,
 
-    CHAT_SERVER_LOAD("chat-server-load"),
+    CHAT_SERVER_LOAD,
 
-    CHAT_MESSAGE_STORAGE("chat-message-storage-"),
+    CHAT_MESSAGE_STORAGE,
 
-    CHAT_ROOM_MEMBERS("chat-room-members-"),
+    CHAT_ROOM_MEMBERS,
 }

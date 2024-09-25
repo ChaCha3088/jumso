@@ -1,6 +1,11 @@
 package kr.co.jumso.interceptor
 
 import kr.co.jumso.domain.auth.service.JwtService
+import kr.co.jumso.enumstorage.RedisKeys.MEMBER_ID_TO_SERVER_PORT
+import kr.co.jumso.registry.SessionRegistry
+import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.http.HttpStatusCode
+import org.springframework.http.HttpStatusCode.valueOf
 import org.springframework.http.server.ServerHttpRequest
 import org.springframework.http.server.ServerHttpResponse
 import org.springframework.stereotype.Component
@@ -10,6 +15,10 @@ import org.springframework.web.socket.server.HandshakeInterceptor
 @Component
 class JwtHandShakeInterceptor(
     private val jwtService: JwtService,
+
+    private val redisTemplate: RedisTemplate<String, Any>,
+
+    private val sessionRegistry: SessionRegistry,
 ): HandshakeInterceptor {
     override fun beforeHandshake(
         request: ServerHttpRequest,
@@ -18,16 +27,35 @@ class JwtHandShakeInterceptor(
         attributes: MutableMap<String, Any>
     ): Boolean {
         // request의 header에서 jwt를 가져온다.
-        var authorization = request.headers["Authorization"]?.firstOrNull()
+        request.headers["Authorization"]?.firstOrNull()
             ?.let {
                 if (!it.contains("Bearer ")) {
                     return false
                 }
 
-                var accessToken = it.replace("Bearer ", "")
+                val accessToken = it.replace("Bearer ", "")
 
                 // 클라이언트의 jwt를 검증하고, memberId를 가져온다.
-                val memberId = jwtService.extractMemberIdFromAccessToken(accessToken)
+                val memberId = runCatching {
+                    jwtService.extractMemberIdFromAccessToken(accessToken)
+                }.getOrElse {
+                    response.setStatusCode(valueOf(401))
+                    return false
+                }
+
+                // sessionRegistry에 이미 있는지 확인한다.
+                if (sessionRegistry.containsSession(memberId)) {
+                    response.setStatusCode(valueOf(400))
+                    return false
+                }
+
+                // redis에 memberId를 키로 이미 연결된 서버가 있는지 확인한다.
+                redisTemplate.opsForHash<String, String>().get(MEMBER_ID_TO_SERVER_PORT.toString(), memberId.toString())
+                    // 이미 있으면
+                    ?.let {
+                        // 연결 종료
+                        return false
+                    }
 
                 // attributes에 memberId를 저장한다.
                 attributes["memberId"] = memberId.toString()

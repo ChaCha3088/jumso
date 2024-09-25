@@ -1,4 +1,4 @@
-package kr.co.jumso.chat.service
+package kr.co.jumso.service
 
 import kr.co.jumso.domain.chat.entity.ChatRoom
 import kr.co.jumso.domain.chat.repository.ChatRoomRepository
@@ -7,6 +7,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.littlenb.snowflake.sequence.IdGenerator
 import kr.co.jumso.annotation.Valid
 import kr.co.jumso.domain.chat.dto.*
+import kr.co.jumso.domain.chat.dto.request.CreateChatRoomRequest
+import kr.co.jumso.domain.chat.dto.request.DeleteChatRoomRequest
+import kr.co.jumso.domain.chat.dto.response.ChatRoomResponse
 import kr.co.jumso.domain.chat.enumstorage.MessageStatus.SUCCESS
 import kr.co.jumso.domain.chat.enumstorage.MessageType.SYSTEM
 import kr.co.jumso.enumstorage.RedisKeys.*
@@ -80,13 +83,10 @@ class ChatRoomService(
             }
         }
 
-        val newMembersId = chatRoom!!.memberChatRooms.map {
-            it.memberId
-        }.toMutableSet()
-
         // redis에 채팅방 참여 회원 정보 저장
-        newMembersId.map {
-            redisTemplate.opsForSet().add("${CHAT_ROOM_MEMBERS}${chatRoom!!.id}", it.toString())
+        val key = "$CHAT_ROOM_MEMBERS ${chatRoom!!.id!!}"
+        chatRoom!!.memberChatRooms.map {
+            redisTemplate.opsForSet().add(key, it.memberId.toString())
         }
 
         // redis에 채팅방 생성 요청
@@ -111,10 +111,10 @@ class ChatRoomService(
         val jsonChatMessage = objectMapper.writeValueAsString(newChatMessage)
 
         // 채팅방에 메시지 추가
-        redisTemplate.opsForZSet().add(CHAT_MESSAGE_STORAGE.key + chatRoom!!.id, jsonChatMessage, newMessageId.toDouble())
+        redisTemplate.opsForZSet().add("$CHAT_MESSAGE_STORAGE ${chatRoom!!.id}", jsonChatMessage, newMessageId.toDouble())
 
         // redis에 회원이 속한 채팅 서버를 조회하고
-        redisTemplate.opsForHash<String, String>().get(MEMBER_ID_TO_SERVER_PORT_AND_SESSION_ID.key, memberId.toString())
+        redisTemplate.opsForHash<String, String>().get(MEMBER_ID_TO_SERVER_PORT.toString(), memberId.toString())
             ?.let {
                 // ToDo: 해당 Kafka에 메시지 발행
             }
@@ -129,25 +129,22 @@ class ChatRoomService(
     }
 
     @Transactional
-    fun deleteChatRoom(memberId: Long, @Valid deleteChatRoomRequest: DeleteChatRoomRequest): ChatRoomResponse {
+    fun deleteChatRoom(memberId: Long, @Valid deleteChatRoomRequest: DeleteChatRoomRequest) {
         // memberId가 들어가있고, chatRoomId가 일치하는 member chat room id 조회
-//        memberChatRoomRepository.
+        val memberChatRoomId = memberChatRoomRepository.findMemberChatRoomIdByMemberIdAndChatRoomId(memberId, deleteChatRoomRequest.chatRoomId)
+            ?: throw IllegalArgumentException("채팅방이 존재하지 않습니다.")
 
+        // member chat room 모두 삭제
+        memberChatRoomRepository.deleteByChatRoomId(deleteChatRoomRequest.chatRoomId)
 
-
-
-
-
-        // member chat room 삭제 후
         // chat room 삭제
+        chatRoomRepository.deleteById(deleteChatRoomRequest.chatRoomId)
 
         // redis에서 채팅방 참여 회원 정보 삭제
-        // redis에서 채팅방 메시지 삭제
+        redisTemplate.delete("$CHAT_ROOM_MEMBERS ${deleteChatRoomRequest.chatRoomId}")
 
-        return ChatRoomResponse(
-            chatRoomId = 0,
-            title = "",
-        )
+        // redis에서 채팅방 메시지 삭제
+        redisTemplate.delete("$CHAT_MESSAGE_STORAGE ${deleteChatRoomRequest.chatRoomId}")
     }
 
     private fun createChatRoom(

@@ -1,15 +1,16 @@
 package kr.co.jumso.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import kr.co.jumso.chat.service.ChatRoomService
-import kr.co.jumso.domain.chat.dto.CreateChatRoomRequest
-import kr.co.jumso.domain.chat.dto.DeleteChatRoomRequest
-import kr.co.jumso.domain.chat.dto.RequestMessage
-import kr.co.jumso.domain.chat.dto.ResponseMessage
+import kr.co.jumso.domain.chat.dto.*
+import kr.co.jumso.domain.chat.dto.request.CreateChatRoomRequest
+import kr.co.jumso.domain.chat.dto.request.DeleteChatRoomRequest
+import kr.co.jumso.domain.chat.dto.request.SelectChatRoomMessagesRequest
+import kr.co.jumso.service.ChatRoomService
 import kr.co.jumso.domain.chat.enumstorage.MessageStatus.SUCCESS
 import kr.co.jumso.domain.chat.enumstorage.MessageType.*
-import kr.co.jumso.enumstorage.RedisKeys.MEMBER_ID_TO_SERVER_PORT_AND_SESSION_ID
+import kr.co.jumso.enumstorage.RedisKeys.MEMBER_ID_TO_SERVER_PORT
 import kr.co.jumso.registry.SessionRegistry
+import kr.co.jumso.service.ChatService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
@@ -22,11 +23,12 @@ import java.time.format.DateTimeFormatter.ofPattern
 
 @Component
 class WebSocketHandler(
+    private val chatService: ChatService,
     private val chatRoomService: ChatRoomService,
 
     private val sessionRegistry: SessionRegistry,
 
-    private val redisTemplate: RedisTemplate<String, String>,
+    private val redisTemplate: RedisTemplate<String, Any>,
 
     private val objectMapper: ObjectMapper,
 
@@ -43,14 +45,14 @@ class WebSocketHandler(
         val memberId = getMemberId(session)
 
         // sessionRegistry에 session을 추가한다.
-        sessionRegistry.addSession(session)
+        sessionRegistry.addSession(memberId, session)
 
         // redis에 memberId를 키로 현재 서버의 포트와 session의 id를 값으로 저장한다.
         // ToDo: TTL은 1일
         redisTemplate.opsForHash<String, String>().put(
-            MEMBER_ID_TO_SERVER_PORT_AND_SESSION_ID.key,
+            MEMBER_ID_TO_SERVER_PORT.toString(),
             memberId.toString(),
-            "${now().format(ofPattern("yyyy-MM-dd"))} $serverPort ${session.id}"
+            "${now().format(ofPattern("yyyy-MM-dd"))} $serverPort"
         )
 
         // redis에 "chat-server-load"로 ws 개수 보고
@@ -80,39 +82,76 @@ class WebSocketHandler(
             }
             // 채팅방 삭제
             REQUEST_DELETE_CHAT_ROOM -> {
-                // message에서 DeleteChatRoomRequest를 가져온다.
-                val deleteChatRoomRequest =
-                    objectMapper.convertValue(responseMessageObject.data, DeleteChatRoomRequest::class.java)
-
-                // session에서 memberId를 가져온다.
-                val memberId = getMemberId(session)
-
-                // 채팅방 삭제 요청
-                chatRoomService.deleteChatRoom(
-                    memberId,
-                    deleteChatRoomRequest
-                )
-
-                val result = ResponseMessage(
-                    status = SUCCESS,
-                    type = RESPONSE_DELETE_CHAT_ROOM,
-                    data = ""
-                )
-
-                session.sendMessage(TextMessage(objectMapper.writeValueAsString(result)))
+                requestDeleteChatRoom(responseMessageObject, session)
             }
             // 채팅방의 메시지 조회
             REQUEST_SELECT_CHAT_ROOM_MESSAGES -> {
-
+                requestSelectChatMessages(responseMessageObject, session)
             }
             // 채팅 보내기
             REQUEST_SEND_CHAT -> {
+                // ToDo: 메시지 길이 한계 정하기
 
             }
             else -> {
                 // ToDo: 예외 처리
             }
         }
+    }
+
+    private fun requestSelectChatMessages(
+        responseMessageObject: RequestMessage,
+        session: WebSocketSession
+    ) {
+        // message에서 SelectChatRoomMessagesRequest를 가져온다.
+        val selectChatRoomMessagesRequest =
+            objectMapper.convertValue(responseMessageObject.data, SelectChatRoomMessagesRequest::class.java)
+
+        // session에서 memberId를 가져온다.
+        val memberId = getMemberId(session)
+
+        // 채팅방의 메시지 조회
+        val chatMessages = chatService.findChatMessages(
+            memberId,
+            selectChatRoomMessagesRequest
+        )
+
+        val result = ResponseMessage(
+            status = SUCCESS,
+            type = RESPONSE_SELECT_CHAT_ROOM_MESSAGES,
+            data = chatMessages
+        )
+
+        session.sendMessage(TextMessage(objectMapper.writeValueAsString(result)))
+    }
+
+    private fun requestDeleteChatRoom(
+        responseMessageObject: RequestMessage,
+        session: WebSocketSession
+    ) {
+        // message에서 DeleteChatRoomRequest를 가져온다.
+        val deleteChatRoomRequest =
+            objectMapper.convertValue(responseMessageObject.data, DeleteChatRoomRequest::class.java)
+
+        // session에서 memberId를 가져온다.
+        val memberId = getMemberId(session)
+
+        // 채팅방 삭제 요청
+        chatRoomService.deleteChatRoom(
+            memberId,
+            deleteChatRoomRequest
+        )
+
+        val result = ResponseMessage(
+            status = SUCCESS,
+            type = RESPONSE_DELETE_CHAT_ROOM,
+            data = ""
+        )
+
+        session.sendMessage(TextMessage(objectMapper.writeValueAsString(result)))
+
+        // 채팅방 목록 조회
+        requestSelectChatRoomList(session)
     }
 
     private fun requestSelectChatRoomList(session: WebSocketSession) {
@@ -163,11 +202,13 @@ class WebSocketHandler(
     override fun handleTransportError(session: WebSocketSession, exception: Throwable) {
         super.handleTransportError(session, exception)
 
+        val memberId = getMemberId(session)
+
         // sessionRegistry에서 session을 제거한다.
-        sessionRegistry.removeSession(session)
+        sessionRegistry.removeSession(memberId)
 
         // redis에서 memberId를 키로 현재 서버의 포트와 session의 id를 삭제한다.
-        redisTemplate.opsForHash<String, String>().delete(MEMBER_ID_TO_SERVER_PORT_AND_SESSION_ID.key, session.attributes["memberId"])
+        redisTemplate.opsForHash<String, String>().delete(MEMBER_ID_TO_SERVER_PORT.toString(), session.attributes["memberId"])
 
         // redis에 "chat-server-load"로 ws 개수 보고
         redisTemplate.opsForZSet().add(chatServerLoad, serverPort, sessionRegistry.getSessionCount())
@@ -177,11 +218,13 @@ class WebSocketHandler(
     override fun afterConnectionClosed(session: WebSocketSession, closeStatus: CloseStatus) {
         super.afterConnectionClosed(session, closeStatus)
 
+        val memberId = getMemberId(session)
+
         // sessionRegistry에서 session을 제거한다.
-        sessionRegistry.removeSession(session)
+        sessionRegistry.removeSession(memberId)
 
         // redis에서 memberId를 키로 현재 서버의 포트와 session의 id를 삭제한다.
-        redisTemplate.opsForHash<String, String>().delete(MEMBER_ID_TO_SERVER_PORT_AND_SESSION_ID.key, session.attributes["memberId"])
+        redisTemplate.opsForHash<String, String>().delete(MEMBER_ID_TO_SERVER_PORT.toString(), session.attributes["memberId"])
 
         // redis에 "chat-server-load"로 ws 개수 보고
         redisTemplate.opsForZSet().add(chatServerLoad, serverPort, sessionRegistry.getSessionCount())

@@ -6,15 +6,17 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class SessionRegistry {
-    private val sessions = ConcurrentHashMap<String, WebSocketSession>()
+    private val sessions = ConcurrentHashMap<Long, WebSocketSession>()
 
-    fun addSession(session: WebSocketSession) {
-        sessions[session.id] = session
+    fun addSession(memberId: Long, session: WebSocketSession) {
+        sessions[memberId] = session
     }
 
-    fun removeSession(session: WebSocketSession) {
-        sessions.remove(session.id)
+    fun removeSession(memberId: Long) {
+        sessions.remove(memberId)
     }
+
+    fun containsSession(memberId: Long) = sessions.containsKey(memberId)
 
     fun getSessionCount() = sessions.size.toDouble()
 }
