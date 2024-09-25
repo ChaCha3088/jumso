@@ -28,8 +28,6 @@ class ChatRoomService(
     private val idGenerator: IdGenerator,
     private val objectMapper: ObjectMapper,
 ) {
-    private val systemName = "system"
-
     fun findChatRoomByMemberId(memberId: Long): List<ChatRoomResponse> {
         return chatRoomRepository.findChatRoomsByMemberId(memberId)
             .map { chatRoom ->
@@ -92,11 +90,10 @@ class ChatRoomService(
         // redis에 채팅방 생성 요청
         // 채팅방에 "채팅방이 생성되었습니다." 메시지 추가
         val newMessageId = idGenerator.nextId()
-        val newChatMessage = ChatMessage(
+        val newChatMessageRedis = ChatMessageRedis(
             chatId = newMessageId,
 
             senderId = memberId,
-            senderName = systemName,
 
             message = "채팅방이 생성되었습니다."
         )
@@ -104,11 +101,11 @@ class ChatRoomService(
         val systemResponseMessage = ResponseMessage(
             status = SUCCESS,
             type = SYSTEM,
-            data = newChatMessage
+            data = newChatMessageRedis
         )
 
         // Json으로 변환
-        val jsonChatMessage = objectMapper.writeValueAsString(newChatMessage)
+        val jsonChatMessage = objectMapper.writeValueAsString(newChatMessageRedis)
 
         // 채팅방에 메시지 추가
         redisTemplate.opsForZSet().add("$CHAT_MESSAGE_STORAGE ${chatRoom!!.id}", jsonChatMessage, newMessageId.toDouble())

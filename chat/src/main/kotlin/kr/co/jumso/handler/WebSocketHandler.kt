@@ -2,6 +2,7 @@ package kr.co.jumso.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import kr.co.jumso.domain.chat.dto.*
+import kr.co.jumso.domain.chat.dto.request.ChatMessageRequest
 import kr.co.jumso.domain.chat.dto.request.CreateChatRoomRequest
 import kr.co.jumso.domain.chat.dto.request.DeleteChatRoomRequest
 import kr.co.jumso.domain.chat.dto.request.SelectChatRoomMessagesRequest
@@ -90,7 +91,8 @@ class WebSocketHandler(
             }
             // 채팅 보내기
             REQUEST_SEND_CHAT -> {
-                // ToDo: 메시지 길이 한계 정하기
+                requestSendChat(responseMessageObject, session)
+
 
             }
             else -> {
@@ -99,13 +101,39 @@ class WebSocketHandler(
         }
     }
 
+    private fun requestSendChat(
+        requestMessageObject: RequestMessage,
+        session: WebSocketSession
+    ) {
+        // message에서 ChatMessage를 가져온다.
+        val chatMessageRequest =
+            objectMapper.convertValue(requestMessageObject.data, ChatMessageRequest::class.java)
+
+        // session에서 memberId를 가져온다.
+        val memberId = getMemberId(session)
+
+        // 채팅 메시지 저장
+        val newChatMessage = chatService.saveChatMessage(
+            memberId,
+            chatMessageRequest
+        )
+
+        val result = ResponseMessage(
+            status = SUCCESS,
+            type = RESPONSE_SEND_CHAT,
+            data = newChatMessage
+        )
+
+        session.sendMessage(TextMessage(objectMapper.writeValueAsString(result)))
+    }
+
     private fun requestSelectChatMessages(
-        responseMessageObject: RequestMessage,
+        requestMessageObject: RequestMessage,
         session: WebSocketSession
     ) {
         // message에서 SelectChatRoomMessagesRequest를 가져온다.
         val selectChatRoomMessagesRequest =
-            objectMapper.convertValue(responseMessageObject.data, SelectChatRoomMessagesRequest::class.java)
+            objectMapper.convertValue(requestMessageObject.data, SelectChatRoomMessagesRequest::class.java)
 
         // session에서 memberId를 가져온다.
         val memberId = getMemberId(session)
@@ -126,12 +154,12 @@ class WebSocketHandler(
     }
 
     private fun requestDeleteChatRoom(
-        responseMessageObject: RequestMessage,
+        requestMessageObject: RequestMessage,
         session: WebSocketSession
     ) {
         // message에서 DeleteChatRoomRequest를 가져온다.
         val deleteChatRoomRequest =
-            objectMapper.convertValue(responseMessageObject.data, DeleteChatRoomRequest::class.java)
+            objectMapper.convertValue(requestMessageObject.data, DeleteChatRoomRequest::class.java)
 
         // session에서 memberId를 가져온다.
         val memberId = getMemberId(session)
