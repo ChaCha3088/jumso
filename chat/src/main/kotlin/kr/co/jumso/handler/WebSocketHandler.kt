@@ -90,10 +90,8 @@ class WebSocketHandler(
                 requestSelectChatMessages(responseMessageObject, session)
             }
             // 채팅 보내기
-            REQUEST_SEND_CHAT -> {
+            REQUEST_SEND_CHAT_MESSAGE -> {
                 requestSendChat(responseMessageObject, session)
-
-
             }
             else -> {
                 // ToDo: 예외 처리

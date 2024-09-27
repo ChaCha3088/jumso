@@ -67,6 +67,7 @@ class ChatService(
             chatMessageRequest.message,
         )
 
+        // redis에 채팅 메시지를 저장한다.
         redisTemplate.opsForZSet().add(
             "$CHAT_MESSAGE_STORAGE ${chatMessageRequest.targetChatRoomId}",
             objectMapper.writeValueAsString(newChatMessageRedis),

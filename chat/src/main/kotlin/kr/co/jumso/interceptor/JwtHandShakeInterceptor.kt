@@ -40,12 +40,20 @@ class JwtHandShakeInterceptor(
                     jwtService.extractMemberIdFromAccessToken(accessToken)
                 }.getOrElse {
                     response.setStatusCode(valueOf(401))
+
+                    // "JWT 토큰이 유효하지 않습니다."
+                    response.body.write("JWT 토큰이 유효하지 않습니다.".toByteArray())
+
                     return false
                 }
 
                 // sessionRegistry에 이미 있는지 확인한다.
                 if (sessionRegistry.containsSession(memberId)) {
                     response.setStatusCode(valueOf(400))
+
+                    // "이미 연결된 세션이 있습니다."
+                    response.body.write("이미 연결된 세션이 있습니다.".toByteArray())
+
                     return false
                 }
 
