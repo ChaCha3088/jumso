@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatusCode.valueOf
 import org.springframework.http.server.ServerHttpRequest
 import org.springframework.http.server.ServerHttpResponse
 import org.springframework.stereotype.Component
+import org.springframework.web.socket.CloseStatus
+import org.springframework.web.socket.CloseStatus.NORMAL
 import org.springframework.web.socket.WebSocketHandler
 import org.springframework.web.socket.server.HandshakeInterceptor
 
@@ -49,21 +51,9 @@ class JwtHandShakeInterceptor(
 
                 // sessionRegistry에 이미 있는지 확인한다.
                 if (sessionRegistry.containsSession(memberId)) {
-                    response.setStatusCode(valueOf(400))
-
-                    // "이미 연결된 세션이 있습니다."
-                    response.body.write("이미 연결된 세션이 있습니다.".toByteArray())
-
-                    return false
+                    // 원래 세션 종료
+                    sessionRegistry.getSession(memberId)?.close(NORMAL)
                 }
-
-                // redis에 memberId를 키로 이미 연결된 서버가 있는지 확인한다.
-                redisTemplate.opsForHash<String, String>().get(MEMBER_ID_TO_SERVER_PORT.toString(), memberId.toString())
-                    // 이미 있으면
-                    ?.let {
-                        // 연결 종료
-                        return false
-                    }
 
                 // attributes에 memberId를 저장한다.
                 attributes["memberId"] = memberId.toString()
@@ -71,7 +61,13 @@ class JwtHandShakeInterceptor(
                 return true
             }
 
-            ?: return false
+        // jwt가 없으면
+        response.setStatusCode(valueOf(401))
+
+        // "JWT 토큰이 없습니다."
+        response.body.write("JWT 토큰이 없습니다.".toByteArray())
+
+        return false
     }
 
     override fun afterHandshake(

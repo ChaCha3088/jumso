@@ -8,6 +8,11 @@ import java.util.concurrent.ConcurrentHashMap
 class SessionRegistry {
     private val sessions = ConcurrentHashMap<Long, WebSocketSession>()
 
+    fun getSession(memberId: Long): WebSocketSession? {
+        // 있으면 WebSocketSession을 반환하고, 없으면 예외 발생
+        return sessions[memberId]
+    }
+
     fun addSession(memberId: Long, session: WebSocketSession) {
         sessions[memberId] = session
     }

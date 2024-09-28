@@ -1,16 +1,18 @@
 package kr.co.jumso.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import kr.co.jumso.domain.chat.dto.*
+import kr.co.jumso.domain.chat.dto.RequestMessage
+import kr.co.jumso.domain.chat.dto.ResponseMessage
 import kr.co.jumso.domain.chat.dto.request.ChatMessageRequest
 import kr.co.jumso.domain.chat.dto.request.CreateChatRoomRequest
 import kr.co.jumso.domain.chat.dto.request.DeleteChatRoomRequest
 import kr.co.jumso.domain.chat.dto.request.SelectChatRoomMessagesRequest
-import kr.co.jumso.service.ChatRoomService
+import kr.co.jumso.domain.chat.enumstorage.MessageStatus
 import kr.co.jumso.domain.chat.enumstorage.MessageStatus.SUCCESS
 import kr.co.jumso.domain.chat.enumstorage.MessageType.*
 import kr.co.jumso.enumstorage.RedisKeys.MEMBER_ID_TO_SERVER_PORT
 import kr.co.jumso.registry.SessionRegistry
+import kr.co.jumso.service.ChatRoomService
 import kr.co.jumso.service.ChatService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.RedisTemplate
@@ -66,35 +68,48 @@ class WebSocketHandler(
     }
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
-        // Message 객체로 변환
-        val payload = message.payload
+        try {
+            // Message 객체로 변환
+            val payload = message.payload
 
-        val responseMessageObject = objectMapper.readValue(payload, RequestMessage::class.java)
+            val responseMessageObject = objectMapper.readValue(payload, RequestMessage::class.java)
 
-        // ToDo: MessageType에 따라 분기처리 예정
-        when (responseMessageObject.type) {
-            // 채팅방 목록 조회
-            REQUEST_SELECT_CHAT_ROOM_LIST -> {
-                requestSelectChatRoomList(session)
+            // ToDo: MessageType에 따라 분기처리 예정
+            when (responseMessageObject.type) {
+                // 채팅방 목록 조회
+                REQUEST_SELECT_CHAT_ROOM_LIST -> {
+                    requestSelectChatRoomList(session)
+                }
+                // 채팅방 생성
+                REQUEST_CREATE_CHAT_ROOM -> {
+                    requestCreateChatRoom(responseMessageObject, session)
+                }
+                // 채팅방 삭제
+                REQUEST_DELETE_CHAT_ROOM -> {
+                    requestDeleteChatRoom(responseMessageObject, session)
+                }
+                // 채팅방의 메시지 조회
+                REQUEST_SELECT_CHAT_ROOM_MESSAGES -> {
+                    requestSelectChatMessages(responseMessageObject, session)
+                }
+                // 채팅 보내기
+                REQUEST_SEND_CHAT_MESSAGE -> {
+                    requestSendChat(responseMessageObject, session)
+                }
+                else -> {
+                    throw IllegalArgumentException("알 수 없는 요청입니다.")
+                }
             }
-            // 채팅방 생성
-            REQUEST_CREATE_CHAT_ROOM -> {
-                requestCreateChatRoom(responseMessageObject, session)
-            }
-            // 채팅방 삭제
-            REQUEST_DELETE_CHAT_ROOM -> {
-                requestDeleteChatRoom(responseMessageObject, session)
-            }
-            // 채팅방의 메시지 조회
-            REQUEST_SELECT_CHAT_ROOM_MESSAGES -> {
-                requestSelectChatMessages(responseMessageObject, session)
-            }
-            // 채팅 보내기
-            REQUEST_SEND_CHAT_MESSAGE -> {
-                requestSendChat(responseMessageObject, session)
-            }
-            else -> {
-                // ToDo: 예외 처리
+        }
+        catch (e: Exception) {
+            if (session.isOpen) {
+                val result = ResponseMessage(
+                    status = MessageStatus.ERROR,
+                    type =  ERROR,
+                    data = e.message ?: "알 수 없는 에러가 발생했습니다."
+                )
+
+                session.sendMessage(TextMessage(objectMapper.writeValueAsString(result)))
             }
         }
     }
@@ -213,7 +228,7 @@ class WebSocketHandler(
         val newChatRoom = chatRoomService.createChatRoom(
                 memberId,
                 createChatRoomRequest
-            )
+        )
 
         val result = ResponseMessage(
             status = SUCCESS,

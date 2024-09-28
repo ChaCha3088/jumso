@@ -2,6 +2,7 @@ package kr.co.jumso.domain.chat.enumstorage
 
 enum class MessageType {
     SYSTEM, // 시스템 메시지
+    ERROR, // 에러 메시지
 
     // 요청
     REQUEST_SELECT_CHAT_ROOM_LIST, // 채팅방 목록 조회 요청
