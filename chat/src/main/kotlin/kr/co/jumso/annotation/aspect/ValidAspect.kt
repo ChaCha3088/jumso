@@ -32,10 +32,23 @@ class ValidAspect(
 
         val targetObject = joinPoint.args[targetIndex]
 
-        val result: Set<ConstraintViolation<Any>> = validator.validate(targetObject, *targetAnnotation!!.value.map { it.java }.toTypedArray())
+        if (targetObject is List<*>) {
+            targetObject.forEach { item ->
+                val result: Set<ConstraintViolation<Any>> = validator.validate(
+                    item,
+                    *targetAnnotation!!.value.map { it.java }.toTypedArray()
+                )
+                if (result.isNotEmpty()) {
+                    throw ConstraintViolationException(result)
+                }
+            }
+        }
+        else {
+            val result: Set<ConstraintViolation<Any>> = validator.validate(targetObject, *targetAnnotation!!.value.map { it.java }.toTypedArray())
 
-        if (result.isNotEmpty()) {
-            throw ConstraintViolationException(result)
+            if (result.isNotEmpty()) {
+                throw ConstraintViolationException(result)
+            }
         }
 
         return joinPoint.proceed()

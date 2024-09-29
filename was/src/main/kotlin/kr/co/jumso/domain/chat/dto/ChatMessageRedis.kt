@@ -5,9 +5,6 @@ import jakarta.validation.constraints.NotNull
 
 data class ChatMessageRedis(
     @field:NotNull
-    val chatId: Long,
-
-    @field:NotNull
     val senderId: Long,
 
     @field:NotBlank

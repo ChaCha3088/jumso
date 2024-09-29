@@ -9,7 +9,7 @@ class SessionRegistry {
     private val sessions = ConcurrentHashMap<Long, WebSocketSession>()
 
     fun getSession(memberId: Long): WebSocketSession? {
-        // 있으면 WebSocketSession을 반환하고, 없으면 예외 발생
+        // 있으면 WebSocketSession을 반환하고, 없으면 null을 반환한다.
         return sessions[memberId]
     }
 

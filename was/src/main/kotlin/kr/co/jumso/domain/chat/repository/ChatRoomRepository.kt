@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository
 interface ChatRoomRepository: JpaRepository<ChatRoom, Long>, ChatRoomCustomRepository
 
 interface ChatRoomCustomRepository {
-    fun findChatRoomsByMemberId(memberId: Long): List<ChatRoom>
+    fun findChatRoomsWithMembersByMemberId(memberId: Long): List<ChatRoom>
 
     fun findExistingOneToOneChatRoom(memberId: Long, targetId: Long): ChatRoom?
 }
@@ -29,7 +29,7 @@ class ChatRoomCustomRepositoryImpl(
     private val context: JpqlRenderContext,
     private val renderer: JpqlRenderer,
 ): ChatRoomCustomRepository {
-    override fun findChatRoomsByMemberId(memberId: Long): List<ChatRoom> {
+    override fun findChatRoomsWithMembersByMemberId(memberId: Long): List<ChatRoom> {
         val subQuery = jpql {
             select<Long>(
                 path(MemberChatRoom::chatRoom).path(ChatRoom::id),
@@ -96,6 +96,8 @@ class ChatRoomCustomRepositoryImpl(
             )
                 .from(
                     entity(ChatRoom::class),
+                    // ToDo: Query 테스트
+                    join(ChatRoom::memberChatRooms)
                 )
                 .where(
                     path(ChatRoom::id).`in`(subQuery.asSubquery())

@@ -1,7 +1,7 @@
 package kr.co.jumso
 
-import kr.co.jumso.enumstorage.RedisKeys.CHAT_SERVER_LOAD
-import kr.co.jumso.enumstorage.RedisKeys.MEMBER_ID_TO_SERVER_PORT
+import kr.co.jumso.domain.chat.enumstorage.RedisKeys.CHAT_SERVER_LOAD
+import kr.co.jumso.domain.chat.enumstorage.RedisKeys.MEMBER_ID_TO_SERVER_PORT
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.event.ApplicationReadyEvent

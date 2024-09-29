@@ -1,15 +1,12 @@
 package kr.co.jumso.interceptor
 
 import kr.co.jumso.domain.auth.service.JwtService
-import kr.co.jumso.enumstorage.RedisKeys.MEMBER_ID_TO_SERVER_PORT
 import kr.co.jumso.registry.SessionRegistry
 import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.HttpStatusCode.valueOf
 import org.springframework.http.server.ServerHttpRequest
 import org.springframework.http.server.ServerHttpResponse
 import org.springframework.stereotype.Component
-import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.CloseStatus.NORMAL
 import org.springframework.web.socket.WebSocketHandler
 import org.springframework.web.socket.server.HandshakeInterceptor

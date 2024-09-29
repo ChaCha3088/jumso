@@ -10,7 +10,7 @@ import kr.co.jumso.domain.chat.dto.request.SelectChatRoomMessagesRequest
 import kr.co.jumso.domain.chat.enumstorage.MessageStatus
 import kr.co.jumso.domain.chat.enumstorage.MessageStatus.SUCCESS
 import kr.co.jumso.domain.chat.enumstorage.MessageType.*
-import kr.co.jumso.enumstorage.RedisKeys.MEMBER_ID_TO_SERVER_PORT
+import kr.co.jumso.domain.chat.enumstorage.RedisKeys.MEMBER_ID_TO_SERVER_PORT
 import kr.co.jumso.registry.SessionRegistry
 import kr.co.jumso.service.ChatRoomService
 import kr.co.jumso.service.ChatService
@@ -62,7 +62,13 @@ class WebSocketHandler(
         redisTemplate.opsForZSet().add(chatServerLoad, serverPort, sessionRegistry.getSessionCount())
 
         // 채팅방 목록을 조회하여 클라이언트에게 전달
-        val result = objectMapper.writeValueAsString(chatRoomService.findChatRoomByMemberId(memberId.toLong()))
+        val result = objectMapper.writeValueAsString(
+            ResponseMessage(
+                status = SUCCESS,
+                type = SELECT_CHAT_ROOM_LIST,
+                data = chatRoomService.findChatRoomByMemberId(memberId)
+            )
+        )
 
         session.sendMessage(TextMessage(result))
     }
@@ -74,26 +80,26 @@ class WebSocketHandler(
 
             val responseMessageObject = objectMapper.readValue(payload, RequestMessage::class.java)
 
-            // ToDo: MessageType에 따라 분기처리 예정
+            // MessageType에 따라 분기처리
             when (responseMessageObject.type) {
                 // 채팅방 목록 조회
-                REQUEST_SELECT_CHAT_ROOM_LIST -> {
+                SELECT_CHAT_ROOM_LIST -> {
                     requestSelectChatRoomList(session)
                 }
                 // 채팅방 생성
-                REQUEST_CREATE_CHAT_ROOM -> {
+                CREATE_CHAT_ROOM -> {
                     requestCreateChatRoom(responseMessageObject, session)
                 }
                 // 채팅방 삭제
-                REQUEST_DELETE_CHAT_ROOM -> {
+                DELETE_CHAT_ROOM -> {
                     requestDeleteChatRoom(responseMessageObject, session)
                 }
                 // 채팅방의 메시지 조회
-                REQUEST_SELECT_CHAT_ROOM_MESSAGES -> {
+                SELECT_CHAT_ROOM_MESSAGES -> {
                     requestSelectChatMessages(responseMessageObject, session)
                 }
                 // 채팅 보내기
-                REQUEST_SEND_CHAT_MESSAGE -> {
+                CHAT_MESSAGE -> {
                     requestSendChat(responseMessageObject, session)
                 }
                 else -> {
@@ -126,18 +132,10 @@ class WebSocketHandler(
         val memberId = getMemberId(session)
 
         // 채팅 메시지 저장
-        val newChatMessage = chatService.saveChatMessage(
+        chatService.saveChatMessage(
             memberId,
             chatMessageRequest
         )
-
-        val result = ResponseMessage(
-            status = SUCCESS,
-            type = RESPONSE_SEND_CHAT,
-            data = newChatMessage
-        )
-
-        session.sendMessage(TextMessage(objectMapper.writeValueAsString(result)))
     }
 
     private fun requestSelectChatMessages(
@@ -159,7 +157,7 @@ class WebSocketHandler(
 
         val result = ResponseMessage(
             status = SUCCESS,
-            type = RESPONSE_SELECT_CHAT_ROOM_MESSAGES,
+            type = SELECT_CHAT_ROOM_MESSAGES,
             data = chatMessages
         )
 
@@ -182,17 +180,6 @@ class WebSocketHandler(
             memberId,
             deleteChatRoomRequest
         )
-
-        val result = ResponseMessage(
-            status = SUCCESS,
-            type = RESPONSE_DELETE_CHAT_ROOM,
-            data = ""
-        )
-
-        session.sendMessage(TextMessage(objectMapper.writeValueAsString(result)))
-
-        // 채팅방 목록 조회
-        requestSelectChatRoomList(session)
     }
 
     private fun requestSelectChatRoomList(session: WebSocketSession) {
@@ -201,12 +188,12 @@ class WebSocketHandler(
 
         // 채팅방 목록을 조회하여 클라이언트에게 전달
         val chatRoomList = chatRoomService.findChatRoomByMemberId(
-                memberId
-            )
+            memberId
+        )
 
         val result = ResponseMessage(
             status = SUCCESS,
-            type = RESPONSE_SELECT_CHAT_ROOM_LIST,
+            type = SELECT_CHAT_ROOM_LIST,
             data = chatRoomList
         )
 
@@ -225,18 +212,10 @@ class WebSocketHandler(
         val memberId = getMemberId(session)
 
         // 채팅방 생성 요청
-        val newChatRoom = chatRoomService.createChatRoom(
-                memberId,
-                createChatRoomRequest
+        chatRoomService.createChatRoom(
+            memberId,
+            createChatRoomRequest
         )
-
-        val result = ResponseMessage(
-            status = SUCCESS,
-            type = RESPONSE_CREATE_CHAT_ROOM,
-            data = newChatRoom
-        )
-
-        session.sendMessage(TextMessage(objectMapper.writeValueAsString(result)))
     }
 
     // 통신 에러시

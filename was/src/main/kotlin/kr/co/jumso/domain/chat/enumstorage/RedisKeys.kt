@@ -1,4 +1,4 @@
-package kr.co.jumso.enumstorage
+package kr.co.jumso.domain.chat.enumstorage
 
 enum class RedisKeys {
     MEMBER_ID_TO_SERVER_PORT,

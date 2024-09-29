@@ -9,5 +9,5 @@ class MemberRoleConverter : AttributeConverter<MemberRole, String> {
     override fun convertToDatabaseColumn(attribute: MemberRole): String = attribute.name
 
     override fun convertToEntityAttribute(dbData: String): MemberRole =
-        MemberRole.entries.first { it.name.equals(dbData) }
+        MemberRole.entries.first { it.name == dbData }
 }
