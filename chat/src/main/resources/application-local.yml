@@ -1,8 +1,12 @@
 spring:
+    datasource:
+        url: jdbc:mysql://localhost:3306/jumso?serverTimezone=Asia/Seoul
+        password: ${database.password}
+
     redis:
         host: localhost
         port: 6379
-        username: cha3088
+        username: jumso
         password: ${redis.password}
 
     config:
@@ -10,8 +14,18 @@ spring:
         activate:
             on-profile: local
 
+    kafka:
+        bootstrap-servers: localhost:9092
+        consumer:
+            # topic
+            topic: KAFKA_CHAT_SERVER-${server.port}
+            # group
+            group-id: KAFKA_CHAT_SERVER-${server.port}
+            auto-offset-reset: earliest
+            key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
 server:
-    port: 7000
     servlet:
         context-path: /
         encoding:

@@ -4,3 +4,4 @@ plugins {
 rootProject.name = "jumso"
 include("was")
 include("chat")
+include("email")

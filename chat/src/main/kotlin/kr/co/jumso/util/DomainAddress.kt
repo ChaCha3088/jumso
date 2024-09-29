@@ -1,4 +1,4 @@
-package com.jumso.util
+package kr.co.jumso.util
 
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component

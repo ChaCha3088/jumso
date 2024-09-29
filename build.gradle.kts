@@ -12,7 +12,7 @@ plugins {
 }
 
 allprojects {
-    group = "com.jumso"
+    group = "kr.co.jumso"
     version = "1.0-SNAPSHOT"
 
     repositories {
@@ -43,21 +43,20 @@ subprojects {
 
         // DataBase
         implementation("org.springframework.boot:spring-boot-starter-data-redis")
-        implementation("com.mysql:mysql-connector-j:8.0.33")
         // Tweeter Snowflake
         implementation("com.littlenb:snowflake:1.0.5")
 
         // Logging
         implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1")
 
-        // AWS Parameter Store
-        implementation("io.awspring.cloud:spring-cloud-starter-aws-parameter-store-config:2.3.3")
-
         // ETC
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
         implementation("org.jetbrains.kotlin:kotlin-reflect")
         // Kotlin Faker
         implementation("io.github.serpro69:kotlin-faker:1.16.0")
+
+        // AWS Parameter Store
+        implementation("io.awspring.cloud:spring-cloud-starter-aws-parameter-store-config:2.3.3")
 
         // Test
         testImplementation(kotlin("test"))

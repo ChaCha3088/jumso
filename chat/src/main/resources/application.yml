@@ -2,9 +2,18 @@ spring:
     application:
         name: jumso-chat
 
-    autoconfigure:
-        exclude:
-            - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        username: jumso
+
+    jpa:
+        hibernate:
+            ddl-auto:
+        open-in-view: false
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.MySQLDialect
+                default_batch_fetch_size: 100
 
 # JWT
 jwt:
