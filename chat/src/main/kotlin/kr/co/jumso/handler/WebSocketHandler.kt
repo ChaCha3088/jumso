@@ -84,7 +84,7 @@ class WebSocketHandler(
             when (responseMessageObject.type) {
                 SYSTEM -> TODO()
                 ERROR -> TODO()
-
+                
                 // 채팅방 목록 조회
                 SELECT_CHAT_ROOM_LIST -> {
                     requestSelectChatRoomList(session)

@@ -18,7 +18,7 @@ import org.springframework.web.socket.WebSocketSession
 @Service
 class ChatKafkaConsumer(
     private val sessionRegistry: SessionRegistry,
-
+  
     private val objectMapper: ObjectMapper,
 ) {
     // Kafka에서 들어오는 메시지를 처리
