@@ -82,6 +82,9 @@ class WebSocketHandler(
 
             // MessageType에 따라 분기처리
             when (responseMessageObject.type) {
+                SYSTEM -> TODO()
+                ERROR -> TODO()
+
                 // 채팅방 목록 조회
                 SELECT_CHAT_ROOM_LIST -> {
                     requestSelectChatRoomList(session)
@@ -101,9 +104,6 @@ class WebSocketHandler(
                 // 채팅 보내기
                 CHAT_MESSAGE -> {
                     requestSendChat(responseMessageObject, session)
-                }
-                else -> {
-                    throw IllegalArgumentException("알 수 없는 요청입니다.")
                 }
             }
         }
