@@ -55,13 +55,9 @@ class TemporaryMemberService(
         val temporaryMember: TemporaryMember = temporaryMemberRepository.findByVerificationCode(verificationCode)
             ?: throw InvalidVerificationCodeException()
 
-        // Member로 옮기기
-        val newMember = temporaryMember.verify(verificationCode)
+        // temporaryMember 인증
+        temporaryMember.verify(verificationCode)
 
-        // temporaryMember 삭제
-        temporaryMemberRepository.delete(temporaryMember)
-
-        // Member 저장
-        memberRepository.save(newMember)
+        temporaryMemberRepository.save(temporaryMember)
     }
 }

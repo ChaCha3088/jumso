@@ -11,6 +11,8 @@ import jakarta.persistence.*
 import jakarta.persistence.CascadeType.ALL
 import jakarta.persistence.EnumType.ORDINAL
 import jakarta.persistence.FetchType.LAZY
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import java.time.LocalDateTime
@@ -22,9 +24,18 @@ class Member(
     password: String,
     nickname: String,
     companyId: Long,
+    bornAt: LocalDateTime,
+    sex: Sex,
+    height: Short,
+    bodyType: BodyType,
+    job: String,
+    marry: Marry,
+    religion: Religion,
+    smoke: Boolean,
 ): AuditingEntity() {
-    @Column(nullable = false, unique = true)
-    @NotBlank
+    @Column(nullable = false, unique = true, length = 50)
+    @NotBlank(message = "이메일을 입력해주세요.")
+    @Max(value = 50, message = "이메일은 50자 이하로 입력해주세요.")
     var email: String = email
         protected set
 
@@ -33,11 +44,13 @@ class Member(
     var password: String = password
         protected set
 
-    @Column(nullable = false)
-    @NotBlank
+    @Column(nullable = false, length = 50)
+    @NotBlank(message = "닉네임을 입력해주세요.")
+    @Max(value = 50, message = "닉네임은 50자 이하로 입력해주세요.")
     var nickname: String = nickname
         protected set
 
+    @Enumerated(ORDINAL)
     @Column(nullable = false)
     @NotNull
     var role: MemberRole = USER
@@ -59,16 +72,13 @@ class Member(
 
     @JoinColumn(nullable = false, insertable = false, updatable = false)
     @ManyToOne(fetch = LAZY, targetEntity = Company::class)
+    @NotNull(message = "회사를 선택해주세요.")
     var company: Company? = null
         protected set
 
     @Column(name = "company_id")
+    @NotNull(message = "회사를 선택해주세요.")
     var companyId: Long = companyId
-        protected set
-
-    @Column(nullable = false)
-    @NotNull
-    var didYouWriteProfile: Boolean = false
         protected set
 
     // Member의 채팅
@@ -77,35 +87,51 @@ class Member(
         protected set
 
     @OneToMany(mappedBy = "member", cascade = [ALL], orphanRemoval = true, fetch = LAZY)
-    var properties: MutableList<MemberProperty> = mutableListOf()
+    var memberProperties: MutableList<MemberProperty> = mutableListOf()
         protected set
 
-    var bornAt: LocalDateTime? = null
-        protected set
-
-    @Enumerated(ORDINAL)
-    var sex: Sex? = null
-        protected set
-
-    var height: Int? = null
+    @Column(nullable = false)
+    @NotNull(message = "생년월일을 입력해주세요.")
+    var bornAt: LocalDateTime = bornAt
         protected set
 
     @Enumerated(ORDINAL)
-    var bodyType: BodyType? = null
+    @Column(nullable = false)
+    @NotNull(message = "성별을 선택해주세요.")
+    var sex: Sex = sex
         protected set
 
-    @Column(length = 50)
-    var job: String? = null
-        protected set
-
-    var marry: Marry? = null
+    @Column(nullable = false)
+    @NotNull
+    @Min(value = 100, message = "키는 100 이상으로 입력해주세요.")
+    @Max(value = 300, message = "키는 300 이하로 입력해주세요.")
+    var height: Short = height
         protected set
 
     @Enumerated(ORDINAL)
-    var religion: Religion? = null
+    @Column(nullable = false)
+    @NotNull(message = "체형을 선택해주세요.")
+    var bodyType: BodyType = bodyType
         protected set
 
-    var smoke: Boolean? = null
+    @Column(nullable = false, length = 50)
+    @NotBlank(message = "직업을 입력해주세요.")
+    @Max(value = 50, message = "직업은 50자 이하로 입력해주세요.")
+    var job: String = job
+        protected set
+
+    @Enumerated(ORDINAL)
+    @NotNull(message = "결혼 여부를 선택해주세요.")
+    var marry: Marry = marry
+        protected set
+
+    @Enumerated(ORDINAL)
+    @NotNull(message = "종교를 선택해주세요.")
+    var religion: Religion = religion
+        protected set
+
+    @NotNull(message = "흡연 여부를 선택해주세요.")
+    var smoke: Boolean = smoke
         protected set
 
     @Enumerated(ORDINAL)
