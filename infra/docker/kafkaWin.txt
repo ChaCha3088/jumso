@@ -1,0 +1,1 @@
+    docker-compose -f /C/Users/cha30/code/private/jumso/infra/docker/kafka-compose.yml up -d

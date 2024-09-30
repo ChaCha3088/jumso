@@ -95,9 +95,7 @@ class ChatRoomCustomRepositoryImpl(
                 entity(ChatRoom::class)
             )
                 .from(
-                    entity(ChatRoom::class),
-                    // ToDo: Query 테스트
-                    join(ChatRoom::memberChatRooms)
+                    entity(ChatRoom::class)
                 )
                 .where(
                     path(ChatRoom::id).`in`(subQuery.asSubquery())
