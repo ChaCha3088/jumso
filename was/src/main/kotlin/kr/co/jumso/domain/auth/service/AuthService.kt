@@ -9,6 +9,9 @@ import kr.co.jumso.domain.member.exception.NoSuchMemberException
 import kr.co.jumso.domain.member.repository.MemberRepository
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import kr.co.jumso.domain.member.entity.TemporaryMember
+import kr.co.jumso.domain.member.exception.NoSuchTemporaryMemberException
+import kr.co.jumso.domain.member.repository.TemporaryMemberRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,8 +20,11 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(readOnly = true)
 class AuthService(
     private val jwtService: JwtService,
+
     private val memberRepository: MemberRepository,
+    private val temporaryMemberRepository: TemporaryMemberRepository,
     private val refreshTokenRepository: RefreshTokenRepository,
+
     private val passwordEncoder: PasswordEncoder
 ) {
     @Transactional
@@ -36,12 +42,32 @@ class AuthService(
         }
 
         // 새로운 토큰을 발급한다.
-        val jwts: Array<String> = jwtService.issueJwts(member)
+        val jwts: Array<String> = jwtService.issueMemberJwts(member)
 
         setHeader(response, jwts)
 
         // member를 반환
         return MemberResponse(member)
+    }
+
+    @Transactional
+    fun temporarySignIn(
+        signInRequest: SignInRequest,
+        response: HttpServletResponse
+    ) {
+        // TemporaryMember가 이미 있는지 확인한다.
+        val temporaryMember: TemporaryMember = temporaryMemberRepository.findByEmail(signInRequest.email!!)
+            ?: throw NoSuchTemporaryMemberException()
+
+        // TemporaryMember가 있으면, 비밀번호가 맞는지 확인한다.
+        if (!passwordEncoder.matches(signInRequest.password!!, temporaryMember.password)) {
+            throw InvalidPasswordException()
+        }
+
+        // 새로운 토큰을 발급한다.
+        val jwts: Array<String> = jwtService.issueTemporaryMemberJwts(temporaryMember)
+
+        setHeader(response, jwts)
     }
 
     @Transactional

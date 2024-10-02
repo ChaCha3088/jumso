@@ -7,25 +7,38 @@ import jakarta.persistence.Entity
 import jakarta.persistence.OneToOne
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import kr.co.jumso.domain.member.entity.TemporaryMember
 
 @Entity
 class RefreshToken(
     token: String,
-    member: Member
 ): AuditingEntity() {
+    constructor(
+        token: String,
+        member: Member
+    ): this(token) {
+        this.member = member
+    }
+
+    constructor(
+        token: String,
+        temporaryMember: TemporaryMember
+    ): this(token) {
+        this.temporaryMember = temporaryMember
+    }
+
     @Column(nullable = false, unique = true, length = 400)
     @NotBlank
     var token: String = token
         protected set
 
     @OneToOne
-    @NotNull
-    var member: Member = member
+    var member: Member? = null
         protected set
 
-    init {
-        member.refreshToken = this
-    }
+    @OneToOne
+    var temporaryMember: TemporaryMember? = null
+        protected set
 
     fun updateToken(token: String) {
         this.token = token

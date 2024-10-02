@@ -14,6 +14,10 @@ spring:
         activate:
             on-profile: local
 
+    kafka:
+        bootstrap-servers: localhost:9092
+        email-server-port: ${email.port}
+
 server:
     port: 9090
     servlet:

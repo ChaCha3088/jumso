@@ -1,5 +1,8 @@
 package kr.co.jumso.domain.auth.controller
 
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import kr.co.jumso.domain.auth.annotation.MemberId
 import kr.co.jumso.domain.auth.dto.SignInRequest
 import kr.co.jumso.domain.auth.exception.CompanyEmailNotFoundException
 import kr.co.jumso.domain.auth.exception.InvalidAccessTokenException
@@ -9,26 +12,20 @@ import kr.co.jumso.domain.auth.service.AuthService
 import kr.co.jumso.domain.member.dto.MemberResponse
 import kr.co.jumso.domain.member.dto.TemporaryMemberRequest
 import kr.co.jumso.domain.member.exception.*
-import kr.co.jumso.domain.member.service.MemberService
 import kr.co.jumso.domain.member.service.TemporaryMemberService
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import org.apache.tomcat.websocket.Constants.UNAUTHORIZED
 import org.springframework.http.HttpStatus.OK
-import org.springframework.http.MediaType.ALL_VALUE
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.bind.annotation.RequestMethod.GET
 
 @RestController
 @RequestMapping(value = ["/api/auth"], consumes = [APPLICATION_JSON_VALUE])
 class AuthController(
     private val authService: AuthService,
     private val temporaryMemberService: TemporaryMemberService,
-    private val memberService: MemberService,
 ) {
     @PostMapping("/signin")
     fun signIn(
@@ -60,15 +57,30 @@ class AuthController(
     }
 
     @PostMapping("/signup")
-    fun create(@Validated @RequestBody temporaryMemberRequest: TemporaryMemberRequest) {
-        temporaryMemberService.create(temporaryMemberRequest)
+    fun create(
+        @Validated @RequestBody temporaryMemberRequest: TemporaryMemberRequest,
+        response: HttpServletResponse
+    ) {
+        temporaryMemberService.create(
+            temporaryMemberRequest,
+            response
+        )
     }
 
-    @RequestMapping(method = [GET], value = ["/verify"], consumes = [ALL_VALUE])
+    @PostMapping("/temporary-signin")
+    fun temporarySignIn(
+        @Validated @RequestBody signInRequest: SignInRequest,
+        response: HttpServletResponse,
+    ) {
+        authService.temporarySignIn(signInRequest, response)
+    }
+
+    @GetMapping(value = ["/verify"])
     fun verify(
-        @RequestParam(value = "verificationCode", required = true) verificationCode: String
+        @RequestParam(value = "verificationCode", required = true) verificationCode: String,
+        @MemberId temporaryMemberId: Long
     ): ResponseEntity<String> {
-        temporaryMemberService.verify(verificationCode)
+        temporaryMemberService.verify(temporaryMemberId, verificationCode.trim())
 
         return ResponseEntity.ok().build()
     }

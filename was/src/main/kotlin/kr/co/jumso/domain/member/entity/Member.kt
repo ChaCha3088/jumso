@@ -29,9 +29,22 @@ class Member(
     height: Short,
     bodyType: BodyType,
     job: String,
-    marry: Marry,
+    marriage: Marriage,
     religion: Religion,
     smoke: Boolean,
+    drink: Drink,
+    latitude: Double,
+    longitude: Double,
+    introduction: String,
+    whatSexDoYouWant: Sex,
+    howOldDoYouWantMin: Byte,
+    howOldDoYouWantMax: Byte,
+    howFarCanYouGo: Byte,
+    whatKindOfBodyTypeDoYouWant: BodyType,
+    whatKindOfMarriageDoYouWant: Marriage,
+    whatKindOfReligionDoYouWant: Religion,
+    whatKindOfSmokeDoYouWant: Boolean,
+    whatKindOfDrinkDoYouWant: Drink,
 ): AuditingEntity() {
     @Column(nullable = false, unique = true, length = 50)
     @NotBlank(message = "이메일을 입력해주세요.")
@@ -76,7 +89,7 @@ class Member(
     var company: Company? = null
         protected set
 
-    @Column(name = "company_id")
+    @Column(name = "company_id", nullable = false)
     @NotNull(message = "회사를 선택해주세요.")
     var companyId: Long = companyId
         protected set
@@ -121,66 +134,90 @@ class Member(
         protected set
 
     @Enumerated(ORDINAL)
+    @Column(nullable = false)
     @NotNull(message = "결혼 여부를 선택해주세요.")
-    var marry: Marry = marry
+    var marriage: Marriage = marriage
         protected set
 
     @Enumerated(ORDINAL)
+    @Column(nullable = false)
     @NotNull(message = "종교를 선택해주세요.")
     var religion: Religion = religion
         protected set
 
+    @Column(nullable = false)
     @NotNull(message = "흡연 여부를 선택해주세요.")
     var smoke: Boolean = smoke
         protected set
 
     @Enumerated(ORDINAL)
-    var drink: Drink? = null
+    @Column(nullable = false)
+    @NotNull(message = "음주 여부를 선택해주세요.")
+    var drink: Drink = drink
         protected set
 
     // x 좌표, 위도
-    var latitude: Double? = null
+    @Column(nullable = false)
+    @NotNull(message = "위치를 선택해주세요.")
+    var latitude: Double = latitude
         protected set
 
     // y 좌표, 경도
-    var longitude: Double? = null
+    @Column(nullable = false)
+    @NotNull(message = "위치를 선택해주세요.")
+    var longitude: Double = longitude
         protected set
 
-    @Column(length = 1000)
-    var introduction: String? = null
-        protected set
-
-    @Enumerated(ORDINAL)
-    var whatSexDoYouWant: Sex? = null
-        protected set
-
-    var howOldDoYouWantMin: Int? = null
-        protected set
-
-    var howOldDoYouWantMax: Int? = null
+    @Column(nullable = false, length = 1000)
+    @NotBlank(message = "자기소개를 입력해주세요.")
+    @Max(value = 1000, message = "자기소개는 1000자 이하로 입력해주세요.")
+    var introduction: String = introduction
         protected set
 
     @Enumerated(ORDINAL)
-    var howFarCanYouGo: HowFar? = null
+    @Column(nullable = false)
+    @NotNull
+    var whatSexDoYouWant: Sex = whatSexDoYouWant
+        protected set
+
+    @Column(nullable = false)
+    @NotNull
+    @Max(value = 127, message = "나이는 127 이하로 입력해주세요.")
+    @Min(value = 0, message = "나이는 0 이상으로 입력해주세요.")
+    var howOldDoYouWantMin: Byte = if (howOldDoYouWantMin < howOldDoYouWantMax) howOldDoYouWantMin else throw IllegalArgumentException("최소 나이보다 최대 나이가 작습니다.")
+        protected set
+
+    @Column(nullable = false)
+    @NotNull
+    @Max(value = 127, message = "나이는 127 이하로 입력해주세요.")
+    @Min(value = 0, message = "나이는 0 이상으로 입력해주세요.")
+    var howOldDoYouWantMax: Byte = if (howOldDoYouWantMax > howOldDoYouWantMin) howOldDoYouWantMax else throw IllegalArgumentException("최대 나이보다 최소 나이가 큽니다.")
+        protected set
+
+    @Column(nullable = false)
+    @NotNull(message = "거리를 입력해주세요.")
+    @Max(value = 127, message = "거리는 127 이하로 입력해주세요.")
+    @Min(value = 0, message = "거리는 0 이상으로 입력해주세요.")
+    var howFarCanYouGo: Byte = howFarCanYouGo
         protected set
 
     @Enumerated(ORDINAL)
-    var whatKindOfBodyTypeDoYouWant: BodyType? = null
+    var whatKindOfBodyTypeDoYouWant: BodyType? = whatKindOfBodyTypeDoYouWant
         protected set
 
     @Enumerated(ORDINAL)
-    var whatKindOfMarryDoYouWant: Marry? = null
+    var whatKindOfMarriageDoYouWant: Marriage? = whatKindOfMarriageDoYouWant
         protected set
 
     @Enumerated(ORDINAL)
-    var whatKindOfReligionDoYouWant: Religion? = null
+    var whatKindOfReligionDoYouWant: Religion? = whatKindOfReligionDoYouWant
         protected set
 
-    var whatKindOfSmokeDoYouWant: Boolean? = null
+    var whatKindOfSmokeDoYouWant: Boolean? = whatKindOfSmokeDoYouWant
         protected set
 
     @Enumerated(ORDINAL)
-    var whatKindOfDrinkDoYouWant: Drink? = null
+    var whatKindOfDrinkDoYouWant: Drink? = whatKindOfDrinkDoYouWant
         protected set
 
     @OneToMany(mappedBy = "member", cascade = [ALL], orphanRemoval = true, fetch = LAZY)

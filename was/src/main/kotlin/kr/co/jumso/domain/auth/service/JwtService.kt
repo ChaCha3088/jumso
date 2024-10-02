@@ -15,9 +15,11 @@ import kr.co.jumso.domain.member.entity.Member
 import kr.co.jumso.domain.member.repository.MemberRepository
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import kr.co.jumso.domain.member.entity.TemporaryMember
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.lang.System.currentTimeMillis
 import java.util.*
 
 @Service
@@ -56,7 +58,7 @@ class JwtService(
 
     // access token, refresh token을 발급, DB에 저장한다.
     @Transactional
-    fun issueJwts(member: Member): Array<String> {
+    fun issueMemberJwts(member: Member): Array<String> {
         // 마지막 로그인 시간 업데이트
         member.updateLastSignIn()
 
@@ -64,10 +66,10 @@ class JwtService(
         val newRefreshToken: String = JWT.create()
             .withIssuer(issuer)
             .withSubject("refreshToken")
-            .withIssuedAt(Date(System.currentTimeMillis()))
-            .withExpiresAt(Date(System.currentTimeMillis() + refreshTokenExpiration))
+            .withIssuedAt(Date(currentTimeMillis()))
+            .withExpiresAt(Date(currentTimeMillis() + refreshTokenExpiration))
             .withClaim("memberId", member.id.toString())
-            .withClaim("issuedTime", System.currentTimeMillis())
+            .withClaim("issuedTime", currentTimeMillis())
             .sign(HMAC512(secret))
 
         // refreshToken이 있으면, 업데이트
@@ -81,10 +83,42 @@ class JwtService(
         val newAccessToken: String = JWT.create()
             .withIssuer(issuer)
             .withSubject("accessToken")
-            .withIssuedAt(Date(System.currentTimeMillis()))
-            .withExpiresAt(Date(System.currentTimeMillis() + accessTokenExpiration))
+            .withIssuedAt(Date(currentTimeMillis()))
+            .withExpiresAt(Date(currentTimeMillis() + accessTokenExpiration))
             .withClaim("memberId", member.id.toString())
-            .withClaim("issuedTime", System.currentTimeMillis())
+            .withClaim("issuedTime", currentTimeMillis())
+            .sign(HMAC512(secret))
+
+        return arrayOf(newAccessToken, newRefreshToken)
+    }
+
+    @Transactional
+    fun issueTemporaryMemberJwts(temporaryMember: TemporaryMember): Array<String> {
+        // refresh token을 발급한다.
+        val newRefreshToken: String = JWT.create()
+            .withIssuer(issuer)
+            .withSubject("refreshToken")
+            .withIssuedAt(Date(currentTimeMillis()))
+            .withExpiresAt(Date(currentTimeMillis() + refreshTokenExpiration))
+            .withClaim("temporaryMemberId", temporaryMember.id.toString())
+            .withClaim("issuedTime", currentTimeMillis())
+            .sign(HMAC512(secret))
+
+        // refreshToken이 있으면, 업데이트
+        temporaryMember.refreshToken?.updateToken(newRefreshToken)
+        // refreshToken이 없으면, 새로 저장
+            ?: refreshTokenRepository.save(
+                RefreshToken(newRefreshToken, temporaryMember)
+            )
+
+        // access token을 발급한다.
+        val newAccessToken: String = JWT.create()
+            .withIssuer(issuer)
+            .withSubject("accessToken")
+            .withIssuedAt(Date(currentTimeMillis()))
+            .withExpiresAt(Date(currentTimeMillis() + accessTokenExpiration))
+            .withClaim("temporaryMemberId", temporaryMember.id.toString())
+            .withClaim("issuedTime", currentTimeMillis())
             .sign(HMAC512(secret))
 
         return arrayOf(newAccessToken, newRefreshToken)
@@ -104,10 +138,10 @@ class JwtService(
         val newRefreshToken: String = JWT.create()
             .withIssuer(issuer)
             .withSubject("refreshToken")
-            .withIssuedAt(Date(System.currentTimeMillis()))
-            .withExpiresAt(Date(System.currentTimeMillis() + refreshTokenExpiration))
+            .withIssuedAt(Date(currentTimeMillis()))
+            .withExpiresAt(Date(currentTimeMillis() + refreshTokenExpiration))
             .withClaim("memberId", memberId.toString())
-            .withClaim("issuedTime", System.currentTimeMillis())
+            .withClaim("issuedTime", currentTimeMillis())
             .sign(HMAC512(secret))
 
         // Refresh Token Entity 업데이트
@@ -117,10 +151,10 @@ class JwtService(
         val newAccessToken: String = JWT.create()
             .withIssuer(issuer)
             .withSubject("accessToken")
-            .withIssuedAt(Date(System.currentTimeMillis()))
-            .withExpiresAt(Date(System.currentTimeMillis() + accessTokenExpiration))
+            .withIssuedAt(Date(currentTimeMillis()))
+            .withExpiresAt(Date(currentTimeMillis() + accessTokenExpiration))
             .withClaim("memberId", memberId.toString())
-            .withClaim("issuedTime", System.currentTimeMillis())
+            .withClaim("issuedTime", currentTimeMillis())
             .sign(HMAC512(secret))
 
         return arrayOf(newAccessToken, newRefreshToken)

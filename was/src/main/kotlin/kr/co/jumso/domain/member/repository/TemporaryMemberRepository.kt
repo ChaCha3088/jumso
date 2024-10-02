@@ -9,28 +9,27 @@ import org.springframework.data.jpa.repository.JpaRepository
 interface TemporaryMemberRepository: JpaRepository<TemporaryMember, Long>, TemporaryMemberRepositoryCustom
 
 interface TemporaryMemberRepositoryCustom {
-    fun findByVerificationCode(verificationCode: String): TemporaryMember?
+    fun findByEmail(email: String): TemporaryMember?
 
-    fun existsByUsernameAndCompanyEmailId(username: String, companyEmailId: Long): Boolean
+    fun existsByEmail(email: String): Boolean
 }
 
 class TemporaryMemberRepositoryImpl(
     private val queryFactory: SpringDataQueryFactory,
 ): TemporaryMemberRepositoryCustom {
-    override fun findByVerificationCode(verificationCode: String): TemporaryMember? {
+    override fun findByEmail(email: String): TemporaryMember? {
         return queryFactory.selectQuery {
             select(entity(TemporaryMember::class))
             from(entity(TemporaryMember::class))
-            where(column(TemporaryMember::verificationCode).equal(verificationCode))
+            where(column(TemporaryMember::email).equal(email))
         }.resultList.firstOrNull()
     }
 
-    override fun existsByUsernameAndCompanyEmailId(username: String, companyEmailId: Long): Boolean {
+    override fun existsByEmail(email: String): Boolean {
         return queryFactory.selectQuery {
             select(entity(TemporaryMember::class))
             from(entity(TemporaryMember::class))
-            where(column(TemporaryMember::username).equal(username))
-            where(column(TemporaryMember::companyEmailId).equal(companyEmailId))
+            where(column(TemporaryMember::email).equal(email))
         }.resultList.isNotEmpty()
     }
 }
