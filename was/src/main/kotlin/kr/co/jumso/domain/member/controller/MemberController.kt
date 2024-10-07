@@ -1,8 +1,8 @@
 package kr.co.jumso.domain.member.controller
 
-import kr.co.jumso.domain.auth.annotation.MemberId
-import kr.co.jumso.domain.member.dto.UpdateIntroductionRequest
-import kr.co.jumso.domain.member.dto.UpdateLocationRequest
+import kr.co.jumso.domain.member.annotation.MemberId
+import kr.co.jumso.domain.member.dto.request.UpdateIntroductionRequest
+import kr.co.jumso.domain.member.dto.request.UpdateLocationRequest
 import kr.co.jumso.domain.member.exception.NoSuchMemberException
 import kr.co.jumso.domain.member.service.MemberService
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE

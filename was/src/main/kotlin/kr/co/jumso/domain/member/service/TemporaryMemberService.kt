@@ -7,11 +7,18 @@ import kr.co.jumso.domain.auth.repository.CompanyEmailRepository
 import kr.co.jumso.domain.auth.service.JwtService
 import kr.co.jumso.domain.kafka.dto.KafkaEmailRequest
 import kr.co.jumso.domain.kafka.enumstorage.KafkaEmail.KAFKA_EMAIL_SERVER
-import kr.co.jumso.domain.member.dto.TemporaryMemberRequest
+import kr.co.jumso.domain.member.dto.request.EnrollRequest
+import kr.co.jumso.domain.member.dto.request.TemporaryMemberRequest
+import kr.co.jumso.domain.member.dto.response.MemberResponse
+import kr.co.jumso.domain.member.entity.Member
+import kr.co.jumso.domain.member.entity.MemberNotTheseCompany
+import kr.co.jumso.domain.member.entity.MemberProperty
 import kr.co.jumso.domain.member.entity.TemporaryMember
+import kr.co.jumso.domain.member.exception.InvalidMemberPropertyIdsException
 import kr.co.jumso.domain.member.exception.InvalidVerificationCodeException
 import kr.co.jumso.domain.member.exception.MemberExistsException
 import kr.co.jumso.domain.member.exception.TemporaryMemberExistsException
+import kr.co.jumso.domain.member.repository.MemberPropertyRepository
 import kr.co.jumso.domain.member.repository.MemberRepository
 import kr.co.jumso.domain.member.repository.TemporaryMemberRepository
 import kr.co.jumso.util.PasswordValidator
@@ -29,6 +36,8 @@ class TemporaryMemberService(
     private val temporaryMemberRepository: TemporaryMemberRepository,
     private val memberRepository: MemberRepository,
     private val companyEmailRepository: CompanyEmailRepository,
+    private val memberPropertyRepository: MemberPropertyRepository,
+    private val memberNotTheseCompanyRepository: MemberNotTheseCompanyRepository,
 
     private val kafkaTemplate: KafkaTemplate<String, String>,
 
@@ -101,6 +110,88 @@ class TemporaryMemberService(
         temporaryMember.verify(verificationCode)
 
         temporaryMemberRepository.save(temporaryMember)
+    }
+
+    @Transactional
+    fun enroll(
+        temporaryMemberId: Long,
+        enrollRequest: EnrollRequest,
+        response: HttpServletResponse,
+    ): MemberResponse {
+        val temporaryMember: TemporaryMember = temporaryMemberRepository.findById(temporaryMemberId)
+            .orElseThrow { throw InvalidVerificationCodeException() }
+
+        // enrollRequest의 memberPropertyIds가 1000번대, 2000번대, 3000번대가 하나 이상 포함되어 있는지 확인
+        enrollRequest.validateMemberPropertyIds()
+            // false일 경우 throw
+            .takeUnless { it }
+            ?.let { throw InvalidMemberPropertyIdsException() }
+
+        // member 생성
+        val newMember = Member(
+            email = temporaryMember.email,
+            password = temporaryMember.password,
+            nickname = temporaryMember.nickname,
+            companyId = temporaryMember.companyEmailId,
+            bornAt = enrollRequest.bornAt,
+            sex = enrollRequest.sex,
+            height = enrollRequest.height,
+            bodyType = enrollRequest.bodyType,
+            job = enrollRequest.job,
+            relationshipStatus = enrollRequest.relationshipStatus,
+            religion = enrollRequest.religion,
+            smoke = enrollRequest.smoke,
+            drink = enrollRequest.drink,
+            latitude = enrollRequest.latitude,
+            longitude = enrollRequest.longitude,
+            introduction = enrollRequest.introduction,
+            whatSexDoYouWant = enrollRequest.whatSexDoYouWant,
+            howOldDoYouWantMin = enrollRequest.howOldDoYouWantMin,
+            howOldDoYouWantMax = enrollRequest.howOldDoYouWantMax,
+            howFarCanYouGo = enrollRequest.howFarCanYouGo,
+            whatKindOfBodyTypeDoYouWant = enrollRequest.whatKindOfBodyTypeDoYouWant,
+            whatKindOfRelationshipStatusDoYouWant = enrollRequest.whatKindOfRelationshipStatusDoYouWant,
+            whatKindOfReligionDoYouWant = enrollRequest.whatKindOfReligionDoYouWant,
+            whatKindOfSmokeDoYouWant = enrollRequest.whatKindOfSmokeDoYouWant,
+            whatKindOfDrinkDoYouWant = enrollRequest.whatKindOfDrinkDoYouWant,
+        )
+
+        val newMemberEntity = memberRepository.save(newMember)
+
+        // memberProperty 생성
+        memberPropertyRepository.saveAll(
+            enrollRequest.propertyIds.map { memberPropertyId ->
+                val newMemberProperty = MemberProperty(
+                    memberId = newMemberEntity.id!!,
+                    propertyId = memberPropertyId,
+                )
+
+                newMember.addMemberProperty(newMemberProperty)
+
+                newMemberProperty
+            }
+        )
+
+        // memberNotTheseCompany 생성
+        memberNotTheseCompanyRepository.saveAll(
+            enrollRequest.notTheseCompanyIds.map { notTheseCompanyId ->
+                val memberNotTheseCompany = MemberNotTheseCompany(
+                    memberId = newMemberEntity.id!!,
+                    companyId = notTheseCompanyId,
+                )
+
+                newMember.addNotTheseCompany(memberNotTheseCompany)
+
+                memberNotTheseCompany
+            }
+        )
+
+        // jwt 발급
+        val newMemberJwts = jwtService.issueMemberJwts(newMember)
+
+        setHeader(response, newMemberJwts)
+
+        return MemberResponse(newMemberEntity)
     }
 
     private fun setHeader(response: HttpServletResponse, jwts: Array<String>) {

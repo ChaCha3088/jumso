@@ -29,9 +29,9 @@ class Member(
     height: Short,
     bodyType: BodyType,
     job: String,
-    marriage: Marriage,
+    relationshipStatus: RelationshipStatus,
     religion: Religion,
-    smoke: Boolean,
+    smoke: Smoke,
     drink: Drink,
     latitude: Double,
     longitude: Double,
@@ -41,9 +41,9 @@ class Member(
     howOldDoYouWantMax: Byte,
     howFarCanYouGo: Byte,
     whatKindOfBodyTypeDoYouWant: BodyType,
-    whatKindOfMarriageDoYouWant: Marriage,
+    whatKindOfRelationshipStatusDoYouWant: RelationshipStatus,
     whatKindOfReligionDoYouWant: Religion,
-    whatKindOfSmokeDoYouWant: Boolean,
+    whatKindOfSmokeDoYouWant: Smoke,
     whatKindOfDrinkDoYouWant: Drink,
 ): AuditingEntity() {
     @Column(nullable = false, unique = true, length = 50)
@@ -100,7 +100,7 @@ class Member(
         protected set
 
     @OneToMany(mappedBy = "member", cascade = [ALL], orphanRemoval = true, fetch = LAZY)
-    var memberProperties: MutableList<MemberProperty> = mutableListOf()
+    var memberProperties: MutableSet<MemberProperty> = mutableSetOf()
         protected set
 
     @Column(nullable = false)
@@ -116,8 +116,8 @@ class Member(
 
     @Column(nullable = false)
     @NotNull
-    @Min(value = 100, message = "키는 100 이상으로 입력해주세요.")
-    @Max(value = 300, message = "키는 300 이하로 입력해주세요.")
+    @Min(value = 100, message = "키는 100cm 이상으로 입력해주세요.")
+    @Max(value = 300, message = "키는 300cm 이하로 입력해주세요.")
     var height: Short = height
         protected set
 
@@ -135,8 +135,8 @@ class Member(
 
     @Enumerated(ORDINAL)
     @Column(nullable = false)
-    @NotNull(message = "결혼 여부를 선택해주세요.")
-    var marriage: Marriage = marriage
+    @NotNull(message = "교제 상태를 선택해주세요.")
+    var relationshipStatus: RelationshipStatus = relationshipStatus
         protected set
 
     @Enumerated(ORDINAL)
@@ -145,9 +145,10 @@ class Member(
     var religion: Religion = religion
         protected set
 
+    @Enumerated(ORDINAL)
     @Column(nullable = false)
     @NotNull(message = "흡연 여부를 선택해주세요.")
-    var smoke: Boolean = smoke
+    var smoke: Smoke = smoke
         protected set
 
     @Enumerated(ORDINAL)
@@ -176,12 +177,12 @@ class Member(
 
     @Enumerated(ORDINAL)
     @Column(nullable = false)
-    @NotNull
+    @NotNull(message = "원하는 성별을 선택해주세요.")
     var whatSexDoYouWant: Sex = whatSexDoYouWant
         protected set
 
     @Column(nullable = false)
-    @NotNull
+    @NotNull(message = "원하는 나이를 선택해주세요.")
     @Max(value = 127, message = "나이는 127 이하로 입력해주세요.")
     @Min(value = 0, message = "나이는 0 이상으로 입력해주세요.")
     var howOldDoYouWantMin: Byte = if (howOldDoYouWantMin < howOldDoYouWantMax) howOldDoYouWantMin else throw IllegalArgumentException("최소 나이보다 최대 나이가 작습니다.")
@@ -195,34 +196,53 @@ class Member(
         protected set
 
     @Column(nullable = false)
-    @NotNull(message = "거리를 입력해주세요.")
+    @NotNull(message = "원하는 거리를 입력해주세요.")
     @Max(value = 127, message = "거리는 127 이하로 입력해주세요.")
     @Min(value = 0, message = "거리는 0 이상으로 입력해주세요.")
     var howFarCanYouGo: Byte = howFarCanYouGo
         protected set
 
     @Enumerated(ORDINAL)
-    var whatKindOfBodyTypeDoYouWant: BodyType? = whatKindOfBodyTypeDoYouWant
+    @Column(nullable = false)
+    @NotNull(message = "원하는 체형을 선택해주세요.")
+    var whatKindOfBodyTypeDoYouWant: BodyType = whatKindOfBodyTypeDoYouWant
         protected set
 
     @Enumerated(ORDINAL)
-    var whatKindOfMarriageDoYouWant: Marriage? = whatKindOfMarriageDoYouWant
+    @Column(nullable = false)
+    @NotNull(message = "원하는 교제 상태를 선택해주세요.")
+    var whatKindOfRelationshipStatusDoYouWant: RelationshipStatus = whatKindOfRelationshipStatusDoYouWant
         protected set
 
     @Enumerated(ORDINAL)
-    var whatKindOfReligionDoYouWant: Religion? = whatKindOfReligionDoYouWant
-        protected set
-
-    var whatKindOfSmokeDoYouWant: Boolean? = whatKindOfSmokeDoYouWant
+    @Column(nullable = false)
+    @NotNull(message = "원하는 종교를 선택해주세요.")
+    var whatKindOfReligionDoYouWant: Religion = whatKindOfReligionDoYouWant
         protected set
 
     @Enumerated(ORDINAL)
-    var whatKindOfDrinkDoYouWant: Drink? = whatKindOfDrinkDoYouWant
+    @Column(nullable = false)
+    @NotNull(message = "원하는 흡연 여부를 선택해주세요.")
+    var whatKindOfSmokeDoYouWant: Smoke = whatKindOfSmokeDoYouWant
+        protected set
+
+    @Enumerated(ORDINAL)
+    @Column(nullable = false)
+    @NotNull(message = "원하는 음주 여부를 선택해주세요.")
+    var whatKindOfDrinkDoYouWant: Drink = whatKindOfDrinkDoYouWant
         protected set
 
     @OneToMany(mappedBy = "member", cascade = [ALL], orphanRemoval = true, fetch = LAZY)
-    var notTheseCompanies: MutableList<MemberNotTheseCompany> = mutableListOf()
+    var notTheseCompanies: MutableSet<MemberNotTheseCompany> = mutableSetOf()
         protected set
+
+    fun addMemberProperty(memberProperty: MemberProperty) {
+        memberProperties.add(memberProperty)
+    }
+
+    fun addNotTheseCompany(memberNotTheseCompany: MemberNotTheseCompany) {
+        notTheseCompanies.add(memberNotTheseCompany)
+    }
 
     fun updateLastSignIn() {
         lastSignIn = now()

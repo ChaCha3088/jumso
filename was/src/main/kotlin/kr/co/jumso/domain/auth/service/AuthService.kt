@@ -3,7 +3,7 @@ package kr.co.jumso.domain.auth.service
 import kr.co.jumso.domain.auth.dto.SignInRequest
 import kr.co.jumso.domain.auth.exception.InvalidPasswordException
 import kr.co.jumso.domain.auth.repository.RefreshTokenRepository
-import kr.co.jumso.domain.member.dto.MemberResponse
+import kr.co.jumso.domain.member.dto.response.MemberResponse
 import kr.co.jumso.domain.member.entity.Member
 import kr.co.jumso.domain.member.exception.NoSuchMemberException
 import kr.co.jumso.domain.member.repository.MemberRepository
@@ -76,7 +76,7 @@ class AuthService(
         response: HttpServletResponse
     ) {
         // Header에서 Refresh Token 추출
-        val refreshToken: String = jwtService.extractRefreshToken(request)
+        val refreshToken: String = jwtService.extractRefreshTokenFromHeader(request)
 
         val memberId: Long = jwtService.validateAndExtractMemberIdFromRefreshToken(refreshToken)
 
@@ -119,7 +119,7 @@ class AuthService(
         response: HttpServletResponse
     ) {
         // Header에서 Refresh Token 추출
-        val refreshToken: String = jwtService.extractRefreshToken(request)
+        val refreshToken: String = jwtService.extractRefreshTokenFromHeader(request)
 
         val memberId: Long = jwtService.validateAndExtractMemberIdFromRefreshToken(refreshToken)
 

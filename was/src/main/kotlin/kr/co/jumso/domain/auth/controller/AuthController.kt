@@ -1,16 +1,18 @@
 package kr.co.jumso.domain.auth.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import kr.co.jumso.domain.auth.annotation.MemberId
+import kr.co.jumso.domain.member.annotation.TemporaryMemberId
 import kr.co.jumso.domain.auth.dto.SignInRequest
 import kr.co.jumso.domain.auth.exception.CompanyEmailNotFoundException
 import kr.co.jumso.domain.auth.exception.InvalidAccessTokenException
 import kr.co.jumso.domain.auth.exception.InvalidPasswordException
 import kr.co.jumso.domain.auth.exception.InvalidRefreshTokenException
 import kr.co.jumso.domain.auth.service.AuthService
-import kr.co.jumso.domain.member.dto.MemberResponse
-import kr.co.jumso.domain.member.dto.TemporaryMemberRequest
+import kr.co.jumso.domain.member.dto.request.EnrollRequest
+import kr.co.jumso.domain.member.dto.response.MemberResponse
+import kr.co.jumso.domain.member.dto.request.TemporaryMemberRequest
 import kr.co.jumso.domain.member.exception.*
 import kr.co.jumso.domain.member.service.TemporaryMemberService
 import org.apache.tomcat.websocket.Constants.UNAUTHORIZED
@@ -26,6 +28,8 @@ import org.springframework.web.bind.annotation.*
 class AuthController(
     private val authService: AuthService,
     private val temporaryMemberService: TemporaryMemberService,
+
+    private val objectMapper: ObjectMapper,
 ) {
     @PostMapping("/signin")
     fun signIn(
@@ -75,14 +79,25 @@ class AuthController(
         authService.temporarySignIn(signInRequest, response)
     }
 
-    @GetMapping(value = ["/verify"])
+    @GetMapping("/verify")
     fun verify(
+        @TemporaryMemberId temporaryMemberId: Long,
         @RequestParam(value = "verificationCode", required = true) verificationCode: String,
-        @MemberId temporaryMemberId: Long
     ): ResponseEntity<String> {
         temporaryMemberService.verify(temporaryMemberId, verificationCode.trim())
 
         return ResponseEntity.ok().build()
+    }
+
+    @PostMapping("/enroll")
+    fun enroll(
+        @TemporaryMemberId temporaryMemberId: Long,
+        @Validated @RequestBody enrollRequest: EnrollRequest,
+        response: HttpServletResponse,
+    ): ResponseEntity<String> {
+        val memberResponse = temporaryMemberService.enroll(temporaryMemberId, enrollRequest, response)
+
+        return ResponseEntity.ok().body(objectMapper.writeValueAsString(memberResponse))
     }
 
     @ExceptionHandler(PasswordInvalidException::class)

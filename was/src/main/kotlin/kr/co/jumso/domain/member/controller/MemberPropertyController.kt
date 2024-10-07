@@ -1,7 +1,7 @@
 package kr.co.jumso.domain.member.controller
 
-import kr.co.jumso.domain.auth.annotation.MemberId
-import kr.co.jumso.domain.member.dto.MemberPropertyRequest
+import kr.co.jumso.domain.member.annotation.MemberId
+import kr.co.jumso.domain.member.dto.request.MemberPropertyRequest
 import kr.co.jumso.domain.member.service.MemberPropertyService
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity

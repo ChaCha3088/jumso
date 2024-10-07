@@ -40,18 +40,20 @@ class JwtService(
     @Value("\${jwt.token.refresh.expiration}")
     private var refreshTokenExpiration: Long = 0
 
-    private lateinit var accessTokenDecoder: JWTVerifier
-    private lateinit var refreshTokenDecoder: JWTVerifier
+    private lateinit var memberAccessTokenDecoder: JWTVerifier
+    private lateinit var memberRefreshTokenDecoder: JWTVerifier
 
     @PostConstruct
     fun init() {
-        accessTokenDecoder = require(HMAC512(secret))
+        memberAccessTokenDecoder = require(HMAC512(secret))
             .withIssuer(issuer)
+            .withClaimPresence("memberId")
             .withSubject("accessToken")
             .build() // 반환된 빌더로 JWT verifier 생성
 
-        refreshTokenDecoder = require(HMAC512(secret))
+        memberRefreshTokenDecoder = require(HMAC512(secret))
             .withIssuer(issuer)
+            .withClaimPresence("memberId")
             .withSubject("refreshToken")
             .build() // 반환된 빌더로 JWT verifier 생성
     }
@@ -160,94 +162,7 @@ class JwtService(
         return arrayOf(newAccessToken, newRefreshToken)
     }
 
-//    @Transactional(noRollbackFor = [JWTVerificationException::class, NoSuchMemberException::class]) // JWTVerificationException 발생해도 롤백 X
-//    fun reissueJwts(memberId: Long?, refreshToken: String): Array<String> {
-////        , String deviceToken)
-////        // RefreshToken과 함께 DeviceTokenEntity를 찾아
-////        DeviceToken deviceTokenEntity = deviceTokenRepository.findByDeviceTokenWithRefreshToken(deviceToken)
-////            // Device Token이 DB에 없으면, Device Token이 바뀐 상황
-////            .orElseThrow(() -> {
-////                // RefreshToken을 DB에서 삭제
-////                refreshTokenRepository.deleteByRefreshToken(refreshToken);
-////
-////                Member member = memberRepository.findNotDeletedByEmailWithRefreshTokenAndSubscriptionAndDeviceToken(email)
-////                    .orElseThrow(() -> new NoSuchMemberException(new StringBuffer().append(SUCH.getMessage()).append(MEMBER.getMessage()).append(NOT_EXISTS.getMessage()).toString()));
-////
-////                // 만료된 Device Token으로 구독한 모든 Topic을 구독 해제한다.
-//////                subscriptionService.unsubscribeFromAllTopics(deviceToken, member);
-////
-////                throw new NoSuchDeviceTokenException(new StringBuffer().append(SUCH.getMessage()).append(DEVICE_TOKEN.getMessage()).append(NOT_EXISTS.getMessage()).toString());
-////            });
-////
-////        // 일치하는 Device Token이 있으면
-////        // 그 RefreshToken이 들어온 RefreshToken과 일치하는지 확인
-////        // 유저가 보낸 Refresh Token와 다르면, 유효하지 않은 Refresh Token이므로
-////        RefreshToken refreshTokenEntity = Optional.ofNullable(deviceTokenEntity.getRefreshToken())
-////            // RefreshToken이 DB에 없으면
-////            .orElseThrow(() -> {
-////                throw new JWTVerificationException(new StringBuffer().append(REFRESH_TOKEN.getMessage()).append(INVALID.getMessage()).toString());
-////            });
-//
-//        // Refresh Token 조회
-//
-//        val key = REFRESH_TOKEN_REDIS_KEY + refreshToken
-//        // Redis에서 RefreshToken 조회
-//        val memberIdInRedis = redisTemplate!!.opsForValue()[key]
-//            ?: // 꺼져
-//            throw NoSuchRefreshTokenException()
-//
-//        // Redis에 RefreshToken이 없으면
-//
-//        // Redis에서 RefreshToken 삭제
-//        redisTemplate.delete(key)
-//
-//        val member: Member = memberRepository.findNotDeletedById(memberId)
-//            .orElseThrow { NoSuchMemberException() }
-//
-//        // refreshToken이 유효하면
-//        // access token을 발급한다.
-//        val newAccessToken: String = JWT.create()
-//            .withIssuer(issuer)
-//            .withSubject("accessToken")
-//            .withIssuedAt(Date(System.currentTimeMillis()))
-//            .withExpiresAt(Date(System.currentTimeMillis() + accessTokenExpiration))
-//            .withClaim("memberId", java.lang.String.valueOf(member.getId()))
-//            .withClaim("issuedTime", System.currentTimeMillis())
-//            .sign(HMAC512(secret))
-//
-//        // refresh token을 발급한다.
-//        val newRefreshToken: String = JWT.create()
-//            .withIssuer(issuer)
-//            .withSubject("refreshToken")
-//            .withIssuedAt(Date(System.currentTimeMillis()))
-//            .withExpiresAt(Date(System.currentTimeMillis() + refreshTokenExpiration))
-//            .withClaim("memberId", java.lang.String.valueOf(member.getId()))
-//            .withClaim("issuedTime", System.currentTimeMillis())
-//            .sign(HMAC512(secret))
-//
-//        return arrayOf(newAccessToken, newRefreshToken)
-//    }
-//
-//    fun saveRefreshTokenToRedis(refreshToken: String, memberId: Long) {
-//        val valueOperations = redisTemplate!!.opsForValue()
-//        valueOperations[REFRESH_TOKEN_REDIS_KEY + refreshToken, memberId.toString(), refreshTokenExpiration] =
-//            TimeUnit.SECONDS
-//    }
-//
-//    fun deleteRefreshTokenFromRedis(refreshToken: String) {
-//        redisTemplate!!.delete(REFRESH_TOKEN_REDIS_KEY + refreshToken)
-//    }
-//
-//    // (RefreshToken, MemberId) 저장 TTL 1주일
-//    // Auth:RefreshToken:{RefreshToken} -> MemberId
-//    //    // refreshToken을 삭제한다.
-//    //    // 검증 안하고 그냥 삭제해도 될 듯? - 해시된 비번들만 들어있으니까
-//    //    @Transactional
-//    //    public void deleteRefreshToken(String refreshToken) throws JWTVerificationException {
-//    //        // refreshToken을 삭제한다.
-//    //        refreshTokenRepository.deleteByRefreshToken(refreshToken);
-//    //    }
-    fun extractAccessToken(request: HttpServletRequest): String {
+    fun extractAccessTokenFromHeader(request: HttpServletRequest): String {
         val accessToken = request.getHeader(ACCESS_TOKEN_HEADER)
 
         if (accessToken.isNullOrBlank()) {
@@ -257,7 +172,7 @@ class JwtService(
         return accessToken.replace(BEARER, "")
     }
 
-    fun extractRefreshToken(request: HttpServletRequest): String {
+    fun extractRefreshTokenFromHeader(request: HttpServletRequest): String {
         val refreshToken = request.getHeader(REFRESH_TOKEN_HEADER)
 
         // refreshToken 값 검증
@@ -268,50 +183,57 @@ class JwtService(
         return refreshToken.replace(BEARER, "")
     }
 
-    /**
-     * 헤더에서 AccessToken 추출 토큰 형식 : Bearer XXX에서 Bearer를 제외하고 순수 토큰만 가져오기 위해서 헤더를 가져온 후 "Bearer"를
-     * 삭제(""로 replace)
-     */
-    fun validateAccessToken(accessToken: String): Boolean {
-        try {
-            require(HMAC512(secret))
-                .withIssuer(issuer)
-                .withSubject("accessToken")
-                .build() // 반환된 빌더로 JWT verifier 생성
-                .verify(accessToken) // accessToken을 검증하고 유효하지 않다면 예외 발생
-
-            return true
-        } catch (e: JWTVerificationException) {
-            return false
-        }
-    }
-
-    fun extractMemberIdFromAccessToken(accessToken: String): Long {
+    fun validateAndExtractMemberIdFromAccessToken(accessToken: String): Long {
         try {
             // accessToken 값 검증
-            val jwt: DecodedJWT = accessTokenDecoder
+            val jwt: DecodedJWT = memberAccessTokenDecoder
                 .verify(accessToken) // accessToken을 검증하고 유효하지 않다면 예외 발생
 
-            return jwt.getClaim("memberId")
+            return jwt
+                .getClaim("memberId")
                 .asString().toLong() // claim(MemberId) 가져오기
         } catch (e: JWTVerificationException) {
             throw InvalidAccessTokenException()
         }
     }
 
-    /**
-     * 헤더에서 RefreshToken 추출 토큰 형식 : Bearer XXX에서 Bearer를 제외하고 순수 토큰만 가져오기 위해서 헤더를 가져온 후 "Bearer"를
-     * 삭제(""로 replace)
-     */
     fun validateAndExtractMemberIdFromRefreshToken(refreshToken: String): Long {
         try {
             // refreshToken을 검증한다.
-            val memberIdInRefreshToken: Long = refreshTokenDecoder
+            val jwt: DecodedJWT = memberRefreshTokenDecoder
                 .verify(refreshToken)
+
+            return jwt
                 .getClaim("memberId")
                 .asString().toLong()
+        } catch (e: JWTVerificationException) {
+            throw InvalidRefreshTokenException()
+        }
+    }
 
-            return memberIdInRefreshToken
+    fun validateAndExtractTemporaryMemberIdFromAccessToken(accessToken: String): Long {
+        try {
+            // accessToken 값 검증
+            val jwt: DecodedJWT = memberAccessTokenDecoder
+                .verify(accessToken) // accessToken을 검증하고 유효하지 않다면 예외 발생
+
+            return jwt
+                .getClaim("temporaryMemberId")
+                .asString().toLong() // claim(MemberId) 가져오기
+        } catch (e: JWTVerificationException) {
+            throw InvalidAccessTokenException()
+        }
+    }
+
+    fun validateAndExtractTemporaryMemberIdFromRefreshToken(refreshToken: String): Long {
+        try {
+            // refreshToken을 검증한다.
+            val jwt: DecodedJWT = memberRefreshTokenDecoder
+                .verify(refreshToken)
+
+            return jwt
+                .getClaim("temporaryMemberId")
+                .asString().toLong()
         } catch (e: JWTVerificationException) {
             throw InvalidRefreshTokenException()
         }

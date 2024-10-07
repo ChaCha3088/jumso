@@ -1,6 +1,6 @@
 package kr.co.jumso.domain.member.enumstorage
 
-enum class Marriage {
+enum class RelationshipStatus {
     SINGLE,
     DOLSING,
 }
