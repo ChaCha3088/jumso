@@ -12,16 +12,12 @@ data class TemporaryMemberRequest(
     @field:NotBlank(message = "비밀번호는 필수 입력 값입니다.")
     var password: String,
 
+    @field:NotBlank(message = "비밀번호는 필수 입력 값입니다.")
+    var passwordConfirm: String,
+
     @field:NotBlank(message = "별명은 필수 입력 값입니다.")
     var nickname: String,
 
     @field:NotNull(message = "회사 Email ID는 필수 입력 값입니다.")
     val companyEmailId: Long,
-) {
-    fun toTemporaryMember(address: String, passwordEncoder: PasswordEncoder) = TemporaryMember(
-        email = "${username.trim()}@$address",
-        password = passwordEncoder.encode(password.trim()),
-        nickname = nickname.trim(),
-        companyEmailId = companyEmailId,
-    )
-}
+)

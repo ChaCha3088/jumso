@@ -19,6 +19,7 @@ interface MemberRepository: JpaRepository<Member, Long>, MemberCustomRepository
 interface MemberCustomRepository {
     fun findNotDeletedById(memberId: Long): Member?
     fun findNotDeletedByEmail(email: String): Member?
+    fun findNotDeletedByVerificationCode(verificationCode: String): Member?
     fun findNotDeletedMembers(): List<Member>
     fun findNotDeletedByEmailWithRefreshToken(email: String): Member?
 
@@ -47,6 +48,15 @@ class MemberCustomRepositoryImpl(
             select(entity(Member::class))
             from(entity(Member::class))
             where(column(Member::email).equal(email))
+            where(column(Member::isDeleted).equal(false))
+        }.resultList.firstOrNull()
+    }
+
+    override fun findNotDeletedByVerificationCode(verificationCode: String): Member? {
+        return queryFactory.selectQuery<Member> {
+            select(entity(Member::class))
+            from(entity(Member::class))
+            where(column(Member::verificationCode).equal(verificationCode))
             where(column(Member::isDeleted).equal(false))
         }.resultList.firstOrNull()
     }

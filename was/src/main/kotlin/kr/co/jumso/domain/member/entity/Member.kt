@@ -17,6 +17,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
+import java.util.UUID.randomUUID
 
 @Entity
 class Member(
@@ -92,6 +93,12 @@ class Member(
     @Column(name = "company_id", nullable = false)
     @NotNull(message = "회사를 선택해주세요.")
     var companyId: Long = companyId
+        protected set
+
+    var verificationCode: String? = null
+        protected set
+
+    var verificationCodeExpiration: LocalDateTime? = null
         protected set
 
     // Member의 채팅
@@ -246,6 +253,22 @@ class Member(
 
     fun updateLastSignIn() {
         lastSignIn = now()
+    }
+
+    fun requestResetPassword() {
+        this.verificationCode = randomUUID().toString()
+        this.verificationCodeExpiration = now().plusMinutes(10)
+    }
+
+    fun resetPassword(newPassword: String) {
+        // verificationCode의 만료 시간이 지났는지 확인
+        if (verificationCode == null || verificationCodeExpiration == null || verificationCodeExpiration!!.isBefore(now())) {
+            throw IllegalArgumentException("인증 코드가 만료되었습니다.")
+        }
+
+        this.password = newPassword
+        this.verificationCode = null
+        this.verificationCodeExpiration = null
     }
 
     fun updateLocation(latitude: Double, longitude: Double) {

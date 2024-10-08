@@ -47,13 +47,10 @@ class TemporaryMember(
     var verificationCode: String = randomUUID().toString()
         protected set
 
+    @Column(nullable = false)
     @NotNull
     var verified: Boolean = false
         protected set
-
-    @OneToOne(mappedBy = "temporaryMember", cascade = [ALL], orphanRemoval = true, fetch = LAZY)
-    var refreshToken: RefreshToken? = null
-        internal set
 
     fun verify(verificationInput: String) {
         if (!verified && verificationInput == verificationCode) {

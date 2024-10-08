@@ -15,6 +15,6 @@ class PasswordConfig {
 
     @Bean
     fun passwordValidator(): PasswordValidator {
-        return PasswordValidator()
+        return PasswordValidator(passwordEncoder())
     }
 }

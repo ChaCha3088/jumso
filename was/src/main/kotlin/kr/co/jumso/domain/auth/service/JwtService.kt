@@ -106,13 +106,6 @@ class JwtService(
             .withClaim("issuedTime", currentTimeMillis())
             .sign(HMAC512(secret))
 
-        // refreshToken이 있으면, 업데이트
-        temporaryMember.refreshToken?.updateToken(newRefreshToken)
-        // refreshToken이 없으면, 새로 저장
-            ?: refreshTokenRepository.save(
-                RefreshToken(newRefreshToken, temporaryMember)
-            )
-
         // access token을 발급한다.
         val newAccessToken: String = JWT.create()
             .withIssuer(issuer)

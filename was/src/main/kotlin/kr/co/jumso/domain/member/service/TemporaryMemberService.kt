@@ -6,6 +6,8 @@ import kr.co.jumso.domain.auth.exception.CompanyEmailNotFoundException
 import kr.co.jumso.domain.auth.repository.CompanyEmailRepository
 import kr.co.jumso.domain.auth.service.JwtService
 import kr.co.jumso.domain.kafka.dto.KafkaEmailRequest
+import kr.co.jumso.domain.kafka.enumstorage.EmailType
+import kr.co.jumso.domain.kafka.enumstorage.EmailType.SIGN_UP
 import kr.co.jumso.domain.kafka.enumstorage.KafkaEmail.KAFKA_EMAIL_SERVER
 import kr.co.jumso.domain.member.dto.request.EnrollRequest
 import kr.co.jumso.domain.member.dto.request.TemporaryMemberRequest
@@ -18,6 +20,7 @@ import kr.co.jumso.domain.member.exception.InvalidMemberPropertyIdsException
 import kr.co.jumso.domain.member.exception.InvalidVerificationCodeException
 import kr.co.jumso.domain.member.exception.MemberExistsException
 import kr.co.jumso.domain.member.exception.TemporaryMemberExistsException
+import kr.co.jumso.domain.member.repository.MemberNotTheseCompanyRepository
 import kr.co.jumso.domain.member.repository.MemberPropertyRepository
 import kr.co.jumso.domain.member.repository.MemberRepository
 import kr.co.jumso.domain.member.repository.TemporaryMemberRepository
@@ -55,10 +58,15 @@ class TemporaryMemberService(
     ) {
         temporaryMemberRequest.username = temporaryMemberRequest.username.trim()
         temporaryMemberRequest.password = temporaryMemberRequest.password.trim()
+        temporaryMemberRequest.passwordConfirm = temporaryMemberRequest.passwordConfirm.trim()
         temporaryMemberRequest.nickname = temporaryMemberRequest.nickname.trim()
 
         // password 검증
-        passwordValidator.validate(temporaryMemberRequest.username, temporaryMemberRequest.password)
+        val validatedAndEncodedPassword = passwordValidator.validate(
+            temporaryMemberRequest.username,
+            temporaryMemberRequest.password,
+            temporaryMemberRequest.passwordConfirm
+        )
 
         // companyEmail 가져오기
         val companyEmail = companyEmailRepository.findById(temporaryMemberRequest.companyEmailId)
@@ -74,10 +82,14 @@ class TemporaryMemberService(
             throw MemberExistsException()
         }
 
-        val newTemporaryMember = temporaryMemberRepository.save(temporaryMemberRequest.toTemporaryMember(
-            companyEmail.address,
-            passwordEncoder
-        ))
+        val newTemporaryMember = temporaryMemberRepository.save(
+            TemporaryMember(
+                email = "${temporaryMemberRequest.username}@${companyEmail.address}",
+                password = validatedAndEncodedPassword,
+                nickname = temporaryMemberRequest.nickname,
+                companyEmailId = companyEmail.id!!,
+            )
+        )
 
         // 새로운 토큰을 발급한다.
         val jwts: Array<String> = jwtService.issueTemporaryMemberJwts(newTemporaryMember)
@@ -90,6 +102,7 @@ class TemporaryMemberService(
             "$KAFKA_EMAIL_SERVER-$emailServerPort",
             objectMapper.writeValueAsString(
                 KafkaEmailRequest(
+                    emailType = SIGN_UP,
                     memberUsername = temporaryMemberRequest.username,
                     domain = companyEmail.address,
                     verificationCode = newTemporaryMember.verificationCode

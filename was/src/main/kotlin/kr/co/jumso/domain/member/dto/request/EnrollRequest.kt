@@ -86,7 +86,20 @@ data class EnrollRequest(
     val notTheseCompanyIds: Set<Long>,
 ) {
     fun validateMemberPropertyIds(): Boolean {
-        // memberPropertyIds가 1000번대, 2000번대, 3000번대가 하나 이상 포함되어 있는지 확인
-        return propertyIds.any { it / 1000 == 1L } && propertyIds.any { it / 1000 == 2L } && propertyIds.any { it / 1000 == 3L }
+        // memberPropertyIds가 1000번대, 2000번대, 3000번대가 하나 이상, 5개 이하인지 확인
+        val propertyIds1000 = mutableSetOf<Long>()
+        val propertyIds2000 = mutableSetOf<Long>()
+        val propertyIds3000 = mutableSetOf<Long>()
+
+        for (propertyId in propertyIds) {
+            when (propertyId) {
+                in 1000..1999 -> propertyIds1000.add(propertyId)
+                in 2000..2999 -> propertyIds2000.add(propertyId)
+                in 3000..3999 -> propertyIds3000.add(propertyId)
+                else -> {}
+            }
+        }
+
+        return propertyIds1000.size in 1..5 && propertyIds2000.size in 1..5 && propertyIds3000.size in 1..5
     }
 }

@@ -12,32 +12,15 @@ import kr.co.jumso.domain.member.entity.TemporaryMember
 @Entity
 class RefreshToken(
     token: String,
+    member: Member,
 ): AuditingEntity() {
-    constructor(
-        token: String,
-        member: Member
-    ): this(token) {
-        this.member = member
-    }
-
-    constructor(
-        token: String,
-        temporaryMember: TemporaryMember
-    ): this(token) {
-        this.temporaryMember = temporaryMember
-    }
-
     @Column(nullable = false, unique = true, length = 400)
     @NotBlank
     var token: String = token
         protected set
 
     @OneToOne
-    var member: Member? = null
-        protected set
-
-    @OneToOne
-    var temporaryMember: TemporaryMember? = null
+    var member: Member = member
         protected set
 
     fun updateToken(token: String) {
