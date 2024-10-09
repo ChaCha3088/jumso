@@ -3,12 +3,15 @@ package kr.co.jumso.domain.auth.service
 import kr.co.jumso.domain.auth.dto.SignInRequest
 import kr.co.jumso.domain.auth.exception.InvalidPasswordException
 import kr.co.jumso.domain.auth.repository.RefreshTokenRepository
-import kr.co.jumso.domain.member.dto.MemberResponse
+import kr.co.jumso.domain.member.dto.response.MemberResponse
 import kr.co.jumso.domain.member.entity.Member
 import kr.co.jumso.domain.member.exception.NoSuchMemberException
 import kr.co.jumso.domain.member.repository.MemberRepository
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import kr.co.jumso.domain.member.entity.TemporaryMember
+import kr.co.jumso.domain.member.exception.NoSuchTemporaryMemberException
+import kr.co.jumso.domain.member.repository.TemporaryMemberRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,8 +20,11 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(readOnly = true)
 class AuthService(
     private val jwtService: JwtService,
+
     private val memberRepository: MemberRepository,
+    private val temporaryMemberRepository: TemporaryMemberRepository,
     private val refreshTokenRepository: RefreshTokenRepository,
+
     private val passwordEncoder: PasswordEncoder
 ) {
     @Transactional
@@ -36,12 +42,32 @@ class AuthService(
         }
 
         // 새로운 토큰을 발급한다.
-        val jwts: Array<String> = jwtService.issueJwts(member)
+        val jwts: Array<String> = jwtService.issueMemberJwts(member)
 
-        setHeader(response, jwts)
+        setJwts(response, jwts)
 
         // member를 반환
         return MemberResponse(member)
+    }
+
+    @Transactional
+    fun temporarySignIn(
+        signInRequest: SignInRequest,
+        response: HttpServletResponse
+    ) {
+        // TemporaryMember가 이미 있는지 확인한다.
+        val temporaryMember: TemporaryMember = temporaryMemberRepository.findByEmail(signInRequest.email!!)
+            ?: throw NoSuchTemporaryMemberException()
+
+        // TemporaryMember가 있으면, 비밀번호가 맞는지 확인한다.
+        if (!passwordEncoder.matches(signInRequest.password!!, temporaryMember.password)) {
+            throw InvalidPasswordException()
+        }
+
+        // 새로운 토큰을 발급한다.
+        val newAccessToken = jwtService.issueTemporaryMemberJwts(temporaryMember)
+
+        setAccessToken(response, newAccessToken)
     }
 
     @Transactional
@@ -50,14 +76,14 @@ class AuthService(
         response: HttpServletResponse
     ) {
         // Header에서 Refresh Token 추출
-        val refreshToken: String = jwtService.extractRefreshToken(request)
+        val refreshToken: String = jwtService.extractRefreshTokenFromHeader(request)
 
         val memberId: Long = jwtService.validateAndExtractMemberIdFromRefreshToken(refreshToken)
 
         // token들을 재발급한다.
         val jwts: Array<String> = jwtService.reissueJwts(memberId, refreshToken)
 
-        setHeader(response, jwts)
+        setJwts(response, jwts)
     }
 
 //    // Transactional 필요 없음
@@ -93,7 +119,7 @@ class AuthService(
         response: HttpServletResponse
     ) {
         // Header에서 Refresh Token 추출
-        val refreshToken: String = jwtService.extractRefreshToken(request)
+        val refreshToken: String = jwtService.extractRefreshTokenFromHeader(request)
 
         val memberId: Long = jwtService.validateAndExtractMemberIdFromRefreshToken(refreshToken)
 
@@ -106,8 +132,12 @@ class AuthService(
         jwtService.setRefreshTokenOnHeader(response, null)
     }
 
-    private fun setHeader(response: HttpServletResponse, jwts: Array<String>) {
+    private fun setJwts(response: HttpServletResponse, jwts: Array<String>) {
         jwtService.setAccessTokenOnHeader(response, jwts[0])
         jwtService.setRefreshTokenOnHeader(response, jwts[1])
+    }
+
+    private fun setAccessToken(response: HttpServletResponse, accessToken: String) {
+        jwtService.setAccessTokenOnHeader(response, accessToken)
     }
 }

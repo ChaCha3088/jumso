@@ -9,7 +9,11 @@ import java.time.LocalDateTime
 
 @EntityListeners(value = [AuditingEntityListener::class])
 @MappedSuperclass
-abstract class AuditingEntity: AuditingEntityId() {
+abstract class AuditingEntity(
+    id: Long? = null,
+): AuditingEntityId(
+    id = id,
+) {
     @Column(nullable = false, updatable = false)
     @CreatedDate
     lateinit var createdAt: LocalDateTime
@@ -23,8 +27,10 @@ abstract class AuditingEntity: AuditingEntityId() {
 
 @EntityListeners(value = [AuditingEntityListener::class])
 @MappedSuperclass
-abstract class AuditingEntityId {
+abstract class AuditingEntityId(
+    id: Long? = null
+) {
     @Id @GeneratedValue(strategy = IDENTITY)
-    var id: Long? = null
+    var id: Long? = id
         protected set
 }

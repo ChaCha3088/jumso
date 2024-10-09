@@ -1,6 +1,6 @@
 package kr.co.jumso.config
 
-import kr.co.jumso.domain.auth.resolver.MemberIdResolver
+import kr.co.jumso.domain.member.resolver.MemberIdResolver
 import kr.co.jumso.domain.auth.service.JwtService
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.method.support.HandlerMethodArgumentResolver

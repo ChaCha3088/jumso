@@ -1,4 +1,4 @@
-package kr.co.jumso.domain.member.dto
+package kr.co.jumso.domain.member.dto.request
 
 import jakarta.validation.constraints.NotBlank
 

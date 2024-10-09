@@ -2,11 +2,12 @@ package kr.co.jumso.domain.member.enumstorage
 
 enum class Religion {
     NONE,
-    CHRISTIANITY,
-    CATHOLICISM,
+    CHRISTIAN,
+    CATHOLIC,
+    ORTHODOX,
+    JUDAISM,
     BUDDHISM,
     ISLAM,
     HINDUISM,
-    JUDAISM,
     OTHER
 }

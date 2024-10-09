@@ -1,11 +1,26 @@
 package kr.co.jumso.util
 
 import kr.co.jumso.domain.member.exception.PasswordInvalidException
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 
 @Component
-class PasswordValidator {
-    fun validate(username: String, password: String): Boolean {
+class PasswordValidator(
+    private val passwordEncoder: PasswordEncoder
+) {
+    fun validate(
+        username: String,
+        password: String,
+        passwordConfirm: String,
+    ): String {
+        val password = password.trim()
+        val passwordConfirm = passwordConfirm.trim()
+
+        // 비밀번호와 비밀번호 확인이 일치하지 않으면 안됨
+        if (password != passwordConfirm) {
+            throw PasswordInvalidException("비밀번호와 비밀번호 확인이 일치하지 않습니다.")
+        }
+
         // 길이는 8자 이상 and 255자 이하
         if (password.length < 8 || password.length > 255) {
             throw PasswordInvalidException("비밀번호는 8자 이상 255자 이하로 입력해주세요.")
@@ -31,6 +46,6 @@ class PasswordValidator {
             throw PasswordInvalidException("비밀번호에 연속된 숫자를 4자 이상 사용할 수 없습니다.")
         }
 
-        return true
+        return passwordEncoder.encode(password)
     }
 }

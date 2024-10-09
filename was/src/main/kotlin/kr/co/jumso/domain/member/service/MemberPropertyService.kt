@@ -1,6 +1,6 @@
 package kr.co.jumso.domain.member.service
 
-import kr.co.jumso.domain.member.dto.MemberPropertyRequest
+import kr.co.jumso.domain.member.dto.request.MemberPropertyRequest
 import kr.co.jumso.domain.member.entity.MemberProperty
 import kr.co.jumso.domain.member.repository.MemberPropertyRepository
 import org.springframework.stereotype.Service

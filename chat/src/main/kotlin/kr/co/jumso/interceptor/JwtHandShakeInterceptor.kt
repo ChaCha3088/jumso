@@ -36,7 +36,7 @@ class JwtHandShakeInterceptor(
 
                 // 클라이언트의 jwt를 검증하고, memberId를 가져온다.
                 val memberId = runCatching {
-                    jwtService.extractMemberIdFromAccessToken(accessToken)
+                    jwtService.validateAndExtractMemberIdFromAccessToken(accessToken)
                 }.getOrElse {
                     response.setStatusCode(valueOf(401))
 

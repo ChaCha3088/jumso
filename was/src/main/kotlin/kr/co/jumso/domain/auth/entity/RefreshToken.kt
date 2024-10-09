@@ -7,11 +7,12 @@ import jakarta.persistence.Entity
 import jakarta.persistence.OneToOne
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import kr.co.jumso.domain.member.entity.TemporaryMember
 
 @Entity
 class RefreshToken(
     token: String,
-    member: Member
+    member: Member,
 ): AuditingEntity() {
     @Column(nullable = false, unique = true, length = 400)
     @NotBlank
@@ -19,13 +20,8 @@ class RefreshToken(
         protected set
 
     @OneToOne
-    @NotNull
     var member: Member = member
         protected set
-
-    init {
-        member.refreshToken = this
-    }
 
     fun updateToken(token: String) {
         this.token = token

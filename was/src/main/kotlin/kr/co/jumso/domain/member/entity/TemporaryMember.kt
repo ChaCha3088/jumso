@@ -1,26 +1,26 @@
 package kr.co.jumso.domain.member.entity
 
+import jakarta.persistence.*
+import jakarta.persistence.CascadeType.ALL
 import kr.co.jumso.domain.AuditingEntity
 import kr.co.jumso.domain.auth.entity.CompanyEmail
 import kr.co.jumso.domain.member.exception.InvalidVerificationCodeException
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
 import jakarta.persistence.FetchType.LAZY
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
 import jakarta.validation.constraints.NotBlank
-import java.util.*
+import jakarta.validation.constraints.NotNull
+import kr.co.jumso.domain.auth.entity.RefreshToken
+import java.util.UUID.randomUUID
 
 @Entity
 class TemporaryMember(
-    username: String,
+    email: String,
     password: String,
     nickname: String,
     companyEmailId: Long,
 ): AuditingEntity() {
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     @NotBlank
-    var username: String = username
+    var email: String = email
         protected set
 
     @Column(nullable = false)
@@ -44,17 +44,17 @@ class TemporaryMember(
 
     @Column(nullable = false, unique = true, length = 36)
     @NotBlank
-    var verificationCode: String = UUID.randomUUID().toString()
+    var verificationCode: String = randomUUID().toString()
         protected set
 
-    fun verify(verificationInput: String): Member {
-        if (verificationInput == verificationCode) {
-            return Member(
-                username + "@" + companyEmail!!.address,
-                password,
-                nickname,
-                companyEmail!!.company.id!!
-            )
+    @Column(nullable = false)
+    @NotNull
+    var verified: Boolean = false
+        protected set
+
+    fun verify(verificationInput: String) {
+        if (!verified && verificationInput == verificationCode) {
+            verified = true
         } else {
             throw InvalidVerificationCodeException()
         }
