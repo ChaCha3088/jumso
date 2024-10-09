@@ -329,4 +329,8 @@ class Member(
     fun updateIntroduction(introduction: String) {
         this.introduction = introduction
     }
+
+    fun delete() {
+        this.isDeleted = true
+    }
 }

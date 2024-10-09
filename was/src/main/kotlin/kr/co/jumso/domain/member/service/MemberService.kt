@@ -161,4 +161,14 @@ class MemberService(
 
         memberRepository.save(member)
     }
+
+    @Transactional
+    fun deleteMember(memberId: Long) {
+        val member = memberRepository.findNotDeletedById(memberId)
+            ?: throw NoSuchMemberException()
+
+        member.delete()
+
+        memberRepository.save(member)
+    }
 }

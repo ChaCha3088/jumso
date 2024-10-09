@@ -57,6 +57,13 @@ class MemberController(
         memberService.updateIntroduce(memberId, updateIntroduceRequest)
     }
 
+    @DeleteMapping("/delete")
+    fun deleteMember(
+        @MemberId memberId: Long,
+    ) {
+        memberService.deleteMember(memberId)
+    }
+
     @ExceptionHandler(NoSuchMemberException::class)
     fun handleException(e: NoSuchMemberException): ResponseEntity<String> {
         return ResponseEntity.badRequest().body(e.message)
