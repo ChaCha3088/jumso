@@ -255,9 +255,12 @@ class Member(
         lastSignIn = now()
     }
 
-    fun requestResetPassword() {
-        this.verificationCode = randomUUID().toString()
+    fun requestResetPassword(): String {
+        val newCode = randomUUID().toString()
+        this.verificationCode = newCode
         this.verificationCodeExpiration = now().plusMinutes(10)
+
+        return newCode
     }
 
     fun resetPassword(newPassword: String) {

@@ -6,7 +6,6 @@ import kr.co.jumso.domain.auth.exception.CompanyEmailNotFoundException
 import kr.co.jumso.domain.auth.repository.CompanyEmailRepository
 import kr.co.jumso.domain.auth.service.JwtService
 import kr.co.jumso.domain.kafka.dto.KafkaEmailRequest
-import kr.co.jumso.domain.kafka.enumstorage.EmailType
 import kr.co.jumso.domain.kafka.enumstorage.EmailType.SIGN_UP
 import kr.co.jumso.domain.kafka.enumstorage.KafkaEmail.KAFKA_EMAIL_SERVER
 import kr.co.jumso.domain.member.dto.request.EnrollRequest
@@ -27,7 +26,6 @@ import kr.co.jumso.domain.member.repository.TemporaryMemberRepository
 import kr.co.jumso.util.PasswordValidator
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -44,7 +42,6 @@ class TemporaryMemberService(
 
     private val kafkaTemplate: KafkaTemplate<String, String>,
 
-    private val passwordEncoder: PasswordEncoder,
     private val passwordValidator: PasswordValidator,
     private val objectMapper: ObjectMapper,
 ) {
@@ -92,10 +89,10 @@ class TemporaryMemberService(
         )
 
         // 새로운 토큰을 발급한다.
-        val jwts: Array<String> = jwtService.issueTemporaryMemberJwts(newTemporaryMember)
+        val newAccessToken = jwtService.issueTemporaryMemberJwts(newTemporaryMember)
 
         // 토큰을 Header에 설정
-        setHeader(response, jwts)
+        setAccessToken(response, newAccessToken)
 
         // Kafka에 이메일 전송 요청을 보내고, Kafka Consumer가 이메일을 보낸다.
         kafkaTemplate.send(
@@ -202,13 +199,17 @@ class TemporaryMemberService(
         // jwt 발급
         val newMemberJwts = jwtService.issueMemberJwts(newMember)
 
-        setHeader(response, newMemberJwts)
+        setJwts(response, newMemberJwts)
 
         return MemberResponse(newMemberEntity)
     }
 
-    private fun setHeader(response: HttpServletResponse, jwts: Array<String>) {
+    private fun setJwts(response: HttpServletResponse, jwts: Array<String>) {
         jwtService.setAccessTokenOnHeader(response, jwts[0])
         jwtService.setRefreshTokenOnHeader(response, jwts[1])
+    }
+
+    private fun setAccessToken(response: HttpServletResponse, accessToken: String) {
+        jwtService.setAccessTokenOnHeader(response, accessToken)
     }
 }

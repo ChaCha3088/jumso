@@ -44,7 +44,7 @@ class AuthService(
         // 새로운 토큰을 발급한다.
         val jwts: Array<String> = jwtService.issueMemberJwts(member)
 
-        setHeader(response, jwts)
+        setJwts(response, jwts)
 
         // member를 반환
         return MemberResponse(member)
@@ -65,9 +65,9 @@ class AuthService(
         }
 
         // 새로운 토큰을 발급한다.
-        val jwts: Array<String> = jwtService.issueTemporaryMemberJwts(temporaryMember)
+        val newAccessToken = jwtService.issueTemporaryMemberJwts(temporaryMember)
 
-        setHeader(response, jwts)
+        setAccessToken(response, newAccessToken)
     }
 
     @Transactional
@@ -83,7 +83,7 @@ class AuthService(
         // token들을 재발급한다.
         val jwts: Array<String> = jwtService.reissueJwts(memberId, refreshToken)
 
-        setHeader(response, jwts)
+        setJwts(response, jwts)
     }
 
 //    // Transactional 필요 없음
@@ -132,8 +132,12 @@ class AuthService(
         jwtService.setRefreshTokenOnHeader(response, null)
     }
 
-    private fun setHeader(response: HttpServletResponse, jwts: Array<String>) {
+    private fun setJwts(response: HttpServletResponse, jwts: Array<String>) {
         jwtService.setAccessTokenOnHeader(response, jwts[0])
         jwtService.setRefreshTokenOnHeader(response, jwts[1])
+    }
+
+    private fun setAccessToken(response: HttpServletResponse, accessToken: String) {
+        jwtService.setAccessTokenOnHeader(response, accessToken)
     }
 }

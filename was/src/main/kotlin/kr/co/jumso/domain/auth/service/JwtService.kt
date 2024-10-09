@@ -7,15 +7,15 @@ import com.auth0.jwt.algorithms.Algorithm.HMAC512
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import jakarta.annotation.PostConstruct
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import kr.co.jumso.domain.auth.entity.RefreshToken
 import kr.co.jumso.domain.auth.exception.InvalidAccessTokenException
 import kr.co.jumso.domain.auth.exception.InvalidRefreshTokenException
 import kr.co.jumso.domain.auth.repository.RefreshTokenRepository
 import kr.co.jumso.domain.member.entity.Member
-import kr.co.jumso.domain.member.repository.MemberRepository
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import kr.co.jumso.domain.member.entity.TemporaryMember
+import kr.co.jumso.domain.member.repository.MemberRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -95,17 +95,7 @@ class JwtService(
     }
 
     @Transactional
-    fun issueTemporaryMemberJwts(temporaryMember: TemporaryMember): Array<String> {
-        // refresh token을 발급한다.
-        val newRefreshToken: String = JWT.create()
-            .withIssuer(issuer)
-            .withSubject("refreshToken")
-            .withIssuedAt(Date(currentTimeMillis()))
-            .withExpiresAt(Date(currentTimeMillis() + refreshTokenExpiration))
-            .withClaim("temporaryMemberId", temporaryMember.id.toString())
-            .withClaim("issuedTime", currentTimeMillis())
-            .sign(HMAC512(secret))
-
+    fun issueTemporaryMemberJwts(temporaryMember: TemporaryMember): String {
         // access token을 발급한다.
         val newAccessToken: String = JWT.create()
             .withIssuer(issuer)
@@ -116,7 +106,7 @@ class JwtService(
             .withClaim("issuedTime", currentTimeMillis())
             .sign(HMAC512(secret))
 
-        return arrayOf(newAccessToken, newRefreshToken)
+        return newAccessToken
     }
 
     @Transactional
