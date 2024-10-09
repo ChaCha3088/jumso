@@ -15,7 +15,7 @@ import kr.co.jumso.domain.auth.exception.InvalidRefreshTokenException
 import kr.co.jumso.domain.auth.service.AuthService
 import kr.co.jumso.domain.member.dto.request.EnrollRequest
 import kr.co.jumso.domain.member.dto.response.MemberResponse
-import kr.co.jumso.domain.member.dto.request.TemporaryMemberRequest
+import kr.co.jumso.domain.member.dto.request.SignUpRequest
 import kr.co.jumso.domain.member.exception.*
 import kr.co.jumso.domain.member.service.MemberService
 import kr.co.jumso.domain.member.service.TemporaryMemberService
@@ -47,6 +47,14 @@ class AuthController(
         )
     }
 
+    @PostMapping("/temporary-signin")
+    fun temporarySignIn(
+        @Validated @RequestBody signInRequest: SignInRequest,
+        response: HttpServletResponse,
+    ) {
+        authService.temporarySignIn(signInRequest, response)
+    }
+
     @PostMapping("/reissue")
     fun reissue(
         request: HttpServletRequest,
@@ -59,39 +67,27 @@ class AuthController(
     fun signOut(
         request: HttpServletRequest,
         response: HttpServletResponse
-    ): ResponseEntity<String> {
+    ) {
         authService.signOut(request, response)
-
-        return ResponseEntity.ok().build()
     }
 
     @PostMapping("/signup")
     fun create(
-        @Validated @RequestBody temporaryMemberRequest: TemporaryMemberRequest,
+        @Validated @RequestBody signUpRequest: SignUpRequest,
         response: HttpServletResponse
     ) {
         temporaryMemberService.create(
-            temporaryMemberRequest,
+            signUpRequest,
             response
         )
-    }
-
-    @PostMapping("/temporary-signin")
-    fun temporarySignIn(
-        @Validated @RequestBody signInRequest: SignInRequest,
-        response: HttpServletResponse,
-    ) {
-        authService.temporarySignIn(signInRequest, response)
     }
 
     @GetMapping("/verify")
     fun verify(
         @TemporaryMemberId temporaryMemberId: Long,
         @NotBlank @RequestParam(value = "verificationCode", required = true) verificationCode: String,
-    ): ResponseEntity<String> {
-        temporaryMemberService.verify(temporaryMemberId, verificationCode.trim())
-
-        return ResponseEntity.ok().build()
+    ) {
+        temporaryMemberService.verify(temporaryMemberId, verificationCode)
     }
 
     @PostMapping("/enroll")

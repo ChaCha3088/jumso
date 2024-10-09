@@ -30,7 +30,7 @@ class MemberController(
         )
     }
 
-    @PostMapping("/change-company")
+    @PatchMapping("/change-company")
     fun changeCompany(
         @MemberId memberId: Long,
         @NotBlank @RequestParam(value = "verificationCode", required = true) verificationCode: String,
