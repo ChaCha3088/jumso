@@ -101,6 +101,15 @@ class Member(
     var verificationCodeExpiration: LocalDateTime? = null
         protected set
 
+    var toBeCompanyId: Long? = null
+        protected set
+
+    var toBeDomain: String? = null
+        protected set
+
+    var toBeUsername: String? = null
+        protected set
+
     // Member의 채팅
     @OneToMany(mappedBy = "member", cascade = [ALL], orphanRemoval = true, fetch = LAZY)
     var membersChatRooms: MutableList<MemberChatRoom> = mutableListOf()
@@ -272,6 +281,44 @@ class Member(
         this.password = newPassword
         this.verificationCode = null
         this.verificationCodeExpiration = null
+    }
+
+    fun requestChangeCompany(
+        companyId: Long,
+        toBeDomain: String,
+        toBeUsername: String,
+    ): String {
+        val newCode = randomUUID().toString()
+        this.verificationCode = newCode
+        this.verificationCodeExpiration = now().plusMinutes(10)
+
+        this.toBeCompanyId = companyId
+        this.toBeDomain = toBeDomain
+        this.toBeUsername = toBeUsername
+
+        return newCode
+    }
+
+    fun changeCompany(
+        verificationCode: String,
+    ) {
+        if (
+            this.toBeCompanyId == null ||
+            this.toBeDomain == null ||
+            this.toBeUsername == null ||
+            this.verificationCode == null ||
+            this.verificationCodeExpiration == null ||
+            this.verificationCodeExpiration!!.isBefore(now())
+        ) {
+            throw IllegalArgumentException("인증 코드가 만료되었거나 회사 변경 요청이 없습니다.")
+        }
+
+        this.companyId = toBeCompanyId!!
+        this.email = "${toBeUsername!!}@${toBeDomain!!}"
+
+        this.toBeCompanyId = null
+        this.toBeDomain = null
+        this.toBeUsername = null
     }
 
     fun updateLocation(latitude: Double, longitude: Double) {
