@@ -1,0 +1,2 @@
+user default on >#mypassword ~* +@all
+user jumso on >#mypassword ~* +@all
