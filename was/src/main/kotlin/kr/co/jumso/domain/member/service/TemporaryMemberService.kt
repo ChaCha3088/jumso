@@ -9,7 +9,7 @@ import kr.co.jumso.domain.kafka.dto.KafkaEmailRequest
 import kr.co.jumso.domain.kafka.enumstorage.EmailType.SIGN_UP
 import kr.co.jumso.domain.kafka.enumstorage.KafkaEmail.KAFKA_EMAIL_SERVER
 import kr.co.jumso.domain.member.dto.request.EnrollRequest
-import kr.co.jumso.domain.member.dto.request.TemporaryMemberRequest
+import kr.co.jumso.domain.member.dto.request.SignUpRequest
 import kr.co.jumso.domain.member.dto.response.MemberResponse
 import kr.co.jumso.domain.member.entity.Member
 import kr.co.jumso.domain.member.entity.MemberNotTheseCompany
@@ -48,40 +48,40 @@ class TemporaryMemberService(
 
     @Transactional
     fun create(
-        temporaryMemberRequest: TemporaryMemberRequest,
+        signUpRequest: SignUpRequest,
         response: HttpServletResponse
     ) {
-        temporaryMemberRequest.username = temporaryMemberRequest.username.trim()
-        temporaryMemberRequest.password = temporaryMemberRequest.password.trim()
-        temporaryMemberRequest.passwordConfirm = temporaryMemberRequest.passwordConfirm.trim()
-        temporaryMemberRequest.nickname = temporaryMemberRequest.nickname.trim()
+        signUpRequest.username = signUpRequest.username.trim()
+        signUpRequest.password = signUpRequest.password.trim()
+        signUpRequest.passwordConfirm = signUpRequest.passwordConfirm.trim()
+        signUpRequest.nickname = signUpRequest.nickname.trim()
 
         // password 검증
         val validatedAndEncodedPassword = passwordValidator.validate(
-            temporaryMemberRequest.username,
-            temporaryMemberRequest.password,
-            temporaryMemberRequest.passwordConfirm
+            signUpRequest.username,
+            signUpRequest.password,
+            signUpRequest.passwordConfirm
         )
 
         // companyEmail 가져오기
-        val companyEmail = companyEmailRepository.findById(temporaryMemberRequest.companyEmailId)
+        val companyEmail = companyEmailRepository.findById(signUpRequest.companyEmailId)
             .orElseThrow { throw CompanyEmailNotFoundException() }
 
         // 이미 존재하는 temporaryMember인지 확인
-        if (temporaryMemberRepository.existsByEmail("${temporaryMemberRequest.username}@${companyEmail.address}")) {
+        if (temporaryMemberRepository.existsByEmail("${signUpRequest.username}@${companyEmail.address}")) {
             throw TemporaryMemberExistsException()
         }
 
         // 이미 존재하는 member인지 확인
-        if (memberRepository.existsByEmail("${temporaryMemberRequest.username}@${companyEmail.address}")) {
+        if (memberRepository.existsByEmail("${signUpRequest.username}@${companyEmail.address}")) {
             throw MemberExistsException()
         }
 
         val newTemporaryMember = temporaryMemberRepository.save(
             TemporaryMember(
-                email = "${temporaryMemberRequest.username}@${companyEmail.address}",
+                email = "${signUpRequest.username}@${companyEmail.address}",
                 password = validatedAndEncodedPassword,
-                nickname = temporaryMemberRequest.nickname,
+                nickname = signUpRequest.nickname,
                 companyEmailId = companyEmail.id!!,
             )
         )
@@ -98,7 +98,7 @@ class TemporaryMemberService(
             objectMapper.writeValueAsString(
                 KafkaEmailRequest(
                     emailType = SIGN_UP,
-                    memberUsername = temporaryMemberRequest.username,
+                    memberUsername = signUpRequest.username,
                     domain = companyEmail.address,
                     verificationCode = newTemporaryMember.verificationCode
                 )
@@ -111,6 +111,8 @@ class TemporaryMemberService(
         temporaryMemberId: Long,
         verificationCode: String,
     ) {
+        val verificationCode = verificationCode.trim()
+
         val temporaryMember: TemporaryMember = temporaryMemberRepository.findById(temporaryMemberId)
             .orElseThrow { throw InvalidVerificationCodeException() }
 

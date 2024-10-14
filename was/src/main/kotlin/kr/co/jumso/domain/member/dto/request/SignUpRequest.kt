@@ -3,7 +3,7 @@ package kr.co.jumso.domain.member.dto.request
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 
-data class TemporaryMemberRequest(
+data class SignUpRequest(
     @field:NotBlank(message = "이메일은 필수 입력 값입니다.")
     var username: String,
 

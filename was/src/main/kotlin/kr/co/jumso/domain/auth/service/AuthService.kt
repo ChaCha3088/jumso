@@ -32,8 +32,11 @@ class AuthService(
         signInRequest: SignInRequest,
         response: HttpServletResponse
     ): MemberResponse {
+        signInRequest.email = signInRequest.email.trim()
+        signInRequest.password = signInRequest.password.trim()
+
         // Member가 이미 있는지 확인한다.
-        val member: Member = memberRepository.findNotDeletedByEmailWithRefreshToken(signInRequest.email!!)
+        val member: Member = memberRepository.findNotDeletedByEmailWithRefreshToken(signInRequest.email)
             ?: throw NoSuchMemberException()
 
         // Member가 있으면, 비밀번호가 맞는지 확인한다.
@@ -55,12 +58,15 @@ class AuthService(
         signInRequest: SignInRequest,
         response: HttpServletResponse
     ) {
+        signInRequest.email = signInRequest.email.trim()
+        signInRequest.password = signInRequest.password.trim()
+
         // TemporaryMember가 이미 있는지 확인한다.
-        val temporaryMember: TemporaryMember = temporaryMemberRepository.findByEmail(signInRequest.email!!)
+        val temporaryMember: TemporaryMember = temporaryMemberRepository.findByEmail(signInRequest.email)
             ?: throw NoSuchTemporaryMemberException()
 
         // TemporaryMember가 있으면, 비밀번호가 맞는지 확인한다.
-        if (!passwordEncoder.matches(signInRequest.password!!, temporaryMember.password)) {
+        if (!passwordEncoder.matches(signInRequest.password, temporaryMember.password)) {
             throw InvalidPasswordException()
         }
 
