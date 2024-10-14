@@ -1,12 +1,12 @@
 package kr.co.jumso.domain.member.entity
 
-import kr.co.jumso.domain.AuditingEntity
-import kr.co.jumso.domain.company.entity.Company
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType.LAZY
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import kr.co.jumso.domain.AuditingEntity
+import kr.co.jumso.domain.company.entity.Company
 
 @Entity
 class MemberNotTheseCompany(
@@ -30,4 +30,20 @@ class MemberNotTheseCompany(
     @Column(name = "company_id")
     var companyId: Long = companyId
         protected set
+
+    override fun hashCode(): Int {
+        return memberId.hashCode() + companyId.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MemberNotTheseCompany
+
+        if (memberId != other.memberId) return false
+        if (companyId != other.companyId) return false
+
+        return true
+    }
 }

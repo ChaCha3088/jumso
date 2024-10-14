@@ -1,14 +1,9 @@
 package kr.co.jumso.domain.chat.repository
 
 import com.linecorp.kotlinjdsl.dsl.jpql.jpql
-import com.linecorp.kotlinjdsl.querydsl.expression.col
-import com.linecorp.kotlinjdsl.querydsl.expression.column
 import com.linecorp.kotlinjdsl.render.jpql.JpqlRenderContext
 import com.linecorp.kotlinjdsl.render.jpql.JpqlRenderer
 import com.linecorp.kotlinjdsl.spring.data.SpringDataQueryFactory
-import com.linecorp.kotlinjdsl.spring.data.deleteQuery
-import com.linecorp.kotlinjdsl.spring.data.selectQuery
-import com.linecorp.kotlinjdsl.spring.data.singleQuery
 import jakarta.persistence.EntityManager
 import jakarta.persistence.Query
 import kr.co.jumso.domain.chat.entity.ChatRoom

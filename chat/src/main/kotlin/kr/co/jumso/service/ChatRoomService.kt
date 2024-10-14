@@ -1,8 +1,5 @@
 package kr.co.jumso.service
 
-import kr.co.jumso.domain.chat.entity.ChatRoom
-import kr.co.jumso.domain.chat.repository.ChatRoomRepository
-import kr.co.jumso.domain.chat.repository.MemberChatRoomRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.littlenb.snowflake.sequence.IdGenerator
 import kr.co.jumso.annotation.Valid
@@ -13,8 +10,11 @@ import kr.co.jumso.domain.chat.dto.response.ChatMessageResponse
 import kr.co.jumso.domain.chat.dto.response.ChatRoomResponse
 import kr.co.jumso.domain.chat.dto.response.CreateChatRoomResponse
 import kr.co.jumso.domain.chat.dto.response.DeleteChatRoomResponse
+import kr.co.jumso.domain.chat.entity.ChatRoom
 import kr.co.jumso.domain.chat.enumstorage.MessageType.*
 import kr.co.jumso.domain.chat.enumstorage.RedisKeys.*
+import kr.co.jumso.domain.chat.repository.ChatRoomRepository
+import kr.co.jumso.domain.chat.repository.MemberChatRoomRepository
 import kr.co.jumso.enumstorage.KafkaConfig.*
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.kafka.core.KafkaTemplate

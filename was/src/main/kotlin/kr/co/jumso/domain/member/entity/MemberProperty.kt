@@ -1,12 +1,12 @@
 package kr.co.jumso.domain.member.entity
 
-import kr.co.jumso.domain.AuditingEntity
-import kr.co.jumso.domain.property.entity.Property
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType.LAZY
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import kr.co.jumso.domain.AuditingEntity
+import kr.co.jumso.domain.property.entity.Property
 
 @Entity
 class MemberProperty(
@@ -30,4 +30,17 @@ class MemberProperty(
     @Column(name = "property_id")
     var propertyId = propertyId
         protected set
+
+    override fun hashCode(): Int {
+        return memberId.hashCode() + propertyId.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+
+        other as MemberProperty
+
+        return memberId == other.memberId && propertyId == other.propertyId
+    }
 }

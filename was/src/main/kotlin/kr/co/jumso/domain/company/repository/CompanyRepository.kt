@@ -2,9 +2,9 @@ package kr.co.jumso.domain.company.repository
 
 import com.linecorp.kotlinjdsl.querydsl.expression.column
 import com.linecorp.kotlinjdsl.querydsl.from.fetch
-import jakarta.persistence.criteria.JoinType.LEFT
 import com.linecorp.kotlinjdsl.spring.data.SpringDataQueryFactory
 import com.linecorp.kotlinjdsl.spring.data.selectQuery
+import jakarta.persistence.criteria.JoinType.LEFT
 import kr.co.jumso.domain.company.entity.Company
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository

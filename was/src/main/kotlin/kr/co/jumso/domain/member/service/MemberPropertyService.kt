@@ -2,34 +2,23 @@ package kr.co.jumso.domain.member.service
 
 import kr.co.jumso.domain.member.dto.request.MemberPropertyRequest
 import kr.co.jumso.domain.member.entity.MemberProperty
-import kr.co.jumso.domain.member.repository.MemberPropertyRepository
+import kr.co.jumso.domain.member.exception.NoSuchMemberException
+import kr.co.jumso.domain.member.repository.MemberRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional(readOnly = true)
 class MemberPropertyService(
-    private val memberPropertyRepository: MemberPropertyRepository
+    private val memberRepository: MemberRepository,
 ) {
     @Transactional
-    fun create(memberId: Long, memberPropertyRequest: MemberPropertyRequest) {
-        val memberProperties = memberPropertyRepository.findByMemberId(memberId)
+    fun putProperties(memberId: Long, memberPropertyRequest: MemberPropertyRequest) {
+        val memberWithMemberProperties = memberRepository.findNotDeletedByIdWithMemberProperties(memberId)
+            ?: throw NoSuchMemberException()
 
-        // propertyId가 memberProperties에 들어있지 않은 경우에만 추가
-        val newIds = memberPropertyRequest.propertyIds!!
-        val oldIds = memberProperties.map { it.propertyId }.toSet()
+        memberWithMemberProperties.addMemberProperties(memberPropertyRequest.propertyIds)
 
-        val diff = newIds - oldIds
-
-        memberProperties.addAll(
-            diff.map {
-                MemberProperty(
-                    memberId,
-                    it
-                )
-            }
-        )
-
-        memberPropertyRepository.saveAll(memberProperties)
+        memberRepository.save(memberWithMemberProperties)
     }
 }

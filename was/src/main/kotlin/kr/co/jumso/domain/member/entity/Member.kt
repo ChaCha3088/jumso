@@ -1,12 +1,5 @@
 package kr.co.jumso.domain.member.entity
 
-import kr.co.jumso.domain.AuditingEntity
-import kr.co.jumso.domain.auth.entity.RefreshToken
-import kr.co.jumso.domain.chat.entity.MemberChatRoom
-import kr.co.jumso.domain.company.entity.Company
-import kr.co.jumso.domain.member.enumstorage.*
-import kr.co.jumso.enumstrorage.MemberRole
-import kr.co.jumso.enumstrorage.MemberRole.USER
 import jakarta.persistence.*
 import jakarta.persistence.CascadeType.ALL
 import jakarta.persistence.EnumType.ORDINAL
@@ -15,6 +8,15 @@ import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import kr.co.jumso.domain.AuditingEntity
+import kr.co.jumso.domain.auth.entity.RefreshToken
+import kr.co.jumso.domain.chat.entity.MemberChatRoom
+import kr.co.jumso.domain.company.entity.Company
+import kr.co.jumso.domain.member.enumstorage.*
+import kr.co.jumso.domain.member.exception.InvalidMemberPropertyIdsException
+import kr.co.jumso.domain.recommend.entity.MemberNoMatch
+import kr.co.jumso.enumstrorage.MemberRole
+import kr.co.jumso.enumstrorage.MemberRole.USER
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.util.UUID.randomUUID
@@ -38,6 +40,8 @@ class Member(
     longitude: Double,
     introduction: String,
     whatSexDoYouWant: Sex,
+    howTallDoYouWantMin: Short,
+    howTallDoYouWantMax: Short,
     howOldDoYouWantMin: Byte,
     howOldDoYouWantMax: Byte,
     howFarCanYouGo: Byte,
@@ -119,6 +123,16 @@ class Member(
     var memberProperties: MutableSet<MemberProperty> = mutableSetOf()
         protected set
 
+    @OneToMany(mappedBy = "member", cascade = [ALL], orphanRemoval = true, fetch = LAZY)
+    var noMatch: MutableSet<MemberNoMatch> = mutableSetOf()
+        protected set
+
+    @Column(nullable = false)
+    @NotNull
+    @Min(value = 0L)
+    var newChatTicket: Long = 0
+        protected set
+
     @Column(nullable = false)
     @NotNull(message = "생년월일을 입력해주세요.")
     var bornAt: LocalDateTime = bornAt
@@ -198,6 +212,20 @@ class Member(
         protected set
 
     @Column(nullable = false)
+    @NotNull
+    @Min(value = 100, message = "키는 100cm 이상으로 입력해주세요.")
+    @Max(value = 300, message = "키는 300cm 이하로 입력해주세요.")
+    var howTallDoYouWantMin: Short = howTallDoYouWantMin
+        protected set
+
+    @Column(nullable = false)
+    @NotNull
+    @Min(value = 100, message = "키는 100cm 이상으로 입력해주세요.")
+    @Max(value = 300, message = "키는 300cm 이하로 입력해주세요.")
+    var howTallDoYouWantMax: Short = howTallDoYouWantMax
+        protected set
+
+    @Column(nullable = false)
     @NotNull(message = "원하는 나이를 선택해주세요.")
     @Max(value = 127, message = "나이는 127 이하로 입력해주세요.")
     @Min(value = 0, message = "나이는 0 이상으로 입력해주세요.")
@@ -252,12 +280,52 @@ class Member(
     var notTheseCompanies: MutableSet<MemberNotTheseCompany> = mutableSetOf()
         protected set
 
-    fun addMemberProperty(memberProperty: MemberProperty) {
-        memberProperties.add(memberProperty)
+    fun addMemberProperties(propertyIds: Set<Long>) {
+        // enrollRequest의 memberPropertyIds가 1000번대, 2000번대, 3000번대가 하나 이상 포함되어 있는지 확인
+        // memberPropertyIds가 1000번대, 2000번대, 3000번대가 하나 이상, 5개 이하인지 확인, 총 최대 15개
+        val propertyIds1000 = mutableSetOf<Long>()
+        val propertyIds2000 = mutableSetOf<Long>()
+        val propertyIds3000 = mutableSetOf<Long>()
+
+        for (propertyId in propertyIds) {
+            when (propertyId) {
+                in 1000..1999 -> propertyIds1000.add(propertyId)
+                in 2000..2999 -> propertyIds2000.add(propertyId)
+                in 3000..3999 -> propertyIds3000.add(propertyId)
+                else -> {}
+            }
+        }
+
+        if (!(propertyIds1000.size in 1..5 && propertyIds2000.size in 1..5 && propertyIds3000.size in 1..5)) {
+            throw InvalidMemberPropertyIdsException()
+        }
+
+        // 회원이 요청한 propertyIds에 없는 propertyIds를 추가
+        for (propertyId in propertyIds) {
+            val memberProperty = MemberProperty(
+                memberId = id!!,
+                propertyId = propertyId,
+            )
+
+            this.memberProperties.add(memberProperty)
+        }
+
+        // 회원이 요청한 propertyIds에 없는 propertyIds를 삭제
+        this.memberProperties.removeIf { it.propertyId !in propertyIds }
     }
 
-    fun addNotTheseCompany(memberNotTheseCompany: MemberNotTheseCompany) {
-        notTheseCompanies.add(memberNotTheseCompany)
+    fun addMemberNotTheseCompany(memberNotTheseCompanyIds: Set<Long>) {
+        for (notTheseCompanyId in memberNotTheseCompanyIds) {
+            val memberNotTheseCompany = MemberNotTheseCompany(
+                memberId = id!!,
+                companyId = notTheseCompanyId,
+            )
+
+            this.notTheseCompanies.add(memberNotTheseCompany)
+        }
+
+        // 회원이 요청한 notTheseCompanyIds에 없는 notTheseCompanyIds를 삭제
+        this.notTheseCompanies.removeIf { it.companyId !in memberNotTheseCompanyIds }
     }
 
     fun updateLastSignIn() {

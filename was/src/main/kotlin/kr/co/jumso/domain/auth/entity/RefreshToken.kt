@@ -1,13 +1,11 @@
 package kr.co.jumso.domain.auth.entity
 
-import kr.co.jumso.domain.AuditingEntity
-import kr.co.jumso.domain.member.entity.Member
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.OneToOne
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
-import kr.co.jumso.domain.member.entity.TemporaryMember
+import kr.co.jumso.domain.AuditingEntity
+import kr.co.jumso.domain.member.entity.Member
 
 @Entity
 class RefreshToken(

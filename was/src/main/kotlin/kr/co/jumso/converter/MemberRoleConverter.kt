@@ -1,8 +1,8 @@
 package kr.co.jumso.converter
 
-import kr.co.jumso.enumstrorage.MemberRole
 import jakarta.persistence.AttributeConverter
 import jakarta.persistence.Converter
+import kr.co.jumso.enumstrorage.MemberRole
 
 @Converter(autoApply = true)
 class MemberRoleConverter : AttributeConverter<MemberRole, String> {

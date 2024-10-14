@@ -1,11 +1,11 @@
 package kr.co.jumso.domain.auth.repository
 
-import kr.co.jumso.domain.auth.entity.RefreshToken
-import kr.co.jumso.domain.member.entity.Member
 import com.linecorp.kotlinjdsl.querydsl.expression.column
 import com.linecorp.kotlinjdsl.spring.data.SpringDataQueryFactory
 import com.linecorp.kotlinjdsl.spring.data.deleteQuery
 import com.linecorp.kotlinjdsl.spring.data.selectQuery
+import kr.co.jumso.domain.auth.entity.RefreshToken
+import kr.co.jumso.domain.member.entity.Member
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 

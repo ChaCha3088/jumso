@@ -1,14 +1,15 @@
 package kr.co.jumso.domain.member.entity
 
-import jakarta.persistence.*
-import jakarta.persistence.CascadeType.ALL
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType.LAZY
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import kr.co.jumso.domain.AuditingEntity
 import kr.co.jumso.domain.auth.entity.CompanyEmail
 import kr.co.jumso.domain.member.exception.InvalidVerificationCodeException
-import jakarta.persistence.FetchType.LAZY
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
-import kr.co.jumso.domain.auth.entity.RefreshToken
 import java.util.UUID.randomUUID
 
 @Entity

@@ -12,14 +12,14 @@ import java.sql.SQLIntegrityConstraintViolationException
 @RestController
 @RequestMapping(value = ["/api/members/properties"], consumes = [APPLICATION_JSON_VALUE])
 class MemberPropertyController(
-    private val memberPropertyService: MemberPropertyService
+    private val memberPropertyService: MemberPropertyService,
 ) {
-    @PostMapping
-    fun create(
+    @PutMapping
+    fun putMemberProperties(
         @MemberId memberId: Long,
         @Validated @RequestBody memberPropertyRequest: MemberPropertyRequest
     ) {
-        memberPropertyService.create(memberId, memberPropertyRequest)
+        memberPropertyService.putProperties(memberId, memberPropertyRequest)
     }
 
     @ExceptionHandler(SQLIntegrityConstraintViolationException::class)
