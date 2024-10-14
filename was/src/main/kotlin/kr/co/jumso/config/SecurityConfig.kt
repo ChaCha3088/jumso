@@ -1,10 +1,10 @@
 package kr.co.jumso.config
 
-import kr.co.jumso.domain.auth.filter.AuthenticationProcessFilter
-import kr.co.jumso.domain.auth.handler.JwtLogoutHandler
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.servlet.http.HttpServletResponse.SC_OK
+import kr.co.jumso.domain.auth.filter.AuthenticationProcessFilter
+import kr.co.jumso.domain.auth.handler.JwtLogoutHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity

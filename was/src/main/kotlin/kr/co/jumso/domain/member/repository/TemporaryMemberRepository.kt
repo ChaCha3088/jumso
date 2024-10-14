@@ -1,9 +1,9 @@
 package kr.co.jumso.domain.member.repository
 
-import kr.co.jumso.domain.member.entity.TemporaryMember
 import com.linecorp.kotlinjdsl.querydsl.expression.column
 import com.linecorp.kotlinjdsl.spring.data.SpringDataQueryFactory
 import com.linecorp.kotlinjdsl.spring.data.selectQuery
+import kr.co.jumso.domain.member.entity.TemporaryMember
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface TemporaryMemberRepository: JpaRepository<TemporaryMember, Long>, TemporaryMemberRepositoryCustom

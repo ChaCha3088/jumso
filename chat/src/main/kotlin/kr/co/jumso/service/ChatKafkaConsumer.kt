@@ -4,12 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import kr.co.jumso.annotation.Valid
 import kr.co.jumso.domain.chat.dto.KafkaMessage
 import kr.co.jumso.domain.chat.dto.ResponseMessage
-import kr.co.jumso.domain.chat.dto.request.SelectChatRoomMessagesRequest
 import kr.co.jumso.domain.chat.dto.response.*
 import kr.co.jumso.domain.chat.enumstorage.MessageStatus.SUCCESS
 import kr.co.jumso.domain.chat.enumstorage.MessageType.*
 import kr.co.jumso.registry.SessionRegistry
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 import org.springframework.web.socket.TextMessage
@@ -18,7 +16,7 @@ import org.springframework.web.socket.WebSocketSession
 @Service
 class ChatKafkaConsumer(
     private val sessionRegistry: SessionRegistry,
-  
+
     private val objectMapper: ObjectMapper,
 ) {
     // Kafka에서 들어오는 메시지를 처리

@@ -6,16 +6,16 @@ import jakarta.servlet.http.HttpServletResponse
 import jakarta.validation.constraints.NotBlank
 import kr.co.jumso.domain.auth.dto.RequestResetPasswordRequest
 import kr.co.jumso.domain.auth.dto.ResetPasswordRequest
-import kr.co.jumso.domain.member.annotation.TemporaryMemberId
 import kr.co.jumso.domain.auth.dto.SignInRequest
 import kr.co.jumso.domain.auth.exception.CompanyEmailNotFoundException
 import kr.co.jumso.domain.auth.exception.InvalidAccessTokenException
 import kr.co.jumso.domain.auth.exception.InvalidPasswordException
 import kr.co.jumso.domain.auth.exception.InvalidRefreshTokenException
 import kr.co.jumso.domain.auth.service.AuthService
+import kr.co.jumso.domain.member.annotation.TemporaryMemberId
 import kr.co.jumso.domain.member.dto.request.EnrollRequest
+import kr.co.jumso.domain.member.dto.request.TemporaryMemberRequest
 import kr.co.jumso.domain.member.dto.response.MemberResponse
-import kr.co.jumso.domain.member.dto.request.SignUpRequest
 import kr.co.jumso.domain.member.exception.*
 import kr.co.jumso.domain.member.service.MemberService
 import kr.co.jumso.domain.member.service.TemporaryMemberService
@@ -47,14 +47,6 @@ class AuthController(
         )
     }
 
-    @PostMapping("/temporary-signin")
-    fun temporarySignIn(
-        @Validated @RequestBody signInRequest: SignInRequest,
-        response: HttpServletResponse,
-    ) {
-        authService.temporarySignIn(signInRequest, response)
-    }
-
     @PostMapping("/reissue")
     fun reissue(
         request: HttpServletRequest,
@@ -67,27 +59,39 @@ class AuthController(
     fun signOut(
         request: HttpServletRequest,
         response: HttpServletResponse
-    ) {
+    ): ResponseEntity<String> {
         authService.signOut(request, response)
+
+        return ResponseEntity.ok().build()
     }
 
     @PostMapping("/signup")
     fun create(
-        @Validated @RequestBody signUpRequest: SignUpRequest,
+        @Validated @RequestBody temporaryMemberRequest: TemporaryMemberRequest,
         response: HttpServletResponse
     ) {
         temporaryMemberService.create(
-            signUpRequest,
+            temporaryMemberRequest,
             response
         )
+    }
+
+    @PostMapping("/temporary-signin")
+    fun temporarySignIn(
+        @Validated @RequestBody signInRequest: SignInRequest,
+        response: HttpServletResponse,
+    ) {
+        authService.temporarySignIn(signInRequest, response)
     }
 
     @GetMapping("/verify")
     fun verify(
         @TemporaryMemberId temporaryMemberId: Long,
         @NotBlank @RequestParam(value = "verificationCode", required = true) verificationCode: String,
-    ) {
-        temporaryMemberService.verify(temporaryMemberId, verificationCode)
+    ): ResponseEntity<String> {
+        temporaryMemberService.verify(temporaryMemberId, verificationCode.trim())
+
+        return ResponseEntity.ok().build()
     }
 
     @PostMapping("/enroll")

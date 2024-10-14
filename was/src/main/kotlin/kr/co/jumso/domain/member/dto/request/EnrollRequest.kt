@@ -49,6 +49,16 @@ data class EnrollRequest(
     @field:NotNull(message = "원하는 성별을 선택해주세요.")
     val whatSexDoYouWant: Sex,
 
+    @field:NotNull(message = "원하는 키를 입력해주세요.")
+    @field:Min(value = 100, message = "키는 100cm 이상으로 입력해주세요.")
+    @field:Max(value = 300, message = "키는 300cm 이하로 입력해주세요.")
+    val howTallDoYouWantMin: Short,
+
+    @field:NotNull(message = "원하는 키를 입력해주세요.")
+    @field:Min(value = 100, message = "키는 100cm 이상으로 입력해주세요.")
+    @field:Max(value = 300, message = "키는 300cm 이하로 입력해주세요.")
+    val howTallDoYouWantMax: Short,
+
     @field:NotNull(message = "원하는 나이를 선택해주세요.")
     @field:Max(value = 127, message = "나이는 127 이하로 입력해주세요.")
     @field:Min(value = 0, message = "나이는 0 이상으로 입력해주세요.")
@@ -84,22 +94,4 @@ data class EnrollRequest(
 
     @field:NotNull(message = "만나기 싫은 회사를 선택해주세요.")
     val notTheseCompanyIds: Set<Long>,
-) {
-    fun validateMemberPropertyIds(): Boolean {
-        // memberPropertyIds가 1000번대, 2000번대, 3000번대가 하나 이상, 5개 이하인지 확인
-        val propertyIds1000 = mutableSetOf<Long>()
-        val propertyIds2000 = mutableSetOf<Long>()
-        val propertyIds3000 = mutableSetOf<Long>()
-
-        for (propertyId in propertyIds) {
-            when (propertyId) {
-                in 1000..1999 -> propertyIds1000.add(propertyId)
-                in 2000..2999 -> propertyIds2000.add(propertyId)
-                in 3000..3999 -> propertyIds3000.add(propertyId)
-                else -> {}
-            }
-        }
-
-        return propertyIds1000.size in 1..5 && propertyIds2000.size in 1..5 && propertyIds3000.size in 1..5
-    }
-}
+)

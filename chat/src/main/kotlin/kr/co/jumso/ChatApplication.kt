@@ -25,13 +25,7 @@ class RedisInit(
     private val redisTemplate: RedisTemplate<String, Any>,
 ): ApplicationListener<ApplicationReadyEvent> {
     override fun onApplicationEvent(event: ApplicationReadyEvent) {
-        try {
-            redisTemplate.opsForHash<String, String>()
-                .delete(MEMBER_ID_TO_SERVER_PORT.toString())
-        } catch (_: Exception) {
-
-        }
-
-        redisTemplate.opsForZSet().remove(CHAT_SERVER_LOAD.toString(), serverPort)
+        // redis에 해당 서버 포트 세션 개수를 0으로 초기화
+        redisTemplate.opsForZSet().add(CHAT_SERVER_LOAD.toString(), serverPort, 0.0)
     }
 }

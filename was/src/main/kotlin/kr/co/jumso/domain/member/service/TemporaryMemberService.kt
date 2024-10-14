@@ -13,9 +13,7 @@ import kr.co.jumso.domain.member.dto.request.SignUpRequest
 import kr.co.jumso.domain.member.dto.response.MemberResponse
 import kr.co.jumso.domain.member.entity.Member
 import kr.co.jumso.domain.member.entity.MemberNotTheseCompany
-import kr.co.jumso.domain.member.entity.MemberProperty
 import kr.co.jumso.domain.member.entity.TemporaryMember
-import kr.co.jumso.domain.member.exception.InvalidMemberPropertyIdsException
 import kr.co.jumso.domain.member.exception.InvalidVerificationCodeException
 import kr.co.jumso.domain.member.exception.MemberExistsException
 import kr.co.jumso.domain.member.exception.TemporaryMemberExistsException
@@ -133,12 +131,6 @@ class TemporaryMemberService(
         val temporaryMember: TemporaryMember = temporaryMemberRepository.findById(temporaryMemberId)
             .orElseThrow { throw InvalidVerificationCodeException() }
 
-        // enrollRequest의 memberPropertyIds가 1000번대, 2000번대, 3000번대가 하나 이상 포함되어 있는지 확인
-        enrollRequest.validateMemberPropertyIds()
-            // false일 경우 throw
-            .takeUnless { it }
-            ?.let { throw InvalidMemberPropertyIdsException() }
-
         // member 생성
         val newMember = Member(
             email = temporaryMember.email,
@@ -158,6 +150,8 @@ class TemporaryMemberService(
             longitude = enrollRequest.longitude,
             introduction = enrollRequest.introduction,
             whatSexDoYouWant = enrollRequest.whatSexDoYouWant,
+            howTallDoYouWantMin = enrollRequest.howTallDoYouWantMin,
+            howTallDoYouWantMax = enrollRequest.howTallDoYouWantMax,
             howOldDoYouWantMin = enrollRequest.howOldDoYouWantMin,
             howOldDoYouWantMax = enrollRequest.howOldDoYouWantMax,
             howFarCanYouGo = enrollRequest.howFarCanYouGo,
@@ -171,32 +165,10 @@ class TemporaryMemberService(
         val newMemberEntity = memberRepository.save(newMember)
 
         // memberProperty 생성
-        memberPropertyRepository.saveAll(
-            enrollRequest.propertyIds.map { memberPropertyId ->
-                val newMemberProperty = MemberProperty(
-                    memberId = newMemberEntity.id!!,
-                    propertyId = memberPropertyId,
-                )
-
-                newMember.addMemberProperty(newMemberProperty)
-
-                newMemberProperty
-            }
-        )
+        newMemberEntity.addMemberProperties(enrollRequest.propertyIds)
 
         // memberNotTheseCompany 생성
-        memberNotTheseCompanyRepository.saveAll(
-            enrollRequest.notTheseCompanyIds.map { notTheseCompanyId ->
-                val memberNotTheseCompany = MemberNotTheseCompany(
-                    memberId = newMemberEntity.id!!,
-                    companyId = notTheseCompanyId,
-                )
-
-                newMember.addNotTheseCompany(memberNotTheseCompany)
-
-                memberNotTheseCompany
-            }
-        )
+        newMemberEntity.addMemberNotTheseCompany(enrollRequest.notTheseCompanyIds)
 
         // jwt 발급
         val newMemberJwts = jwtService.issueMemberJwts(newMember)

@@ -10,6 +10,7 @@ import kr.co.jumso.domain.chat.dto.request.SelectChatRoomMessagesRequest
 import kr.co.jumso.domain.chat.enumstorage.MessageStatus
 import kr.co.jumso.domain.chat.enumstorage.MessageStatus.SUCCESS
 import kr.co.jumso.domain.chat.enumstorage.MessageType.*
+import kr.co.jumso.domain.chat.enumstorage.RedisKeys.CHAT_SERVER_LOAD
 import kr.co.jumso.domain.chat.enumstorage.RedisKeys.MEMBER_ID_TO_SERVER_PORT
 import kr.co.jumso.registry.SessionRegistry
 import kr.co.jumso.service.ChatRoomService
@@ -38,8 +39,6 @@ class WebSocketHandler(
     @Value("\${server.port}")
     private val serverPort: String,
 ): TextWebSocketHandler() {
-    private val chatServerLoad = "chat-server-load"
-
     // 클라이언트와 연결이 맺어진 후
     override fun afterConnectionEstablished(session: WebSocketSession) {
         super.afterConnectionEstablished(session)
@@ -58,8 +57,8 @@ class WebSocketHandler(
             "${now().format(ofPattern("yyyy-MM-dd"))} $serverPort"
         )
 
-        // redis에 "chat-server-load"로 ws 개수 보고
-        redisTemplate.opsForZSet().add(chatServerLoad, serverPort, sessionRegistry.getSessionCount())
+        // redis에 CHAT_SERVER_LOAD로 ws 개수 보고
+        redisTemplate.opsForZSet().add(CHAT_SERVER_LOAD.toString(), serverPort, sessionRegistry.getSessionCount())
 
         // 채팅방 목록을 조회하여 클라이언트에게 전달
         val result = objectMapper.writeValueAsString(
@@ -84,7 +83,7 @@ class WebSocketHandler(
             when (responseMessageObject.type) {
                 SYSTEM -> TODO()
                 ERROR -> TODO()
-                
+
                 // 채팅방 목록 조회
                 SELECT_CHAT_ROOM_LIST -> {
                     requestSelectChatRoomList(session)
@@ -230,8 +229,8 @@ class WebSocketHandler(
         // redis에서 memberId를 키로 현재 서버의 포트와 session의 id를 삭제한다.
         redisTemplate.opsForHash<String, String>().delete(MEMBER_ID_TO_SERVER_PORT.toString(), session.attributes["memberId"])
 
-        // redis에 "chat-server-load"로 ws 개수 보고
-        redisTemplate.opsForZSet().add(chatServerLoad, serverPort, sessionRegistry.getSessionCount())
+        // redis에 CHAT_SERVER_LOAD로 ws 개수 보고
+        redisTemplate.opsForZSet().add(CHAT_SERVER_LOAD.toString(), serverPort, sessionRegistry.getSessionCount())
     }
 
     // 연결 종료시
@@ -246,8 +245,8 @@ class WebSocketHandler(
         // redis에서 memberId를 키로 현재 서버의 포트와 session의 id를 삭제한다.
         redisTemplate.opsForHash<String, String>().delete(MEMBER_ID_TO_SERVER_PORT.toString(), session.attributes["memberId"])
 
-        // redis에 "chat-server-load"로 ws 개수 보고
-        redisTemplate.opsForZSet().add(chatServerLoad, serverPort, sessionRegistry.getSessionCount())
+        // redis에 CHAT_SERVER_LOAD로 ws 개수 보고
+        redisTemplate.opsForZSet().add(CHAT_SERVER_LOAD.toString(), serverPort, sessionRegistry.getSessionCount())
     }
 
     private fun getMemberId(session: WebSocketSession): Long {

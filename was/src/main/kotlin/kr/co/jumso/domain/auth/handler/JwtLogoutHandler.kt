@@ -1,9 +1,9 @@
 package kr.co.jumso.domain.auth.handler
 
-import kr.co.jumso.domain.auth.service.AuthService
 import com.fasterxml.jackson.core.JsonProcessingException
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import kr.co.jumso.domain.auth.service.AuthService
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.security.core.Authentication

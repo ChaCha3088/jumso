@@ -1,12 +1,12 @@
 package kr.co.jumso.domain.company.entity
 
-import kr.co.jumso.domain.AuditingEntity
-import kr.co.jumso.domain.auth.entity.CompanyEmail
 import jakarta.persistence.CascadeType.ALL
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType.LAZY
 import jakarta.persistence.OneToMany
 import jakarta.validation.constraints.NotNull
+import kr.co.jumso.domain.AuditingEntity
+import kr.co.jumso.domain.auth.entity.CompanyEmail
 
 @Entity
 class Company(

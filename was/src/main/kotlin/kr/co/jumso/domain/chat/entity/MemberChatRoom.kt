@@ -1,9 +1,9 @@
 package kr.co.jumso.domain.chat.entity
 
 import jakarta.persistence.*
+import jakarta.persistence.FetchType.LAZY
 import kr.co.jumso.domain.AuditingEntity
 import kr.co.jumso.domain.member.entity.Member
-import jakarta.persistence.FetchType.LAZY
 
 @Table(
     name = "member_chat_room",
