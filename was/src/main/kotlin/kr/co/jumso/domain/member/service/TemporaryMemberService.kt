@@ -12,13 +12,10 @@ import kr.co.jumso.domain.member.dto.request.EnrollRequest
 import kr.co.jumso.domain.member.dto.request.SignUpRequest
 import kr.co.jumso.domain.member.dto.response.MemberResponse
 import kr.co.jumso.domain.member.entity.Member
-import kr.co.jumso.domain.member.entity.MemberNotTheseCompany
 import kr.co.jumso.domain.member.entity.TemporaryMember
 import kr.co.jumso.domain.member.exception.InvalidVerificationCodeException
 import kr.co.jumso.domain.member.exception.MemberExistsException
 import kr.co.jumso.domain.member.exception.TemporaryMemberExistsException
-import kr.co.jumso.domain.member.repository.MemberNotTheseCompanyRepository
-import kr.co.jumso.domain.member.repository.MemberPropertyRepository
 import kr.co.jumso.domain.member.repository.MemberRepository
 import kr.co.jumso.domain.member.repository.TemporaryMemberRepository
 import kr.co.jumso.util.PasswordValidator
@@ -35,8 +32,6 @@ class TemporaryMemberService(
     private val temporaryMemberRepository: TemporaryMemberRepository,
     private val memberRepository: MemberRepository,
     private val companyEmailRepository: CompanyEmailRepository,
-    private val memberPropertyRepository: MemberPropertyRepository,
-    private val memberNotTheseCompanyRepository: MemberNotTheseCompanyRepository,
 
     private val kafkaTemplate: KafkaTemplate<String, String>,
 
