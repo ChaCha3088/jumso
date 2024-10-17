@@ -19,7 +19,6 @@ spring:
         email-server-port: ${email.port}
 
 server:
-    port: 9090
     servlet:
         context-path: /
         encoding:
