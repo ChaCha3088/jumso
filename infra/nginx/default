@@ -1,0 +1,21 @@
+server {
+    server_name jumso.life; # managed by Certbot
+
+    # SSL configuration
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/jumso.life/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/jumso.life/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+        # redirect https to was http
+        location / {
+            # docker was라는 이름의 컨테이너로 요청을 보낸다.
+            proxy_pass http://was:10080;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+}
