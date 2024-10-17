@@ -8,4 +8,13 @@ pipeline {
             }
         }
     }
+
+    post {
+            success {
+                echo 'Pull Main이 성공했습니다.'
+            }
+            failure {
+                echo 'Pull Main이 실패했습니다.'
+            }
+        }
 }

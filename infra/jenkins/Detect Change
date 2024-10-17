@@ -20,6 +20,7 @@ pipeline {
                         }
                         if (emailChanged) {
                             build job: 'Email Build'
+                        }
                     }
                 }
             }
