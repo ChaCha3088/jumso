@@ -14,7 +14,7 @@ import kr.co.jumso.domain.auth.exception.InvalidRefreshTokenException
 import kr.co.jumso.domain.auth.service.AuthService
 import kr.co.jumso.domain.member.annotation.TemporaryMemberId
 import kr.co.jumso.domain.member.dto.request.EnrollRequest
-import kr.co.jumso.domain.member.dto.request.TemporaryMemberRequest
+import kr.co.jumso.domain.member.dto.request.SignUpRequest
 import kr.co.jumso.domain.member.dto.response.MemberResponse
 import kr.co.jumso.domain.member.exception.*
 import kr.co.jumso.domain.member.service.MemberService
@@ -67,11 +67,11 @@ class AuthController(
 
     @PostMapping("/signup")
     fun create(
-        @Validated @RequestBody temporaryMemberRequest: TemporaryMemberRequest,
+        @Validated @RequestBody signUpRequest: SignUpRequest,
         response: HttpServletResponse
     ) {
         temporaryMemberService.create(
-            temporaryMemberRequest,
+            signUpRequest,
             response
         )
     }
