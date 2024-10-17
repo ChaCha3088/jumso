@@ -1,0 +1,28 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Detect Changes') {
+            steps {
+                // Pull Main로 이동
+                dir('../Pull Main') {
+                    script {
+                        def changedFiles = sh(script: 'git diff --name-only HEAD~1 HEAD', returnStdout: true).trim().split('\n')
+                        def chatChanged = changedFiles.any { it.startsWith('chat/') }
+                        def wasChanged = changedFiles.any { it.startsWith('was/') }
+                        def emailChanged = changedFiles.any { it.startsWith('email/') }
+
+                        if (chatChanged) {
+                            build job: 'Chat Build'
+                        }
+                        if (wasChanged) {
+                            build job: 'WAS Build'
+                        }
+                        if (emailChanged) {
+                            build job: 'Email Build'
+                    }
+                }
+            }
+        }
+    }
+}

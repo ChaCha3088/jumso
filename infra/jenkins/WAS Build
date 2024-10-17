@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Build WAS Module') {
+            steps {
+                script {
+                    // Pull Main 안에 WAS 모듈로 이동
+                    dir('../Pull Main/was') {
+                        // grant permission
+                        sh 'chmod +x gradlew'
+
+                        // build
+                        sh './gradlew clean build -Dspring.profiles.active=prod -Dserver.port=8000'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'WAS 모듈 빌드가 성공했습니다.'
+        }
+        failure {
+            echo 'WAS 모듈 빌드에 실패했습니다.'
+        }
+    }
+}
