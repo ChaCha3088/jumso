@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Run WAS') {
+            steps {
+                script {
+                    // docker ps로 name이 WAS:A인 컨테이너가 있는지 확인한다.
+                    def isA = sh(script: 'docker ps -a --format "{{.Names}}" | grep WAS:A', returnStatus: true)
+                    def version = "A"
+
+                    // isA가 true이면,
+                    if (isA == true) {
+                        // version을 B로 바꾼다.
+                        version = "B"
+                    }
+
+                    def howMany = 3
+                    def port = 8000
+
+                    if (isA == true) {
+                        port = port + howMany
+                    }
+
+                    // 새로운 이미지를 실행한다.
+
+                }
+
+                echo 'WAS 서버가 성공적으로 실행되었습니다.'
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo 'WAS 서버 실행에 실패했습니다.'
+        }
+    }
+}

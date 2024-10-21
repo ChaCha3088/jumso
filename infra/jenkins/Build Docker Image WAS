@@ -1,0 +1,35 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Build Docker Image WAS') {
+            steps {
+                script {
+                    // docker ps로 name이 WAS:A인 컨테이너가 있는지 확인한다.
+                    def isA = sh(script: 'docker ps -a --format "{{.Names}}" | grep WAS:A', returnStatus: true)
+                    def version = "A"
+
+                    // isA가 true이면,
+                    if (isA == true) {
+                        // version을 B로 바꾼다.
+                        version = "B"
+                    }
+
+                    // /var/jenkins_home/dockerfile/DockerfileWAS 파일을 이용하여 WAS 이미지를 빌드한다.
+                    sh 'docker build --force-rm -t WAS:$version -f /var/jenkins_home/dockerfile/DockerfileWAS .'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'WAS Image 빌드가 성공했습니다.'
+
+            build 'Run WAS'
+        }
+        failure {
+            echo 'WAS Image 빌드에 실패했습니다.'
+        }
+    }
+}

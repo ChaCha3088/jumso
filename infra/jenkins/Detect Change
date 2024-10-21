@@ -13,13 +13,13 @@ pipeline {
                         def emailChanged = changedFiles.any { it.startsWith('email/') }
 
                         if (chatChanged) {
-                            build job: 'Chat Build'
+                            build job: 'Build Chat'
                         }
                         if (wasChanged) {
-                            build job: 'WAS Build'
+                            build job: 'Build WAS'
                         }
                         if (emailChanged) {
-                            build job: 'Email Build'
+                            build job: 'Build Email'
                         }
                     }
                 }

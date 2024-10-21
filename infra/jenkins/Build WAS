@@ -11,7 +11,7 @@ pipeline {
                         sh 'chmod +x gradlew'
 
                         // build
-                        sh './gradlew clean build -Dspring.profiles.active=prod -Dserver.port=8000'
+                        sh './gradlew clean build'
                     }
                 }
             }
@@ -21,6 +21,8 @@ pipeline {
     post {
         success {
             echo 'WAS 모듈 빌드가 성공했습니다.'
+
+            build 'Build Docker Image WAS'
         }
         failure {
             echo 'WAS 모듈 빌드에 실패했습니다.'
