@@ -98,6 +98,7 @@ services:
             - production_network
         volumes:
             - /jenkins/jenkins_home:/var/jenkins_home
+            - /nginx/conf:/nginx/conf
         restart: always
         environment:
             TZ: Asia/Seoul

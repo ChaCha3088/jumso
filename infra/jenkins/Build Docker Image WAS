@@ -17,6 +17,9 @@ pipeline {
 
                     // /var/jenkins_home/dockerfile/DockerfileWAS 파일을 이용하여 WAS 이미지를 빌드한다.
                     sh 'docker build --force-rm -t WAS:$version -f /var/jenkins_home/dockerfile/DockerfileWAS .'
+
+                    // 이미지 빌드에 성공하면, Run WAS 파이프라인을 실행한다.
+                    build 'Run WAS'
                 }
             }
         }

@@ -10,7 +10,7 @@ pipeline {
                     def version = "A"
 
                     // isA가 true이면,
-                    if (isA == true) {
+                    if (isA) {
                         // version을 B로 바꾼다.
                         version = "B"
                     }
@@ -18,12 +18,67 @@ pipeline {
                     def howMany = 3
                     def port = 8000
 
-                    if (isA == true) {
+                    if (isA) {
                         port = port + howMany
                     }
 
                     // 새로운 이미지를 실행한다.
+                    sh "docker run -d -p $port:8080 --name WAS:$version:$port WAS:$version"
 
+                    // 30초간 WAS 서버가 실행되는지 확인한다.
+                    def healthy = false
+                    for (int i = 0; i < 60; i++) {
+                        // WAS 서버가 실행되었는지 확인한다.
+                        def logs = sh(script: "docker logs WAS:$version:$port", returnStdout: true).trim()
+
+                        def result = (logs != null && logs.contains('Started WasApplicationKt in '))
+
+                        if (result) {
+                            healthy = true
+                            break
+                        }
+
+                        sleep 0.5
+                    }
+
+                    // WAS 서버가 실행되지 않았으면, 실패한다.
+                    if (!healthy) {
+                        // 해당 컨테이너 삭제
+                        sh "docker rm -f WAS:$version:$port"
+
+                        error 'WAS 서버가 실행되지 않았습니다.'
+                    }
+
+                    // 나머지 WAS 서버들도 실행한다.
+                    for (int i = 1; i < howMany; i++) {
+                        def port += 1;
+
+                        // 새로운 컨테이너를 실행한다.
+                        sh "docker run -d -p $port:8080 --name WAS:$version:$port WAS:$version"
+                    }
+
+                    // Nginx의 conf 파일을 수정
+                    if (isA) {
+                        // /nginx/conf/B.conf를 /nginx/conf/default.conf에 덮어쓴다.
+                        sh 'cp /nginx/conf/B.conf /nginx/conf/default.conf'
+                    }
+                    else {
+                        // /nginx/conf/A.conf를 /nginx/conf/default.conf에 덮어쓴다.
+                        sh 'cp /nginx/conf/A.conf /nginx/conf/default.conf'
+                    }
+
+                    // Nginx reload 백그라운드로
+                    sh 'docker exec -d nginx nginx -s reload'
+
+                    // 기존 WAS 컨테이너들을 중지시킨다.
+                    if (isA) {
+                        // WAS:A 컨테이너들을 중지시킨다.
+                        sh 'docker stop $(docker ps -a --format "{{.Names}}" | grep WAS:A)'
+                    }
+                    else {
+                        // WAS:B 컨테이너들을 중지시킨다.
+                        sh 'docker stop $(docker ps -a --format "{{.Names}}" | grep WAS:B)'
+                    }
                 }
 
                 echo 'WAS 서버가 성공적으로 실행되었습니다.'
