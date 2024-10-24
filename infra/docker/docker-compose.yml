@@ -86,23 +86,6 @@ services:
         environment:
             TZ: Asia/Seoul
 
-    jenkins:
-        image: jenkins/jenkins:lts
-        container_name: jenkins
-        hostname: jenkins
-        ports:
-            - "8080:8080"
-        expose:
-            - "8080"
-        networks:
-            - production_network
-        volumes:
-            - /jenkins/jenkins_home:/var/jenkins_home
-            - /nginx/conf:/nginx/conf
-        restart: always
-        environment:
-            TZ: Asia/Seoul
-
 networks:
     production_network:
         driver: bridge

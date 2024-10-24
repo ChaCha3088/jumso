@@ -1,9 +1,9 @@
 FROM openjdk:17-oracle
 
-COPY .aws/ root/.aws
+COPY /.aws root/.aws
 
-COPY /var/jenkins_home/workspace/Pull Main/was/build/libs/jumso.jar /WAS
+WORKDIR /was
 
-WORKDIR /WAS
+COPY ./jumso.jar .
 
 ENTRYPOINT ["java","-jar","-Dspring.profiles.active=prod","jumso.jar"]

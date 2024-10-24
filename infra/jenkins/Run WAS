@@ -5,31 +5,35 @@ pipeline {
         stage('Run WAS') {
             steps {
                 script {
-                    // docker ps로 name이 WAS:A인 컨테이너가 있는지 확인한다.
-                    def isA = sh(script: 'docker ps -a --format "{{.Names}}" | grep WAS:A', returnStatus: true)
-                    def version = "A"
-
-                    // isA가 true이면,
-                    if (isA) {
-                        // version을 B로 바꾼다.
-                        version = "B"
-                    }
-
+                    // 변수 선언
+                    def isA = 0
+                    def version = "a"
                     def howMany = 3
                     def port = 8000
 
-                    if (isA) {
+                    // docker ps로 name이 was_a이고 status가 up인 컨테이너가 있는지 확인한다.
+                    isA = sh(script: 'docker ps -a --format "{{.Names}} {{.Status}}" | grep was_a | grep "Up"', returnStatus: true)
+
+                    // isA가 true이면,
+                    if (isA == 0) {
+                        // version을 B로 바꾼다.
+                        version = "b"
+                    }
+
+                    if (isA == 0) {
                         port = port + howMany
                     }
 
                     // 새로운 이미지를 실행한다.
-                    sh "docker run -d -p $port:8080 --name WAS:$version:$port WAS:$version"
+                    sh "docker run -d -p ${port}:${port} --network docker-compose_production_network --name was_${version}_${port} was_${version}  --server.port=${port}"
 
                     // 30초간 WAS 서버가 실행되는지 확인한다.
                     def healthy = false
                     for (int i = 0; i < 60; i++) {
                         // WAS 서버가 실행되었는지 확인한다.
-                        def logs = sh(script: "docker logs WAS:$version:$port", returnStdout: true).trim()
+                        def logs = sh(script: "docker logs was_${version}_${port}", returnStdout: true).trim()
+
+                        echo logs
 
                         def result = (logs != null && logs.contains('Started WasApplicationKt in '))
 
@@ -44,21 +48,23 @@ pipeline {
                     // WAS 서버가 실행되지 않았으면, 실패한다.
                     if (!healthy) {
                         // 해당 컨테이너 삭제
-                        sh "docker rm -f WAS:$version:$port"
+                        sh "docker rm -f was_${version}_${port}"
 
                         error 'WAS 서버가 실행되지 않았습니다.'
                     }
 
+                    def newPort = port
+
                     // 나머지 WAS 서버들도 실행한다.
                     for (int i = 1; i < howMany; i++) {
-                        def port += 1;
+                        newPort += 1;
 
                         // 새로운 컨테이너를 실행한다.
-                        sh "docker run -d -p $port:8080 --name WAS:$version:$port WAS:$version"
+                        sh "docker run -d -p ${newPort}:${newPort} --network docker-compose_production_network --name was_${version}_${newPort} was_${version} --server.port=${newPort}"
                     }
 
                     // Nginx의 conf 파일을 수정
-                    if (isA) {
+                    if (isA == 0) {
                         // /nginx/conf/B.conf를 /nginx/conf/default.conf에 덮어쓴다.
                         sh 'cp /nginx/conf/B.conf /nginx/conf/default.conf'
                     }
@@ -71,13 +77,19 @@ pipeline {
                     sh 'docker exec -d nginx nginx -s reload'
 
                     // 기존 WAS 컨테이너들을 중지시킨다.
-                    if (isA) {
-                        // WAS:A 컨테이너들을 중지시킨다.
-                        sh 'docker stop $(docker ps -a --format "{{.Names}}" | grep WAS:A)'
+                    if (isA == 0) {
+                        // was_a 컨테이너들을 중지시킨다.
+                        sh 'docker ps -a --format "{{.Names}}" | grep was_a | xargs -r docker stop'
+
+                        // was_a 컨테이너들을 삭제한다.
+                        sh 'docker ps -a --format "{{.Names}}" | grep was_a | xargs -r docker rm'
                     }
                     else {
-                        // WAS:B 컨테이너들을 중지시킨다.
-                        sh 'docker stop $(docker ps -a --format "{{.Names}}" | grep WAS:B)'
+                        // was_B 컨테이너들을 중지시킨다.
+                        sh 'docker ps -a --format "{{.Names}}" | grep was_b | xargs -r docker stop'
+
+                        // was_B 컨테이너들을 삭제한다.
+                        sh 'docker ps -a --format "{{.Names}}" | grep was_b | xargs -r docker rm'
                     }
                 }
 
@@ -89,6 +101,12 @@ pipeline {
     post {
         failure {
             echo 'WAS 서버 실행에 실패했습니다.'
+
+            // 실패하면, 해당 컨테이너들을 모두 중지시킨다.
+            sh 'docker stop $(docker ps -a --format "{{.Names}}" | grep was_${version})'
+
+            // 실패하면, 해당 컨테이너들을 모두 삭제한다.
+            sh 'docker rm $(docker ps -a --format "{{.Names}}" | grep was_${version})'
         }
     }
 }
