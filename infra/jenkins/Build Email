@@ -1,0 +1,31 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Build Email Module') {
+            steps {
+                script {
+                    // Pull Main 안에 Email 모듈로 이동
+                    dir('../Pull Main/email') {
+                        // grant permission
+                        sh 'chmod +x gradlew'
+
+                        // build
+                        sh './gradlew clean build'
+                    }
+                }
+
+                echo 'Email 모듈 빌드가 성공했습니다.'
+
+                // Run Email
+                build 'Run Email'
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Email 모듈 빌드에 실패했습니다.'
+        }
+    }
+}

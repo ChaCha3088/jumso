@@ -1,0 +1,31 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Build Chat Module') {
+            steps {
+                script {
+                    // Pull Main 안에 Chat 모듈로 이동
+                    dir('../Pull Main/chat') {
+                        // grant permission
+                        sh 'chmod +x gradlew'
+
+                        // build
+                        sh './gradlew clean build'
+                    }
+                }
+
+                echo 'Chat 모듈 빌드가 성공했습니다.'
+
+                // Run Chat
+                build 'Run Chat'
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Chat 모듈 빌드에 실패했습니다.'
+        }
+    }
+}

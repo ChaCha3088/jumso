@@ -1,0 +1,9 @@
+FROM openjdk:17-oracle
+
+COPY /.aws root/.aws
+
+WORKDIR /was
+
+COPY ./jumso.jar .
+
+ENTRYPOINT ["java","-jar","-Dspring.profiles.active=prod","jumso.jar"]
