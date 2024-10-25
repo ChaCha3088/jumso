@@ -25,7 +25,7 @@ pipeline {
                     }
 
                     // 새로운 이미지를 실행한다.
-                    sh "docker run -d -p ${port}:${port} --network docker-compose_production_network --name was_${version}_${port} was_${version}  --server.port=${port}"
+                    sh "docker run -d -p ${port}:${port} --network docker-compose_production_network --name was_${version}_${port} was_${version} --server.port=${port}"
 
                     // 30초간 WAS 서버가 실행되는지 확인한다.
                     def healthy = false

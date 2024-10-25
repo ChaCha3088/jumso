@@ -44,7 +44,7 @@ services:
         ports:
             - "6379:6379"
         volumes:
-            - /redis:/usr/local/etc/redis
+            - /Users/mac/Desktop/code/private/simple-blog/infra/redis:/usr/local/etc/redis
         command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
         restart: always
         networks:
@@ -52,20 +52,17 @@ services:
         environment:
             TZ: Asia/Seoul
 
-    nginx:
-        image: nginx
-        container_name: nginx
+    mysql:
+        image: mysql:8.0.39
+        platform: linux/arm64
+        container_name: mysql
         ports:
-            - "80:80"
-            - "443:443"
+            - "3306:3306"
+        restart: always
         networks:
             - production_network
-        volumes:
-            - /nginx/conf/default.conf:/etc/nginx/sites-enabled/default.conf
-            - /nginx/conf/nginx.conf:/etc/nginx/nginx.conf
-            - /etc/letsencrypt:/etc/letsencrypt
-        restart: always
         environment:
+            MYSQL_ROOT_PASSWORD: # YOUR_PASSWORD
             TZ: Asia/Seoul
 
 networks:

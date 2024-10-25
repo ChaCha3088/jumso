@@ -25,7 +25,7 @@ pipeline {
                     }
 
                     // 새로운 이미지를 실행한다.
-                    sh "docker run -d -p ${port}:${port} --network docker-compose_production_network --name chat_${version}_${port} chat_${version}  --server.port=${port}"
+                    sh "docker run -d -p ${port}:${port} --network docker-compose_production_network --name chat_${version}_${port} chat_${version} --server.port=${port}"
 
                     // 30초간 Chat 서버가 실행되는지 확인한다.
                     def healthy = false
@@ -35,7 +35,7 @@ pipeline {
                         // Chat 서버가 실행되었는지 확인한다.
                         logs = sh(script: "docker logs chat_${version}_${port}", returnStdout: true).trim()
 
-                        def result = (logs != null && logs.contains('Started WasApplicationKt in '))
+                        def result = (logs != null && logs.contains('Started ChatApplicationKt in '))
 
                         if (result) {
                             healthy = true
