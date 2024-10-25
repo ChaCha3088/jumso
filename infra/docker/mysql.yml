@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+    mysql:
+        image: mysql:8.0.39
+        platform: linux/amd64
+        container_name: mysql
+        ports:
+            - "3306:3306"
+        restart: always
+        networks:
+            - production_network
+        environment:
+            MYSQL_ROOT_PASSWORD: #password
+            TZ: Asia/Seoul
+        volumes:
+            #            - /mysql/mysql.cnf:/etc/mysql/my.cnf
+            - /mysql/cert/jenkins.jumso.life:/etc/mysql/cert
+        command: [ "--ssl-ca=/etc/mysql/cert/fullchain1.pem", "--ssl-cert=/etc/mysql/cert/cert.pem", "--ssl-key=/etc/mysql/cert/privkey.pem" ]
+
+networks:
+    production_network:
+        driver: bridge
