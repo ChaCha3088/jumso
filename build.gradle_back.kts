@@ -42,13 +42,7 @@ subprojects {
         implementation("org.springframework.boot:spring-boot-starter-web")
 
         // DataBase
-        implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-        implementation("com.mysql:mysql-connector-j:8.0.33")
         implementation("org.springframework.boot:spring-boot-starter-data-redis")
-
-        // Kafka
-        implementation("org.springframework.kafka:spring-kafka")
-
         // Tweeter Snowflake
         implementation("com.littlenb:snowflake:1.0.5")
 
