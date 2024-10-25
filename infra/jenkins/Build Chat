@@ -14,16 +14,17 @@ pipeline {
                         sh './gradlew clean build'
                     }
                 }
-
-                echo 'Chat 모듈 빌드가 성공했습니다.'
-
-                // Run Chat
-                build 'Run Chat'
             }
         }
     }
 
     post {
+        success {
+            echo 'Chat 모듈 빌드가 성공했습니다.'
+
+            // Chat 모듈 빌드 성공 시, Docker Image Chat 빌드
+            build 'Build Docker Image Chat'
+        }
         failure {
             echo 'Chat 모듈 빌드에 실패했습니다.'
         }

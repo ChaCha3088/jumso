@@ -14,7 +14,7 @@ pipeline {
 
                     // isA가 true이면,
                     if (isA == 0) {
-                        // version을 B로 바꾼다.
+                        // version을 b로 바꾼다.
                         version = "b"
                     }
 

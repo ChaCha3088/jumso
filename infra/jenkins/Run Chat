@@ -2,17 +2,17 @@ pipeline {
     agent any
 
     stages {
-        stage('Run WAS') {
+        stage('Run Chat') {
             steps {
                 script {
                     // 변수 선언
-                    def isA = 0
+                    def isa = 0
                     def version = "a"
                     def howMany = 3
                     def port = 8000
 
-                    // docker ps로 name이 was_a이고 status가 up인 컨테이너가 있는지 확인한다.
-                    isA = sh(script: 'docker ps -a --format "{{.Names}} {{.Status}}" | grep was_a | grep "Up"', returnStatus: true)
+                    // docker ps로 name이 chat_a이고 status가 up인 컨테이너가 있는지 확인한다.
+                    isA = sh(script: 'docker ps -a --format "{{.Names}} {{.Status}}" | grep chat_a | grep "Up"', returnStatus: true)
 
                     // isA가 true이면,
                     if (isA == 0) {
@@ -25,13 +25,13 @@ pipeline {
                     }
 
                     // 새로운 이미지를 실행한다.
-                    sh "docker run -d -p ${port}:${port} --network docker-compose_production_network --name was_${version}_${port} was_${version}  --server.port=${port}"
+                    sh "docker run -d -p ${port}:${port} --network docker-compose_production_network --name chat_${version}_${port} chat_${version}  --server.port=${port}"
 
-                    // 30초간 WAS 서버가 실행되는지 확인한다.
+                    // 30초간 Chat 서버가 실행되는지 확인한다.
                     def healthy = false
                     for (int i = 0; i < 60; i++) {
-                        // WAS 서버가 실행되었는지 확인한다.
-                        def logs = sh(script: "docker logs was_${version}_${port}", returnStdout: true).trim()
+                        // Chat 서버가 실행되었는지 확인한다.
+                        def logs = sh(script: "docker logs chat_${version}_${port}", returnStdout: true).trim()
 
                         echo logs
 
@@ -45,22 +45,22 @@ pipeline {
                         sleep 0.5
                     }
 
-                    // WAS 서버가 실행되지 않았으면, 실패한다.
+                    // Chat 서버가 실행되지 않았으면, 실패한다.
                     if (!healthy) {
                         // 해당 컨테이너 삭제
-                        sh "docker rm -f was_${version}_${port}"
+                        sh "docker rm -f chat_${version}_${port}"
 
-                        error 'WAS 서버가 실행되지 않았습니다.'
+                        error 'Chat 서버가 실행되지 않았습니다.'
                     }
 
                     def newPort = port
 
-                    // 나머지 WAS 서버들도 실행한다.
+                    // 나머지 Chat 서버들도 실행한다.
                     for (int i = 1; i < howMany; i++) {
                         newPort += 1;
 
                         // 새로운 컨테이너를 실행한다.
-                        sh "docker run -d -p ${newPort}:${newPort} --network docker-compose_production_network --name was_${version}_${newPort} was_${version} --server.port=${newPort}"
+                        sh "docker run -d -p ${newPort}:${newPort} --network docker-compose_production_network --name chat_${version}_${newPort} chat_${version} --server.port=${newPort}"
                     }
 
                     // Nginx의 conf 파일을 수정
@@ -76,37 +76,37 @@ pipeline {
                     // Nginx reload 백그라운드로
                     sh 'docker exec -d nginx nginx -s reload'
 
-                    // 기존 WAS 컨테이너들을 중지시킨다.
+                    // 기존 Chat 컨테이너들을 중지시킨다.
                     if (isA == 0) {
-                        // was_a 컨테이너들을 중지시킨다.
-                        sh 'docker ps -a --format "{{.Names}}" | grep was_a | xargs -r docker stop'
+                        // chat_a 컨테이너들을 중지시킨다.
+                        sh 'docker ps -a --format "{{.Names}}" | grep chat_a | xargs -r docker stop'
 
-                        // was_a 컨테이너들을 삭제한다.
-                        sh 'docker ps -a --format "{{.Names}}" | grep was_a | xargs -r docker rm'
+                        // chat_a 컨테이너들을 삭제한다.
+                        sh 'docker ps -a --format "{{.Names}}" | grep chat_a | xargs -r docker rm'
                     }
                     else {
-                        // was_b 컨테이너들을 중지시킨다.
-                        sh 'docker ps -a --format "{{.Names}}" | grep was_b | xargs -r docker stop'
+                        // chat_b 컨테이너들을 중지시킨다.
+                        sh 'docker ps -a --format "{{.Names}}" | grep chat_b | xargs -r docker stop'
 
-                        // was_b 컨테이너들을 삭제한다.
-                        sh 'docker ps -a --format "{{.Names}}" | grep was_b | xargs -r docker rm'
+                        // chat_b 컨테이너들을 삭제한다.
+                        sh 'docker ps -a --format "{{.Names}}" | grep chat_b | xargs -r docker rm'
                     }
                 }
 
-                echo 'WAS 서버가 성공적으로 실행되었습니다.'
+                echo 'Chat 서버가 성공적으로 실행되었습니다.'
             }
         }
     }
 
     post {
         failure {
-            echo 'WAS 서버 실행에 실패했습니다.'
+            echo 'Chat 서버 실행에 실패했습니다.'
 
             // 실패하면, 해당 컨테이너들을 모두 중지시킨다.
-            sh 'docker stop $(docker ps -a --format "{{.Names}}" | grep was_${version})'
+            sh 'docker stop $(docker ps -a --format "{{.Names}}" | grep chat_${version})'
 
             // 실패하면, 해당 컨테이너들을 모두 삭제한다.
-            sh 'docker rm $(docker ps -a --format "{{.Names}}" | grep was_${version})'
+            sh 'docker rm $(docker ps -a --format "{{.Names}}" | grep chat_${version})'
         }
     }
 }
