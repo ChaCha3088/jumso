@@ -9,7 +9,7 @@ pipeline {
                     def isa = 0
                     def version = "a"
                     def howMany = 3
-                    def port = 8000
+                    def port = 9000
 
                     // docker ps로 name이 chat_a이고 status가 up인 컨테이너가 있는지 확인한다.
                     isA = sh(script: 'docker ps -a --format "{{.Names}} {{.Status}}" | grep chat_a | grep "Up"', returnStatus: true)
@@ -29,11 +29,11 @@ pipeline {
 
                     // 30초간 Chat 서버가 실행되는지 확인한다.
                     def healthy = false
+                    def logs = ""
+
                     for (int i = 0; i < 60; i++) {
                         // Chat 서버가 실행되었는지 확인한다.
-                        def logs = sh(script: "docker logs chat_${version}_${port}", returnStdout: true).trim()
-
-                        echo logs
+                        logs = sh(script: "docker logs chat_${version}_${port}", returnStdout: true).trim()
 
                         def result = (logs != null && logs.contains('Started WasApplicationKt in '))
 
@@ -47,6 +47,8 @@ pipeline {
 
                     // Chat 서버가 실행되지 않았으면, 실패한다.
                     if (!healthy) {
+                        echo logs
+
                         // 해당 컨테이너 삭제
                         sh "docker rm -f chat_${version}_${port}"
 

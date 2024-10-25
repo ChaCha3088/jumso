@@ -29,11 +29,10 @@ pipeline {
 
                     // 30초간 WAS 서버가 실행되는지 확인한다.
                     def healthy = false
+                    def logs = ""
                     for (int i = 0; i < 60; i++) {
                         // WAS 서버가 실행되었는지 확인한다.
-                        def logs = sh(script: "docker logs was_${version}_${port}", returnStdout: true).trim()
-
-                        echo logs
+                        logs = sh(script: "docker logs was_${version}_${port}", returnStdout: true).trim()
 
                         def result = (logs != null && logs.contains('Started WasApplicationKt in '))
 
@@ -47,6 +46,8 @@ pipeline {
 
                     // WAS 서버가 실행되지 않았으면, 실패한다.
                     if (!healthy) {
+                        echo logs
+
                         // 해당 컨테이너 삭제
                         sh "docker rm -f was_${version}_${port}"
 
