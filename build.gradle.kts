@@ -70,15 +70,15 @@ subprojects {
         testImplementation("org.junit.jupiter:junit-jupiter")
     }
 
-    tasks.test {
-        useJUnitPlatform()
-    }
-
     tasks.withType<KotlinCompile> {
         kotlinOptions {
             freeCompilerArgs = listOf("-Xjsr305=strict")
             jvmTarget = "17"
         }
+    }
+
+    tasks.test {
+        useJUnitPlatform()
     }
 
     tasks.withType<Test> {
@@ -88,9 +88,14 @@ subprojects {
 
 // was 설정
 project(":was") {
-    val jar: Jar by tasks
-    jar.enabled = true
+    tasks.withType<BootJar> {
+        archiveFileName.set("was.jar")
+    }
+}
 
-    val bootJar: BootJar by tasks
-    bootJar.enabled = false
+// chat 설정
+project(":chat") {
+    tasks.withType<BootJar> {
+        archiveFileName.set("chat.jar")
+    }
 }

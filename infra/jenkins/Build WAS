@@ -5,13 +5,13 @@ pipeline {
         stage('Build WAS Module') {
             steps {
                 script {
-                    // Pull Main 안에 WAS 모듈로 이동
-                    dir('../Pull Main/was') {
+                    // Pull Main로 이동
+                    dir('../Pull Main') {
                         // grant permission
                         sh 'chmod +x gradlew'
 
                         // build
-                        sh './gradlew clean build'
+                        sh './gradlew :was:build'
                     }
                 }
             }

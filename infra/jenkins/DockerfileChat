@@ -4,6 +4,6 @@ COPY /.aws root/.aws
 
 WORKDIR /chat
 
-COPY ./jumso.jar .
+COPY ./chat.jar .
 
-ENTRYPOINT ["java","-jar","-Dspring.profiles.active=prod","jumso.jar"]
+ENTRYPOINT ["java","-jar","-Dspring.profiles.active=prod","chat.jar"]

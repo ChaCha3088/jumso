@@ -18,8 +18,8 @@ pipeline {
                         version = "b"
                     }
 
-                    // /var/jenkins_home/workspace/Pull Main/was/build/libs/jumso.jar 파일을 /var/jenkins_home/workspace/Build Docker Image WAS/was로 복사한다.
-                    sh 'cp "/var/jenkins_home/workspace/Pull Main/was/build/libs/jumso.jar" "/var/jenkins_home/workspace/Build Docker Image WAS"'
+                    // /var/jenkins_home/workspace/Pull Main/was/build/libs/was.jar 파일을 /var/jenkins_home/workspace/Build Docker Image WAS/was로 복사한다.
+                    sh 'cp "/var/jenkins_home/workspace/Pull Main/was/build/libs/was.jar" "/var/jenkins_home/workspace/Build Docker Image WAS"'
 
                     // /var/jenkins_home/dockerfile/DockerfileWAS 파일을 이용하여 WAS 이미지를 빌드한다.
                     sh "docker build --force-rm -t was_${version} -f /var/jenkins_home/dockerfile/DockerfileWAS ."

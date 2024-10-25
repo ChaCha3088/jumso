@@ -8,18 +8,27 @@ pipeline {
                 dir('../Pull Main') {
                     script {
                         def changedFiles = sh(script: 'git diff --name-only HEAD~1 HEAD', returnStdout: true).trim().split('\n')
+
+                        echo "Changed files: ${changedFiles}"
+
                         def chatChanged = changedFiles.any { it.startsWith('chat/') }
                         def wasChanged = changedFiles.any { it.startsWith('was/') }
                         def emailChanged = changedFiles.any { it.startsWith('email/') }
 
-                        if (chatChanged) {
-                            build job: 'Build Chat'
-                        }
                         if (wasChanged) {
-                            build job: 'Build WAS'
+                            catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
+                                build job: 'Build WAS'
+                            }
+                        }
+                        if (chatChanged) {
+                            catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
+                                build job: 'Build Chat'
+                            }
                         }
                         if (emailChanged) {
-                            build job: 'Build Email'
+                            catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
+                                build job: 'Build Email'
+                            }
                         }
                     }
                 }

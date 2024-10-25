@@ -5,13 +5,13 @@ pipeline {
         stage('Build Chat Module') {
             steps {
                 script {
-                    // Pull Main 안에 Chat 모듈로 이동
-                    dir('../Pull Main/chat') {
+                    // Pull Main로 이동
+                    dir('../Pull Main') {
                         // grant permission
                         sh 'chmod +x gradlew'
 
                         // build
-                        sh './gradlew clean build'
+                        sh './gradlew :chat:build'
                     }
                 }
             }
