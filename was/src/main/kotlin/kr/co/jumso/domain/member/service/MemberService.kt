@@ -2,6 +2,8 @@ package kr.co.jumso.domain.member.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import kr.co.jumso.domain.auth.dto.ResetPasswordRequest
+import kr.co.jumso.domain.chat.dto.KafkaMessage
+import kr.co.jumso.domain.chat.enumstorage.MessageType.EMAIL
 import kr.co.jumso.domain.company.repository.CompanyRepository
 import kr.co.jumso.domain.kafka.dto.KafkaEmailRequest
 import kr.co.jumso.domain.kafka.enumstorage.EmailType.CHANGE_COMPANY
@@ -49,11 +51,15 @@ class MemberService(
         kafkaTemplate.send(
             "$KAFKA_EMAIL_SERVER-$emailServerPort",
             objectMapper.writeValueAsString(
-                KafkaEmailRequest(
-                    emailType = RESET_PASSWORD,
-                    memberUsername = username,
-                    domain = domain,
-                    verificationCode = newVerificationCode,
+                KafkaMessage(
+                    type = EMAIL,
+                    targetMemberId = 0L,
+                    data = KafkaEmailRequest(
+                        emailType = RESET_PASSWORD,
+                        memberUsername = username,
+                        domain = domain,
+                        verificationCode = newVerificationCode,
+                    )
                 )
             )
         )
@@ -110,11 +116,15 @@ class MemberService(
         kafkaTemplate.send(
             "$KAFKA_EMAIL_SERVER-$emailServerPort",
             objectMapper.writeValueAsString(
-                KafkaEmailRequest(
-                    emailType = CHANGE_COMPANY,
-                    memberUsername = newUsername,
-                    domain = newDomain,
-                    verificationCode = newVerificationCode,
+                KafkaMessage(
+                    type = EMAIL,
+                    targetMemberId = 0L,
+                    data = KafkaEmailRequest(
+                            emailType = CHANGE_COMPANY,
+                            memberUsername = newUsername,
+                            domain = newDomain,
+                            verificationCode = newVerificationCode,
+                    )
                 )
             )
         )

@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletResponse
 import kr.co.jumso.domain.auth.exception.CompanyEmailNotFoundException
 import kr.co.jumso.domain.auth.repository.CompanyEmailRepository
 import kr.co.jumso.domain.auth.service.JwtService
+import kr.co.jumso.domain.chat.dto.KafkaMessage
+import kr.co.jumso.domain.chat.enumstorage.MessageType.EMAIL
 import kr.co.jumso.domain.kafka.dto.KafkaEmailRequest
 import kr.co.jumso.domain.kafka.enumstorage.EmailType.SIGN_UP
 import kr.co.jumso.domain.kafka.enumstorage.KafkaEmail.KAFKA_EMAIL_SERVER
@@ -91,11 +93,15 @@ class TemporaryMemberService(
         kafkaTemplate.send(
             "$KAFKA_EMAIL_SERVER-$emailServerPort",
             objectMapper.writeValueAsString(
-                KafkaEmailRequest(
-                    emailType = SIGN_UP,
-                    memberUsername = signUpRequest.username,
-                    domain = companyEmail.address,
-                    verificationCode = newTemporaryMember.verificationCode
+                KafkaMessage(
+                    type = EMAIL,
+                    targetMemberId = 0L,
+                    data = KafkaEmailRequest(
+                        emailType = SIGN_UP,
+                        memberUsername = signUpRequest.username,
+                        domain = companyEmail.address,
+                        verificationCode = newTemporaryMember.verificationCode
+                    )
                 )
             )
         )

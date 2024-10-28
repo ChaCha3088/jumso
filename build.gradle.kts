@@ -13,7 +13,7 @@ plugins {
 
 allprojects {
     group = "kr.co.jumso"
-    version = "1.0-SNAPSHOT"
+    version = "1.0"
 
     repositories {
         mavenCentral()
@@ -32,19 +32,16 @@ subprojects {
     apply(plugin = "kotlin-jpa")
 //    apply(plugin = "kotlin-spring") //all-open
 
+    // 모든 모듈에 적용되는 의존성
     dependencies {
         // JWT
         implementation("com.auth0:java-jwt:4.4.0")
+
         // Validation
         implementation("org.springframework.boot:spring-boot-starter-validation")
 
         // Web
         implementation("org.springframework.boot:spring-boot-starter-web")
-
-        // DataBase
-        implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-        implementation("com.mysql:mysql-connector-j:8.0.33")
-        implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
         // Kafka
         implementation("org.springframework.kafka:spring-kafka")
@@ -97,5 +94,12 @@ project(":was") {
 project(":chat") {
     tasks.withType<BootJar> {
         archiveFileName.set("chat.jar")
+    }
+}
+
+// email 설정
+project(":email") {
+    tasks.withType<BootJar> {
+        archiveFileName.set("email.jar")
     }
 }

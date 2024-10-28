@@ -104,6 +104,7 @@ class WebSocketHandler(
                 CHAT_MESSAGE -> {
                     requestSendChat(responseMessageObject, session)
                 }
+                EMAIL -> {}
             }
         }
         catch (e: Exception) {

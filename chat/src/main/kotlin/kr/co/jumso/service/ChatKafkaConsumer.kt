@@ -72,6 +72,7 @@ class ChatKafkaConsumer(
 
                 sendChatMessage(chatMessageResponse, targetSession)
             }
+            EMAIL -> {}
         }
     }
 

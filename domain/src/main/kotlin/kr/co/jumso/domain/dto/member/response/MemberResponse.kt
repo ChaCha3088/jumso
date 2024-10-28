@@ -1,4 +1,4 @@
-package kr.co.jumso.domain.member.dto.response
+package kr.co.jumso.domain.dto.member.response
 
 import kr.co.jumso.domain.member.entity.Member
 

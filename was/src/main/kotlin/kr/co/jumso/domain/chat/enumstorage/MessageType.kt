@@ -10,4 +10,6 @@ enum class MessageType {
     SELECT_CHAT_ROOM_MESSAGES, // 채팅방의 메시지 조회 응답
 
     CHAT_MESSAGE, // 채팅 메시지 전송 응답
+
+    EMAIL, // 이메일
 }
