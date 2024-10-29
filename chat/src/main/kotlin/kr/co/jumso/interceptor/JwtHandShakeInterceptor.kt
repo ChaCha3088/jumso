@@ -1,6 +1,6 @@
 package kr.co.jumso.interceptor
 
-import kr.co.jumso.domain.auth.service.JwtService
+import kr.co.jumso.auth.service.JwtService
 import kr.co.jumso.registry.SessionRegistry
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.http.HttpStatusCode.valueOf
@@ -13,7 +13,7 @@ import org.springframework.web.socket.server.HandshakeInterceptor
 
 @Component
 class JwtHandShakeInterceptor(
-    private val jwtService: JwtService,
+    private val jwtService: kr.co.jumso.auth.service.JwtService,
 
     private val redisTemplate: RedisTemplate<String, Any>,
 

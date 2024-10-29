@@ -1,6 +1,6 @@
 package kr.co.jumso.util
 
-import kr.co.jumso.domain.member.exception.PasswordInvalidException
+import kr.co.jumso.member.exception.PasswordInvalidException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 

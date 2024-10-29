@@ -1,6 +1,6 @@
 package kr.co.jumso.dummy
 
-import kr.co.jumso.domain.property.repository.PropertyRepository
+import kr.co.jumso.property.repository.PropertyRepository
 import org.springframework.context.annotation.Configuration
 
 @Configuration
