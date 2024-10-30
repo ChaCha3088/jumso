@@ -2,11 +2,11 @@ package kr.co.jumso.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import kr.co.jumso.annotation.Valid
-import kr.co.jumso.domain.chat.dto.KafkaMessage
-import kr.co.jumso.domain.chat.dto.ResponseMessage
-import kr.co.jumso.domain.chat.dto.response.*
-import kr.co.jumso.domain.chat.enumstorage.MessageStatus.SUCCESS
-import kr.co.jumso.domain.chat.enumstorage.MessageType.*
+import kr.co.jumso.dto.chat.KafkaMessage
+import kr.co.jumso.dto.chat.ResponseMessage
+import kr.co.jumso.dto.chat.response.*
+import kr.co.jumso.enumstorage.chat.MessageStatus.SUCCESS
+import kr.co.jumso.enumstorage.chat.MessageType.*
 import kr.co.jumso.registry.SessionRegistry
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
@@ -72,6 +72,7 @@ class ChatKafkaConsumer(
 
                 sendChatMessage(chatMessageResponse, targetSession)
             }
+            EMAIL -> {}
         }
     }
 

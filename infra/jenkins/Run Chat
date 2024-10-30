@@ -67,15 +67,15 @@ pipeline {
 
                     // Nginx의 conf 파일을 수정
                     if (isA == 0) {
-                        // /nginx/conf/B.conf를 /nginx/conf/default.conf에 덮어쓴다.
-                        sh 'cp /nginx/conf/B.conf /nginx/conf/default.conf'
+                        // /nginx/conf/ChatB.conf를 /nginx/conf/sites-enabled/Chat.conf에 덮어쓴다.
+                        sh 'cp /nginx/conf/ChatB.conf /nginx/conf/sites-enabled/Chat.conf'
                     }
                     else {
-                        // /nginx/conf/A.conf를 /nginx/conf/default.conf에 덮어쓴다.
-                        sh 'cp /nginx/conf/A.conf /nginx/conf/default.conf'
+                        // /nginx/conf/ChatA.conf를 /nginx/conf/sites-enabled/Chat.conf에 덮어쓴다.
+                        sh 'cp /nginx/conf/ChatA.conf /nginx/conf/sites-enabled/Chat.conf'
                     }
 
-                    // Nginx reload 백그라운드로
+                    // Nginx reload
                     sh 'docker exec -d nginx nginx -s reload'
 
                     // 기존 Chat 컨테이너들을 중지시킨다.

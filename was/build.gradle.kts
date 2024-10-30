@@ -2,6 +2,14 @@ plugins {
 }
 
 dependencies {
+    // domain
+        implementation(project(":domain"))
+
+    // DataBase
+        implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+        implementation("com.mysql:mysql-connector-j:8.0.33")
+        implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
     // Security
         implementation("org.springframework.boot:spring-boot-starter-security")
 

@@ -1,17 +1,17 @@
 package kr.co.jumso.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import kr.co.jumso.domain.chat.dto.RequestMessage
-import kr.co.jumso.domain.chat.dto.ResponseMessage
-import kr.co.jumso.domain.chat.dto.request.ChatMessageRequest
-import kr.co.jumso.domain.chat.dto.request.CreateChatRoomRequest
-import kr.co.jumso.domain.chat.dto.request.DeleteChatRoomRequest
-import kr.co.jumso.domain.chat.dto.request.SelectChatRoomMessagesRequest
-import kr.co.jumso.domain.chat.enumstorage.MessageStatus
-import kr.co.jumso.domain.chat.enumstorage.MessageStatus.SUCCESS
-import kr.co.jumso.domain.chat.enumstorage.MessageType.*
-import kr.co.jumso.domain.chat.enumstorage.RedisKeys.CHAT_SERVER_LOAD
-import kr.co.jumso.domain.chat.enumstorage.RedisKeys.MEMBER_ID_TO_SERVER_PORT
+import kr.co.jumso.dto.chat.RequestMessage
+import kr.co.jumso.dto.chat.ResponseMessage
+import kr.co.jumso.dto.chat.request.ChatMessageRequest
+import kr.co.jumso.dto.chat.request.CreateChatRoomRequest
+import kr.co.jumso.dto.chat.request.DeleteChatRoomRequest
+import kr.co.jumso.dto.chat.request.SelectChatRoomMessagesRequest
+import kr.co.jumso.enumstorage.chat.MessageStatus
+import kr.co.jumso.enumstorage.chat.MessageStatus.SUCCESS
+import kr.co.jumso.enumstorage.chat.MessageType.*
+import kr.co.jumso.enumstorage.chat.RedisKeys.CHAT_SERVER_LOAD
+import kr.co.jumso.enumstorage.chat.RedisKeys.MEMBER_ID_TO_SERVER_PORT
 import kr.co.jumso.registry.SessionRegistry
 import kr.co.jumso.service.ChatRoomService
 import kr.co.jumso.service.ChatService
@@ -104,6 +104,7 @@ class WebSocketHandler(
                 CHAT_MESSAGE -> {
                     requestSendChat(responseMessageObject, session)
                 }
+                EMAIL -> {}
             }
         }
         catch (e: Exception) {

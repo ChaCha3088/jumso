@@ -2,9 +2,9 @@ plugins {
 }
 
 dependencies {
-    // DataBase
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    // was
+        implementation(project(":domain"))
 
     // Spring Email
-    implementation("org.springframework.boot:spring-boot-starter-mail")
+        implementation("org.springframework.boot:spring-boot-starter-mail")
 }

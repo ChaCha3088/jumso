@@ -15,7 +15,7 @@ spring:
             on-profile: prod
 
     kafka:
-        bootstrap-servers: kafka
+        bootstrap-servers: kafka:9092
         email-server-port: ${email.port}
 
 server:

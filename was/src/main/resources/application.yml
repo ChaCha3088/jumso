@@ -14,9 +14,6 @@ spring:
                 dialect: org.hibernate.dialect.MySQLDialect
                 default_batch_fetch_size: 100
 
-server:
-    port: 8080
-
 # JWT
 jwt:
     issuer: jumso

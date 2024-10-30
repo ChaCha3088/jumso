@@ -1,0 +1,6 @@
+package kr.co.jumso.enumstorage.member
+
+enum class RelationshipStatus {
+    SINGLE,
+    DOLSING,
+}

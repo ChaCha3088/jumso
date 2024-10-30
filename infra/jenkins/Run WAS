@@ -66,15 +66,15 @@ pipeline {
 
                     // Nginx의 conf 파일을 수정
                     if (isA == 0) {
-                        // /nginx/conf/B.conf를 /nginx/conf/default.conf에 덮어쓴다.
-                        sh 'cp /nginx/conf/B.conf /nginx/conf/default.conf'
+                        // /nginx/conf/WASB.conf를 /nginx/conf/sites-enabled/WAS.conf에 덮어쓴다.
+                        sh 'cp /nginx/conf/WASB.conf /nginx/conf/sites-enabled/WAS.conf'
                     }
                     else {
-                        // /nginx/conf/A.conf를 /nginx/conf/default.conf에 덮어쓴다.
-                        sh 'cp /nginx/conf/A.conf /nginx/conf/default.conf'
+                        // /nginx/conf/WASA.conf를 /nginx/conf/sites-enabled/WAS.conf에 덮어쓴다.
+                        sh 'cp /nginx/conf/WASA.conf /nginx/conf/sites-enabled/WAS.conf'
                     }
 
-                    // Nginx reload 백그라운드로
+                    // Nginx reload
                     sh 'docker exec -d nginx nginx -s reload'
 
                     // 기존 WAS 컨테이너들을 중지시킨다.
