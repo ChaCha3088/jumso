@@ -11,9 +11,9 @@ spring:
         bootstrap-servers: localhost:9092
         consumer:
             # topic
-            topic: KAFKA_EMAIL_SERVER-7000
+            topic: KAFKA_EMAIL_SERVER-7001
             # group
-            group-id: KAFKA_EMAIL_SERVER-7000
+            group-id: KAFKA_EMAIL_SERVER-7001
             auto-offset-reset: earliest
             key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
             value-deserializer: org.apache.kafka.common.serialization.StringDeserializer

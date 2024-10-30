@@ -7,6 +7,9 @@ dependencies {
     implementation("com.mysql:mysql-connector-j:8.0.33")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
+    // domain
+        implementation(project(":domain"))
+
     // was
         implementation(project(":was"))
 

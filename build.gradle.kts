@@ -52,6 +52,9 @@ subprojects {
         // Logging
         implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1")
 
+        // AspectJ
+        implementation("org.springframework:spring-aspects:6.1.11")
+
         // ETC
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
         implementation("org.jetbrains.kotlin:kotlin-reflect")
