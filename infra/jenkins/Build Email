@@ -5,25 +5,26 @@ pipeline {
         stage('Build Email Module') {
             steps {
                 script {
-                    // Pull Main 안에 Email 모듈로 이동
-                    dir('../Pull Main/email') {
+                    // Pull Main로 이동
+                    dir('../Pull Main') {
                         // grant permission
                         sh 'chmod +x gradlew'
 
                         // build
-                        sh './gradlew clean build'
+                        sh './gradlew :email:build'
                     }
                 }
-
-                echo 'Email 모듈 빌드가 성공했습니다.'
-
-                // Run Email
-                build 'Run Email'
             }
         }
     }
 
     post {
+        success {
+            echo 'Email 모듈 빌드가 성공했습니다.'
+
+            // Email 모듈 빌드 성공 시, Docker Image Email 빌드
+            build 'Build Docker Image Email'
+        }
         failure {
             echo 'Email 모듈 빌드에 실패했습니다.'
         }
