@@ -90,7 +90,7 @@ class TemporaryMemberService(
 
         // Kafka에 이메일 전송 요청을 보내고, Kafka Consumer가 이메일을 보낸다.
         kafkaTemplate.send(
-            "$KAFKA_EMAIL_SERVER-$emailServerPort",
+            "$KAFKA_EMAIL_SERVER",
             objectMapper.writeValueAsString(
                 KafkaMessage(
                     type = EMAIL,

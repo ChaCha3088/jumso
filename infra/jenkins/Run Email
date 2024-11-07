@@ -49,8 +49,11 @@ pipeline {
                     if (!healthy) {
                         echo logs
 
-                        // 해당 컨테이너 삭제
-                        sh "docker rm -f email_${version}_${port}"
+                        // 실패하면, 해당 컨테이너들을 모두 중지시킨다.
+                        sh 'docker ps -a --format "{{.Names}}" | grep email_${version} | xargs -r docker stop'
+
+                        // 실패하면, 해당 컨테이너들을 모두 삭제한다.
+                        sh 'docker ps -a --format "{{.Names}}" | grep email_a | xargs -r docker rm'
 
                         error 'Email 서버가 실행되지 않았습니다.'
                     }
@@ -80,12 +83,6 @@ pipeline {
     post {
         failure {
             echo 'Email 서버 실행에 실패했습니다.'
-
-            // 실패하면, 해당 컨테이너들을 모두 중지시킨다.
-            sh 'docker stop $(docker ps -a --format "{{.Names}}" | grep email_${version})'
-
-            // 실패하면, 해당 컨테이너들을 모두 삭제한다.
-            sh 'docker rm $(docker ps -a --format "{{.Names}}" | grep email_${version})'
         }
     }
 }
