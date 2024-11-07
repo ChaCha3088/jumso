@@ -49,7 +49,7 @@ class MemberService(
 
         // Kafka로 비밀번호 초기화 이메일 발송
         kafkaTemplate.send(
-            "$KAFKA_EMAIL_SERVER-$emailServerPort",
+            "$KAFKA_EMAIL_SERVER",
             objectMapper.writeValueAsString(
                 KafkaMessage(
                     type = EMAIL,
@@ -114,16 +114,16 @@ class MemberService(
 
         // Kafka로 회사 변경 이메일 발송
         kafkaTemplate.send(
-            "$KAFKA_EMAIL_SERVER-$emailServerPort",
+            "$KAFKA_EMAIL_SERVER",
             objectMapper.writeValueAsString(
                 KafkaMessage(
                     type = EMAIL,
                     targetMemberId = 0L,
                     data = KafkaEmailRequest(
-                            emailType = CHANGE_COMPANY,
-                            memberUsername = newUsername,
-                            domain = newDomain,
-                            verificationCode = newVerificationCode,
+                        emailType = CHANGE_COMPANY,
+                        memberUsername = newUsername,
+                        domain = newDomain,
+                        verificationCode = newVerificationCode,
                     )
                 )
             )

@@ -19,16 +19,16 @@ class EmailKafkaConsumer(
     @KafkaListener(topics = ["\${spring.kafka.consumer.topic}"], groupId = "\${spring.kafka.consumer.group-id}")
     fun listen(message: String) {
         // json 파싱
-        val chatMessageObject = objectMapper.readValue(message, KafkaMessage::class.java)
+        val kafkaMessage = objectMapper.readValue(message, KafkaMessage::class.java)
 
-        processKafkaMessage(chatMessageObject)
+        processKafkaMessage(kafkaMessage)
     }
 
     // 서버가 이메일 요청 메시지를 수신할 때
     private fun processKafkaMessage(@Valid kafkaMessage: KafkaMessage) {
         when (kafkaMessage.type) {
             EMAIL -> {
-                val kafkaEmailRequest = objectMapper.readValue(kafkaMessage.data.toString(), KafkaEmailRequest::class.java)
+                val kafkaEmailRequest = objectMapper.convertValue(kafkaMessage.data, KafkaEmailRequest::class.java)
 
                 // 이메일 요청 처리
                 processEmailRequest(kafkaEmailRequest)
