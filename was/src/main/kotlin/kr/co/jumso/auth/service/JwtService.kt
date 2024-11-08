@@ -146,24 +146,24 @@ class JwtService(
     }
 
     fun extractAccessTokenFromHeader(request: HttpServletRequest): String {
-        val accessToken = request.getHeader(kr.co.jumso.auth.service.JwtService.Companion.ACCESS_TOKEN_HEADER)
+        val accessToken = request.getHeader(ACCESS_TOKEN_HEADER)
 
         if (accessToken.isNullOrBlank()) {
             throw InvalidAccessTokenException()
         }
 
-        return accessToken.replace(kr.co.jumso.auth.service.JwtService.Companion.BEARER, "")
+        return accessToken.replace(BEARER, "")
     }
 
     fun extractRefreshTokenFromHeader(request: HttpServletRequest): String {
-        val refreshToken = request.getHeader(kr.co.jumso.auth.service.JwtService.Companion.REFRESH_TOKEN_HEADER)
+        val refreshToken = request.getHeader(REFRESH_TOKEN_HEADER)
 
         // refreshToken 값 검증
         if (refreshToken.isNullOrBlank()) {
             throw InvalidRefreshTokenException()
         }
 
-        return refreshToken.replace(kr.co.jumso.auth.service.JwtService.Companion.BEARER, "")
+        return refreshToken.replace(BEARER, "")
     }
 
     fun validateAndExtractMemberIdFromAccessToken(accessToken: String): Long {
@@ -228,11 +228,11 @@ class JwtService(
     fun setAccessTokenOnHeader(response: HttpServletResponse, token: String?) {
         // token이 null이 아니면, Header에 작성
         if (token != null) {
-            response.setHeader(kr.co.jumso.auth.service.JwtService.Companion.ACCESS_TOKEN_HEADER, kr.co.jumso.auth.service.JwtService.Companion.BEARER + token)
+            response.setHeader(ACCESS_TOKEN_HEADER, BEARER + token)
         }
         // token이 null이면, Header에서 삭제
         else {
-            response.setHeader(kr.co.jumso.auth.service.JwtService.Companion.ACCESS_TOKEN_HEADER, "")
+            response.setHeader(ACCESS_TOKEN_HEADER, "")
         }
     }
 
@@ -242,11 +242,11 @@ class JwtService(
     fun setRefreshTokenOnHeader(response: HttpServletResponse, token: String?) {
         // token이 null이 아니면, Header에 작성
         if (token != null) {
-            response.setHeader(kr.co.jumso.auth.service.JwtService.Companion.REFRESH_TOKEN_HEADER, kr.co.jumso.auth.service.JwtService.Companion.BEARER + token)
+            response.setHeader(REFRESH_TOKEN_HEADER, BEARER + token)
         }
         // token이 null이면, Header에서 삭제
         else {
-            response.setHeader(kr.co.jumso.auth.service.JwtService.Companion.REFRESH_TOKEN_HEADER, "")
+            response.setHeader(REFRESH_TOKEN_HEADER, "")
         }
     }
 
