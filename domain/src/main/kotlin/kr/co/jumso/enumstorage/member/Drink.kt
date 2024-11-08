@@ -2,7 +2,7 @@ package kr.co.jumso.enumstorage.member
 
 enum class Drink {
     NONE,
-    NEVER,
+    NO,
     SOMETIMES,
     OFTEN,
 }

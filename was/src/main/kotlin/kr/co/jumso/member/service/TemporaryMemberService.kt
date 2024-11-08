@@ -73,6 +73,11 @@ class TemporaryMemberService(
             throw MemberExistsException()
         }
 
+        // 이미 존재하는 member인지 확인
+        if (memberRepository.existsByCompanyId(companyEmail.company.id!!)) {
+            throw MemberExistsException()
+        }
+
         val newTemporaryMember = temporaryMemberRepository.save(
             TemporaryMember(
                 email = "${signUpRequest.username}@${companyEmail.address}",

@@ -19,7 +19,6 @@ import kr.co.jumso.member.entity.Member
 import kr.co.jumso.enumstorage.member.*
 import kr.co.jumso.enumstorage.member.BodyType.*
 import kr.co.jumso.enumstorage.member.BodyType.NONE
-import kr.co.jumso.enumstorage.member.Drink.NEVER
 import kr.co.jumso.enumstorage.member.RelationshipStatus.DOLSING
 import kr.co.jumso.enumstorage.member.RelationshipStatus.SINGLE
 import kr.co.jumso.enumstorage.member.Religion.*
@@ -45,6 +44,7 @@ interface MemberCustomRepository {
     fun findNotDeletedByIdWithNotTheseCompaniesAndNoMatch(memberId: Long): Member?
 
     fun existsByEmail(email: String): Boolean
+    fun existsByCompanyId(companyId: Long): Boolean
 
     fun deleteByMemberId(memberId: Long)
 
@@ -188,6 +188,14 @@ class MemberCustomRepositoryImpl(
         }.resultList.isNotEmpty()
     }
 
+    override fun existsByCompanyId(companyId: Long): Boolean {
+        return queryFactory.selectQuery<Member> {
+            select(entity(Member::class))
+            from(entity(Member::class))
+            where(column(Member::companyId).equal(companyId))
+        }.resultList.isNotEmpty()
+    }
+
     override fun deleteByMemberId(memberId: Long) {
         queryFactory.deleteQuery<Member> {
             where(column(Member::id).equal(memberId))
@@ -284,15 +292,15 @@ class MemberCustomRepositoryImpl(
                     path(Member::smoke).equal(
                         when (whatKindOfSmokeDoYouWant) {
                             Smoke.NONE -> Expressions.nullValue()
-                            NO -> Expressions.value(NO)
-                            SOMETIMES -> Expressions.value(SOMETIMES)
-                            OFTEN -> Expressions.value(OFTEN)
+                            Smoke.NO -> Expressions.value(NO)
+                            Smoke.SOMETIMES -> Expressions.value(SOMETIMES)
+                            Smoke.OFTEN -> Expressions.value(OFTEN)
                         }
                     ),
                     path(Member::drink).equal(
                         when (whatKindOfDrinkDoYouWant) {
                             Drink.NONE -> Expressions.nullValue()
-                            NEVER -> Expressions.nullValue()
+                            Drink.NO -> Expressions.nullValue()
                             Drink.SOMETIMES -> Expressions.value(Drink.SOMETIMES)
                             Drink.OFTEN -> Expressions.value(Drink.OFTEN)
                         }
