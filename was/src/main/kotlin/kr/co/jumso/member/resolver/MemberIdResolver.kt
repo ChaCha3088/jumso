@@ -1,13 +1,13 @@
 package kr.co.jumso.member.resolver
 
 import jakarta.servlet.http.HttpServletRequest
+import kr.co.jumso.auth.service.JwtService
 import kr.co.jumso.member.annotation.MemberId
 import org.springframework.core.MethodParameter
 import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
-import java.lang.Long
 
 class MemberIdResolver(
     private val jwtService: JwtService,
