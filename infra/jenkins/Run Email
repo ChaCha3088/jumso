@@ -50,10 +50,10 @@ pipeline {
                         echo logs
 
                         // 실패하면, 해당 컨테이너들을 모두 중지시킨다.
-                        sh 'docker ps -a --format "{{.Names}}" | grep email_${version} | xargs -r docker stop'
+                        sh "docker ps -a --format {{.Names}} | grep email_${version} | xargs -r docker stop"
 
                         // 실패하면, 해당 컨테이너들을 모두 삭제한다.
-                        sh 'docker ps -a --format "{{.Names}}" | grep email_a | xargs -r docker rm'
+                        sh "docker ps -a --format {{.Names}} | grep email_${version} | xargs -r docker rm"
 
                         error 'Email 서버가 실행되지 않았습니다.'
                     }
