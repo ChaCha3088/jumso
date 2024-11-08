@@ -8,9 +8,10 @@ import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
+import java.lang.Long
 
 class TemporaryMemberIdResolver(
-    private val jwtService: kr.co.jumso.auth.service.JwtService,
+    private val jwtService: JwtService,
 ) : HandlerMethodArgumentResolver {
     override fun supportsParameter(parameter: MethodParameter): Boolean {
         return parameter.parameterType == Long::class.java && parameter.hasParameterAnnotation(
