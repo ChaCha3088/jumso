@@ -133,8 +133,8 @@ class TemporaryMemberService(
         enrollRequest: EnrollRequest,
         response: HttpServletResponse,
     ): MemberResponse {
-        val temporaryMember: TemporaryMember = temporaryMemberRepository.findById(temporaryMemberId)
-            .orElseThrow { throw InvalidVerificationCodeException() }
+        val temporaryMember: TemporaryMember = temporaryMemberRepository.findVerifiedById(temporaryMemberId)
+            ?: throw InvalidVerificationCodeException()
 
         // member 생성
         val newMember = Member(

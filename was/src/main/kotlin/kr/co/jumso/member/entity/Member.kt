@@ -4,10 +4,7 @@ import jakarta.persistence.*
 import jakarta.persistence.CascadeType.ALL
 import jakarta.persistence.EnumType.ORDINAL
 import jakarta.persistence.FetchType.LAZY
-import jakarta.validation.constraints.Max
-import jakarta.validation.constraints.Min
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.*
 import kr.co.jumso.AuditingEntity
 import kr.co.jumso.auth.entity.RefreshToken
 import kr.co.jumso.chat.entity.MemberChatRoom
@@ -52,7 +49,7 @@ class Member(
 ): AuditingEntity() {
     @Column(nullable = false, unique = true, length = 50)
     @NotBlank(message = "이메일을 입력해주세요.")
-    @Max(value = 50, message = "이메일은 50자 이하로 입력해주세요.")
+    @Size(max = 50, message = "이메일은 50자 이하로 입력해주세요.")
     var email: String = email
         protected set
 
@@ -63,7 +60,7 @@ class Member(
 
     @Column(nullable = false, length = 50)
     @NotBlank(message = "닉네임을 입력해주세요.")
-    @Max(value = 50, message = "닉네임은 50자 이하로 입력해주세요.")
+    @Size(max = 50, message = "닉네임은 50자 이하로 입력해주세요.")
     var nickname: String = nickname
         protected set
 
@@ -157,7 +154,7 @@ class Member(
 
     @Column(nullable = false, length = 50)
     @NotBlank(message = "직업을 입력해주세요.")
-    @Max(value = 50, message = "직업은 50자 이하로 입력해주세요.")
+    @Size(max = 50, message = "직업은 50자 이하로 입력해주세요.")
     var job: String = job
         protected set
 
@@ -199,7 +196,7 @@ class Member(
 
     @Column(nullable = false, length = 1000)
     @NotBlank(message = "자기소개를 입력해주세요.")
-    @Max(value = 1000, message = "자기소개는 1000자 이하로 입력해주세요.")
+    @Size(max = 1000, message = "자기소개는 1000자 이하로 입력해주세요.")
     var introduction: String = introduction
         protected set
 

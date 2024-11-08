@@ -10,6 +10,7 @@ interface TemporaryMemberRepository: JpaRepository<TemporaryMember, Long>, Tempo
 
 interface TemporaryMemberRepositoryCustom {
     fun findByEmail(email: String): TemporaryMember?
+    fun findVerifiedById(id: Long): TemporaryMember?
 
     fun existsByEmail(email: String): Boolean
 }
@@ -22,6 +23,15 @@ class TemporaryMemberRepositoryImpl(
             select(entity(TemporaryMember::class))
             from(entity(TemporaryMember::class))
             where(column(TemporaryMember::email).equal(email))
+        }.resultList.firstOrNull()
+    }
+
+    override fun findVerifiedById(id: Long): TemporaryMember? {
+        return queryFactory.selectQuery {
+            select(entity(TemporaryMember::class))
+            from(entity(TemporaryMember::class))
+            where(column(TemporaryMember::id).equal(id)
+                .and(column(TemporaryMember::verified).equal(true)))
         }.resultList.firstOrNull()
     }
 
