@@ -1,12 +1,18 @@
-package kr.co.jumso.dummy
-
-import kr.co.jumso.property.repository.PropertyRepository
-import org.springframework.context.annotation.Configuration
-
-@Configuration
-class PushData(
-    private val propertyRepository: PropertyRepository,
-) {
+//package kr.co.jumso.dummy
+//
+//import kr.co.jumso.property.entity.Property
+//import kr.co.jumso.property.repository.PropertyRepository
+//import org.springframework.boot.context.event.ApplicationReadyEvent
+//import org.springframework.context.annotation.Configuration
+//import org.springframework.context.event.EventListener
+//import java.io.BufferedReader
+//import java.io.FileInputStream
+//import java.io.InputStreamReader
+//
+//@Configuration
+//class PushData(
+//    private val propertyRepository: PropertyRepository,
+//) {
 //    @EventListener(ApplicationReadyEvent::class)
 //    private fun init() {
 //        // Property 생성
@@ -49,4 +55,4 @@ class PushData(
 //
 //        propertyRepository.saveAll(properties)
 //    }
-}
+//}

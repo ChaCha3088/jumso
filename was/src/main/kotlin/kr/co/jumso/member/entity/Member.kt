@@ -89,7 +89,6 @@ class Member(
 
     @JoinColumn(nullable = false, insertable = false, updatable = false)
     @ManyToOne(fetch = LAZY, targetEntity = Company::class)
-    @NotNull(message = "회사를 선택해주세요.")
     var company: Company? = null
         protected set
 
