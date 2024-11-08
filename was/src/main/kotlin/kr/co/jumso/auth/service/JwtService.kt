@@ -42,6 +42,7 @@ class JwtService(
 
     private lateinit var memberAccessTokenDecoder: JWTVerifier
     private lateinit var memberRefreshTokenDecoder: JWTVerifier
+    private lateinit var temporaryMemberAccessTokenDecoder: JWTVerifier
 
     @PostConstruct
     fun init() {
@@ -55,6 +56,12 @@ class JwtService(
             .withIssuer(issuer)
             .withClaimPresence("memberId")
             .withSubject("refreshToken")
+            .build() // 반환된 빌더로 JWT verifier 생성
+
+        temporaryMemberAccessTokenDecoder = require(HMAC512(secret))
+            .withIssuer(issuer)
+            .withClaimPresence("temporaryMemberId")
+            .withSubject("accessToken")
             .build() // 반환된 빌더로 JWT verifier 생성
     }
 
@@ -197,7 +204,7 @@ class JwtService(
     fun validateAndExtractTemporaryMemberIdFromAccessToken(accessToken: String): Long {
         try {
             // accessToken 값 검증
-            val jwt: DecodedJWT = memberAccessTokenDecoder
+            val jwt: DecodedJWT = temporaryMemberAccessTokenDecoder
                 .verify(accessToken) // accessToken을 검증하고 유효하지 않다면 예외 발생
 
             return jwt

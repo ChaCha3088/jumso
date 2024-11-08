@@ -84,8 +84,8 @@ class AuthController(
 
     @GetMapping("/verify")
     fun verify(
-        @TemporaryMemberId temporaryMemberId: Long,
         @NotBlank @RequestParam(value = "verificationCode", required = true) verificationCode: String,
+        @TemporaryMemberId temporaryMemberId: Long,
     ): ResponseEntity<String> {
         temporaryMemberService.verify(temporaryMemberId, verificationCode.trim())
 

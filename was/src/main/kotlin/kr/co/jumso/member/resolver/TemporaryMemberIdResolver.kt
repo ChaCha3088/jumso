@@ -8,13 +8,13 @@ import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
-import java.lang.Long
 
 class TemporaryMemberIdResolver(
     private val jwtService: JwtService,
 ) : HandlerMethodArgumentResolver {
     override fun supportsParameter(parameter: MethodParameter): Boolean {
-        return parameter.parameterType == Long::class.java && parameter.hasParameterAnnotation(
+        return parameter.parameterType == Long::class.java
+            && parameter.hasParameterAnnotation(
             TemporaryMemberId::class.java)
     }
 
@@ -22,7 +22,7 @@ class TemporaryMemberIdResolver(
         parameter: MethodParameter, mavContainer: ModelAndViewContainer?,
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
-    ): Any {
+    ): Long {
         val request = webRequest.nativeRequest as HttpServletRequest
         val accessToken: String = jwtService.extractAccessTokenFromHeader(request)
 
