@@ -14,7 +14,8 @@ class TemporaryMemberIdResolver(
     private val jwtService: JwtService,
 ) : HandlerMethodArgumentResolver {
     override fun supportsParameter(parameter: MethodParameter): Boolean {
-        return parameter.parameterType == Long::class.java && parameter.hasParameterAnnotation(
+        return parameter.parameterType == Long::class.java
+            && parameter.hasParameterAnnotation(
             TemporaryMemberId::class.java)
     }
 
@@ -22,7 +23,7 @@ class TemporaryMemberIdResolver(
         parameter: MethodParameter, mavContainer: ModelAndViewContainer?,
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
-    ): Any {
+    ): Long {
         val request = webRequest.nativeRequest as HttpServletRequest
         val accessToken: String = jwtService.extractAccessTokenFromHeader(request)
 

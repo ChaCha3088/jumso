@@ -7,9 +7,9 @@ import kr.co.jumso.enumstorage.chat.MessageType.EMAIL
 import kr.co.jumso.email.service.EmailService
 import kr.co.jumso.dto.kafka.KafkaEmailRequest
 import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
-@Component
+@Service
 class EmailKafkaConsumer(
     private val emailService: EmailService,
 

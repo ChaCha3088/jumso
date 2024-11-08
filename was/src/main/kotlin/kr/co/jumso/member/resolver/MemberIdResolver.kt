@@ -10,7 +10,7 @@ import org.springframework.web.method.support.ModelAndViewContainer
 import java.lang.Long
 
 class MemberIdResolver(
-    private val jwtService: kr.co.jumso.auth.service.JwtService,
+    private val jwtService: JwtService,
 ) : HandlerMethodArgumentResolver {
     override fun supportsParameter(parameter: MethodParameter): Boolean {
         return parameter.parameterType == Long::class.java && parameter.hasParameterAnnotation(
@@ -21,7 +21,7 @@ class MemberIdResolver(
         parameter: MethodParameter, mavContainer: ModelAndViewContainer?,
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
-    ): Any {
+    ): Long {
         val request = webRequest.nativeRequest as HttpServletRequest
         val accessToken: String = jwtService.extractAccessTokenFromHeader(request)
 
